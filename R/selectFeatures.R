@@ -6,7 +6,9 @@ selectFeatures <- function(RentABaymodel){
                       RentABaymodel$likelihood.params,
                       RentABaymodel$prior.params,
                       lower = 0,
-                      upper = 1)
+                      upper = 1,
+                      nBits = ncol(RentABaymodel$data)
+                      )
 
   return(opt_state)
 }

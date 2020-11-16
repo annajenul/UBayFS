@@ -13,5 +13,8 @@ RoxygenNote: 7.1.1
 Imports: RENT,
          GA,
          matrixStats,
-         shiny
+         shiny,
+         shinyjs,
+         DT,
+         shinyWidgets
          

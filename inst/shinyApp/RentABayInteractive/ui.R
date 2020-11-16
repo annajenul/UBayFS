@@ -79,7 +79,7 @@ shinyUI(fluidPage(
                 ),
                 tabPanel("RENT parameter selector",
                     sliderInput("alpha", "alpha", min = 0, max = 1, step = 0.1, value = 0.1),
-                    sliderInput("lambda", "lambda", min = 0, max = 100, step = 1, value = 1),
+                    sliderTextInput("lambda", "lambda", choices = c(1e-3, 1e-2, 1e-1, 1e0, 1e1, 1e2, 1e3)),
                     sliderInput("K", "K", min = 1, max = 100, step = 1, value = 10),
                     sliderInput("testsize", "testsize", min = 0.1, max = 0.9, step = 0.05, value = 0.25)
                 ),

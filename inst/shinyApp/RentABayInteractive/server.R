@@ -1,29 +1,18 @@
 library(shiny)
 library(DT)
+library(ggplot2)
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output, session) {
 
-    # INITIAL SETTINGS
-    A <- reactiveVal(NULL)
-    b <- reactiveVal(NULL)
-    rho <- reactiveVal(NULL)
-
-    alpha <- reactiveVal(NULL)
-    lambda <- reactiveVal(NULL)
-    K <- reactiveVal(NULL)
-    testsize <- reactiveVal(NULL)
-
-    optim_probs <- reactiveVal(NULL)
-    sel_fs <- reactiveVal(NULL)
-
+    # help functions
     addConstraint <- function(A, b, rho){
         if(is.null(A())){
             newA <- A
             newb <- b
             newrho <- rho
 
-            colnames(newA) <- paste0("A-",names_feats())
+            colnames(newA) <- names_feats()
         }
         else{
             newA <- rbind(A(), A)
@@ -38,13 +27,35 @@ shinyServer(function(input, output, session) {
         selectRows(proxy, c())
     }
 
+    FStoString <- function(vec){
+      return(paste0("{",
+                    paste0(names_feats()[which(vec == 1)], collapse = ","),
+                    "}"))
+    }
+
+    rho_fct <- function(x, rho){
+      eterm <- exp(-rho * x)
+      y <- eterm / (1+eterm)
+      return(y)
+    }
+
+    # INITIAL SETTINGS
+    A <- reactiveVal(NULL)
+    b <- reactiveVal(NULL)
+    rho <- reactiveVal(NULL)
+
+    model <- reactiveVal(NULL)
+
+    optim_fs <- reactiveVal(NULL)
+
+
     # FILE INPUT HANDLING
     train_data <- reactive({
         if(is.null(input$train_data)){
             NULL
         }
         else{
-            read.csv(input$train_data$datapath)
+            read.csv(input$train_data$datapath, row.names = 1)
         }
     })
 
@@ -53,7 +64,7 @@ shinyServer(function(input, output, session) {
             NULL
         }
         else{
-            read.csv(input$train_labels$datapath)
+            unlist(read.csv(input$train_labels$datapath, row.names = 1))
         }
     })
 
@@ -69,10 +80,17 @@ shinyServer(function(input, output, session) {
 
     # LIKELIHOOD INPUT HANDLING
     observeEvent(input$confirmParam, {
-      alpha(input$alpha)
-      lambda(input$lambda)
-      K(input$K)
-      testsize(input$testsize)
+      withProgress(min = 0, max = 1, value = 0, message = "building RENT model", {
+        model(RentABay::build.model(train_data(),
+                                     train_labels(),
+                                     reg.param = list(alpha = input$alpha, lambda = input$lambda),
+                                     K = input$K,
+                                     testsize = input$testsize,
+                                     A = NULL,
+                                     b = NULL,
+                                     rho = NULL,
+                                     verbose = FALSE))
+      })
     })
 
     # CONSTRAINT INPUT HANDLING
@@ -111,24 +129,16 @@ shinyServer(function(input, output, session) {
         }
     })
 
+
     # FEATURE SELECTION
     observeEvent(input$run_RentABay, {
-      withProgress(message = 'preparing model', value = 0, {
-        incProgress(0, detail = paste("Building RENT model"))
-        mod <- RentABay::build.model(train_data(),
-                                     train_labels(),
-                                     reg.param = list(alpha = input$alpha, lambda = input$lambda),
-                                     K = input$K,
-                                     testsize = input$testsize,
-                                     A = A(),
-                                     b = b(),
-                                     rho = rho(),
-                                     verbose = FALSE)
-        incProgress(0, detail = paste("optimizing posterior"))
-        fs <- RentABay::selectFeatures(mod)
+      model(set_prior_params(model(), A(), b(), rho()))
+
+      withProgress(min = 0, max = 1, value = 0, message = "optimizing posterior function", {
+        fs <- RentABay::selectFeatures(model())
       })
-      sel_fs(fs@solution)
-      optim_probs(posterior(sel_fs), mod$likelihood.params, mod$prior.params)
+
+      optim_fs(fs@solution)
     })
 
     # STATUS SETTINGS
@@ -137,7 +147,7 @@ shinyServer(function(input, output, session) {
     })
 
     likelihood_complete <- reactive({
-      ifelse(!data_complete() | is.null(alpha()) | is.null(lambda()) | is.null(K()) | is.null(testsize()), FALSE, TRUE)
+      ifelse(!data_complete() | is.null(model()), FALSE, TRUE)
     })
 
     prior_complete <- reactive({
@@ -149,15 +159,16 @@ shinyServer(function(input, output, session) {
     })
 
     featureselection_complete <- reactive({
-      ifelse(!parameters_complete() | is.null(sel_fs()), FALSE, TRUE)
+      ifelse(!parameters_complete() | is.null(optim_fs()), FALSE, TRUE)
     })
 
     observeEvent(data_complete(), {
       if(data_complete()){
-        updatePrettyToggle(session, "status_data", "data loaded", value = TRUE)
+        updatePrettyToggle(session, "status_data", "input ok", value = TRUE)
         showTab("tabs", target = "input")
         showTab("tabs", target = "likelihood parameters")
         showTab("tabs", target = "prior parameters")
+        updateSliderInput(session, "maxsize", value = min(10, n_feats()), max = n_feats(), step = 1)
       }
       else{
         hideTab("tabs", target = "input")
@@ -168,13 +179,13 @@ shinyServer(function(input, output, session) {
 
     observeEvent(likelihood_complete(), {
       if(likelihood_complete()){
-        updatePrettyToggle(session, "status_likelihood", "likelihood set", value = TRUE)
+        updatePrettyToggle(session, "status_likelihood", "likelihood setting ok", value = TRUE)
       }
     })
 
     observeEvent(prior_complete(), {
       if(prior_complete()){
-        updatePrettyToggle(session, "status_prior", "prior set", value = TRUE)
+        updatePrettyToggle(session, "status_prior", "prior setting ok", value = TRUE)
       }
     })
 
@@ -203,7 +214,7 @@ shinyServer(function(input, output, session) {
       datatable(
         cbind(train_data(), train_labels()),
         filter = 'top',
-        options = list(pageLength = 20, sDom = '<"top">rt<"bottom">ip'),
+        options = list(pageLength = 10, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE),
         selection = "none"
       )
     )
@@ -217,38 +228,70 @@ shinyServer(function(input, output, session) {
             max = round(apply(train_data(), 2, max), 2)
         ),
         filter = 'top',
-        options = list(pageLength = 10)
+        options = list(pageLength = 5, scrollX = TRUE)
       )
     )
 
     output$params <- renderUI(
       if(likelihood_complete()){
         withMathJax(
-          sprintf('$$\\alpha= %.03f,~ \\lambda= %.03f$$
-                  $$K= %.03f,~ testsize= %.03f$$',
-                  input$alpha,input$lambda,input$K,input$testsize)
+          paste0("$$\\alpha= ",
+                input$alpha,
+                ",~\\lambda=",
+                input$lambda,
+                "$$",
+                "\n",
+                "$$K= ",
+                input$K,
+                ",~\\text{testsize}= ",
+                input$testsize,
+                "$$")
         )
       }
       else{
-        paste0("No parameters set yet")
+        paste0("no parameters set")
       }
     )
 
+    output$constraints <- renderUI({
+      if(is.null(A()) | is.null(b())){
+        paste0("no constraints set")
+      }
+      else{
+        matA <- paste0(apply(A(), 1, function(x){paste0(x, collapse = " & ")}), collapse = "\\\\")
+        matb <- paste0(b(), collapse = "\\\\")
 
-    output$constraints <- DT::renderDataTable(
+        withMathJax(
+          paste0("$$\\begin{pmatrix}",
+          matA,
+          "\\end{pmatrix} x
+          \\leq
+          \\begin{pmatrix}",
+          matb,
+          "\\end{pmatrix}$$")
+        )
+      }
+    })
+
+
+
+    output$feature_results <- DT::renderDataTable(
       datatable(
-        cbind(A = A(), b = b(), rho = rho()),
-        options = list(autoWidth = TRUE, pageLength = 10, sDom = '<"top">rt<"bottom">ip'),
-        rownames = FALSE,
+        data.frame(set = apply(optim_fs(), 1, FStoString),
+                   cardinality = apply(optim_fs(), 1, sum),
+                   posterior = round(apply(optim_fs(), 1, posterior, likelihood.params = model()$likelihood.params, prior.params = model()$prior.params),4),
+                   likelihood = round(apply(optim_fs(), 1, likelihood, likelihood.params = model()$likelihood.params),4),
+                   prior = round(apply(optim_fs(), 1, prior, prior.params = model()$prior.params),4)),
+        options = list(autoWidth = TRUE, pageLength = 10, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE),
         selection = "none"
       )
     )
 
-    output$selected_features <- renderText({
-        paste0(names_feats()[which(sel_fs == 1)], collapse = ",")
-    })
-
-    output$probabilities <- DT::renderDataTable({
-        optim_probs()
+    output$rho_plot <- renderPlot({
+      x <- seq(-1,1,by = 0.01)
+      ggplot2::ggplot(data = data.frame(x = x, y = rho_fct(x, input$rho)), aes(x = x, y = y, group = 1)) +
+        geom_line() +
+        xlab(label = "ax-b") +
+        ylab(label = "prior prob.")
     })
 })

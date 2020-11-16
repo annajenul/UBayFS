@@ -3,7 +3,7 @@
 
 
 build.model <- function(data, target, reg.param = NULL, K = 100,
-                        testsize = 0.25, A, b, rho, verbose = TRUE,
+                        testsize = 0.25, A = NULL, b = NULL, rho = NULL, verbose = TRUE,
                         alpha0 = c(5,1), beta0 = c(1,5)){
 
   if(!is.matrix(data)){
@@ -16,7 +16,7 @@ build.model <- function(data, target, reg.param = NULL, K = 100,
 
 
   RENT_model = RENT::build.model(data = data, target = target, reg.param = reg.param,
-                                 K=K, testsize = testsize,
+                                 K = K, testsize = testsize,
                                  verbose = verbose)
 
   RENT_model = RENT::train.model(RENT_model)

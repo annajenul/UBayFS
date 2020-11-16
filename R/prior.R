@@ -1,4 +1,5 @@
 #' @importFrom matrixStats logSumExp
+#' @export
 
 prior <- function(state, prior.params){
 

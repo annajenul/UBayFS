@@ -16,5 +16,7 @@ Imports: RENT,
          shiny,
          shinyjs,
          DT,
-         shinyWidgets
+         shinyWidgets,
+         shinythemes,
+         ggplot2
          

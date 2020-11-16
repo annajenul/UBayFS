@@ -1,4 +1,5 @@
 #' @importFrom matrixStats logSumExp
+#' @export
 
 
 likelihood <- function(state, likelihood.params){

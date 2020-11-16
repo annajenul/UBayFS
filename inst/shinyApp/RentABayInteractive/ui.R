@@ -10,6 +10,7 @@ shinyUI(fluidPage(
     theme = shinytheme("spacelab"),
 
     useShinyjs(),
+    withMathJax(),
 
     # Application title
     titlePanel("RentABay - Bayesian Repeated Elastic Net Technique for User-Guided Feature Selection"),
@@ -17,41 +18,41 @@ shinyUI(fluidPage(
     # Sidebar with a slider input for number of bins
     sidebarLayout(
         sidebarPanel(
-            h4("Data"),
+            h4("data"),
             fileInput("train_data", "load training data", multiple = FALSE, accept = c(".csv")),
             fileInput("train_labels", "load training labels", multiple = FALSE, accept = c(".csv")),
             hr(),
-            h4("Status"),
+            h4("status"),
             disabled(
                 prettyToggle(
                     inputId = "status_data",
-                    label_on = "data loaded",
+                    label_on = "data ok",
                     icon_on = icon("check"),
                     status_on = "info",
                     status_off = "warning",
-                    label_off = "no data loaded yet",
+                    label_off = "no data loaded",
                     icon_off = icon("remove")
                 )
             ),
             disabled(
                 prettyToggle(
                     inputId = "status_likelihood",
-                    label_on = "likelihood set",
+                    label_on = "likelihood setting ok",
                     icon_on = icon("check"),
                     status_on = "info",
                     status_off = "warning",
-                    label_off = "no likelihood set",
+                    label_off = "no likelihood setting",
                     icon_off = icon("remove")
                 )
             ),
             disabled(
                 prettyToggle(
                     inputId = "status_prior",
-                    label_on = "prior set",
+                    label_on = "prior setting ok",
                     icon_on = icon("check"),
                     status_on = "info",
                     status_off = "warning",
-                    label_off = "no prior set",
+                    label_off = "no prior setting",
                     icon_off = icon("remove")
                 )
             ),
@@ -78,7 +79,8 @@ shinyUI(fluidPage(
             tabsetPanel(id = "tabs",
                 tabPanel("input",
                     h2("training data matrix"),
-                    DT::dataTableOutput("data")
+                    DT::dataTableOutput("data",
+                                        width = "90%")
                 ),
                 tabPanel("likelihood parameters",
                     h2("model parameters for RENT model"),
@@ -105,7 +107,8 @@ shinyUI(fluidPage(
                         column(12,
                                h4("parameter overview"),
                                uiOutput("params"),
-                               style = "background-color: #aaaaaa;"
+                               style = "background-color: #aaaaaa;",
+                               align = "center"
                         )
                     )
                 ),
@@ -122,19 +125,22 @@ shinyUI(fluidPage(
                                hr(),
                                fluidRow(
                                    column(4,
-                                          h4("shape")
+                                          h4("constraint shape")
                                    ),
-                                   column(8,
-                                          sliderTextInput("rho", "constraint shape", choices = c(0.1,1,10,100,1000))
-                                   )
+                                   column(4,
+                                          sliderTextInput("rho", "$$\\rho$$", choices = c(0.1,1,10,100,1000))
+                                   ),
+                                   column(4,
+                                          plotOutput("rho_plot", height = "200px")
+                                    )
                                ),
                                hr(),
                                fluidRow(
                                    column(4,
-                                          h4("size constraint")
+                                          h4("set size constraint")
                                    ),
                                    column(4,
-                                          sliderInput("maxsize", "maximum size", min = 0, max = 10, value = 10, step = 1),
+                                          sliderInput("maxsize", "max. size", min = 0, max = 10, value = 10, step = 1),
                                    ),
                                    column(4,
                                           actionButton("add_maxsize", "add size constraint")
@@ -164,7 +170,9 @@ shinyUI(fluidPage(
                             hr(),
                             fluidRow(
                                 column(12,
-                                       DT::dataTableOutput("features")
+                                       DT::dataTableOutput("features",
+                                                           width = "100%"),
+                                       align = "center"
                                 )
                             )
                         )
@@ -173,15 +181,21 @@ shinyUI(fluidPage(
                     fluidRow(
                         column(12,
                             h4("constraint overview"),
-                            DT::dataTableOutput("constraints"),
+                            uiOutput("constraints"),
+                            align = "center",
                             style = "background-color: #aaaaaa;"
                         )
                     )
                 ),
                 tabPanel("feature selection",
                     h2("results from RentABay feature selection"),
-                    textOutput("selected_features"),
-                    DT::dataTableOutput("probabilities")
+                    fluidRow(
+                        column(12,
+                                DT::dataTableOutput("feature_results"),
+                                align = "center",
+                                style = "background-color: #aaaaaa;"
+                        )
+                    )
                 )
             )
         )

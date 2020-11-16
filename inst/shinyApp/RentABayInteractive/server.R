@@ -8,6 +8,13 @@ shinyServer(function(input, output, session) {
     A <- reactiveVal(NULL)
     b <- reactiveVal(NULL)
     rho <- reactiveVal(NULL)
+
+    alpha <- reactiveVal(NULL)
+    lambda <- reactiveVal(NULL)
+    K <- reactiveVal(NULL)
+    testsize <- reactiveVal(NULL)
+
+    optim_probs <- reactiveVal(NULL)
     sel_fs <- reactiveVal(NULL)
 
     addConstraint <- function(A, b, rho){
@@ -60,6 +67,14 @@ shinyServer(function(input, output, session) {
         colnames(train_data())
     })
 
+    # LIKELIHOOD INPUT HANDLING
+    observeEvent(input$confirmParam, {
+      alpha(input$alpha)
+      lambda(input$lambda)
+      K(input$K)
+      testsize(input$testsize)
+    })
+
     # CONSTRAINT INPUT HANDLING
     observeEvent(input$add_maxsize, {
         addConstraint(A = matrix(1, nrow = 1, ncol = n_feats()),
@@ -68,33 +83,52 @@ shinyServer(function(input, output, session) {
     })
 
     observeEvent(input$add_must, {
-        newA = matrix(0, nrow = 2, ncol = n_feats())
-        newA[1,input$features_rows_selected] <- c(1,-1)
-        newA[2,input$features_rows_selected] <- c(-1,1)
-        newb = c(0,0)
+        sel <- input$features_rows_selected
 
-        addConstraint(A = newA,
-                      b = newb,
-                      rho = rep(input$rho, 2))
+        if(length(sel) > 1){
+          pairs <- expand.grid(sel, sel) # all pairs
+          pairs <- pairs[-which(pairs[,1] == pairs[,2]),] # delete main diagonal
+
+          newA <- t(apply(pairs, 1, function(x){return(((1:n_feats()) == x[1]) - ((1:n_feats()) == x[2]))}))
+
+          addConstraint(A = newA,
+                        b = rep(0, nrow(newA)),
+                        rho = rep(input$rho, nrow(newA)))
+        }
     })
 
     observeEvent(input$add_cannot, {
-        addConstraint(A = matrix((1:n_feats()) %in% input$features_rows_selected, nrow = 1, ncol = n_feats()),
-                      b = 1,
-                      rho = input$rho)
+        sel <- input$features_rows_selected
+
+        if(length(sel) > 1){
+          pairs <- expand.grid(sel, sel) # all pairs
+          pairs <- pairs[-which(pairs[,1] <= pairs[,2]),] # delete main diagonal & lower triangle
+
+          newA = t(apply(pairs, 1, function(x){return(((1:n_feats()) == x[1]) + ((1:n_feats()) == x[2]))}))
+          addConstraint(A = newA,
+                        b = rep(1, nrow(newA)),
+                        rho = rep(input$rho, nrow(newA)))
+        }
     })
 
     # FEATURE SELECTION
     observeEvent(input$run_RentABay, {
-      mod <- RentABay::build.model(train_data(),
-                                   train_labels(),
-                                   reg.param = list(alpha = input$alpha, lambda = input$lambda),
-                                   K = input$K,
-                                   testsize = input$testsize,
-                                   A = A(),
-                                   b = b(),
-                                   rho = rho())
-      sel_fs(RentABay::selectFeatures(mod))
+      withProgress(message = 'preparing model', value = 0, {
+        incProgress(0, detail = paste("Building RENT model"))
+        mod <- RentABay::build.model(train_data(),
+                                     train_labels(),
+                                     reg.param = list(alpha = input$alpha, lambda = input$lambda),
+                                     K = input$K,
+                                     testsize = input$testsize,
+                                     A = A(),
+                                     b = b(),
+                                     rho = rho(),
+                                     verbose = FALSE)
+        incProgress(0, detail = paste("optimizing posterior"))
+        fs <- RentABay::selectFeatures(mod)
+      })
+      sel_fs(fs@solution)
+      optim_probs(posterior(sel_fs), mod$likelihood.params, mod$prior.params)
     })
 
     # STATUS SETTINGS
@@ -103,7 +137,7 @@ shinyServer(function(input, output, session) {
     })
 
     likelihood_complete <- reactive({
-      ifelse(!data_complete() | is.null(input$alpha) | is.null(input$lambda) | is.null(input$K) | is.null(input$testsize), FALSE, TRUE)
+      ifelse(!data_complete() | is.null(alpha()) | is.null(lambda()) | is.null(K()) | is.null(testsize()), FALSE, TRUE)
     })
 
     prior_complete <- reactive({
@@ -120,27 +154,27 @@ shinyServer(function(input, output, session) {
 
     observeEvent(data_complete(), {
       if(data_complete()){
-        updatePrettyToggle(session, "status_data", "Data loaded", value = TRUE)
-        showTab("tabs", target = "Input data")
-        showTab("tabs", target = "RENT parameter selector")
-        showTab("tabs", target = "Prior constraint selector")
+        updatePrettyToggle(session, "status_data", "data loaded", value = TRUE)
+        showTab("tabs", target = "input")
+        showTab("tabs", target = "likelihood parameters")
+        showTab("tabs", target = "prior parameters")
       }
       else{
-        hideTab("tabs", target = "Input data")
-        hideTab("tabs", target = "RENT parameter selector")
-        hideTab("tabs", target = "Prior constraint selector")
+        hideTab("tabs", target = "input")
+        hideTab("tabs", target = "likelihood parameters")
+        hideTab("tabs", target = "prior parameters")
       }
     })
 
     observeEvent(likelihood_complete(), {
       if(likelihood_complete()){
-        updatePrettyToggle(session, "status_likelihood", "RENT parameters set", value = TRUE)
+        updatePrettyToggle(session, "status_likelihood", "likelihood set", value = TRUE)
       }
     })
 
     observeEvent(prior_complete(), {
       if(prior_complete()){
-        updatePrettyToggle(session, "status_prior", "Prior constraints set", value = TRUE)
+        updatePrettyToggle(session, "status_prior", "prior set", value = TRUE)
       }
     })
 
@@ -155,37 +189,66 @@ shinyServer(function(input, output, session) {
 
     observeEvent(featureselection_complete(), {
       if(featureselection_complete()){
-        updatePrettyToggle(session, "status_featureselection", "Feature selection calculated", value = TRUE)
-        showTab("tabs", target = "Feature selection")
-        print(paste0("HERE:", sel_fs()))
+        updatePrettyToggle(session, "status_featureselection", "optimal features calculated", value = TRUE)
+        showTab("tabs", target = "feature selection")
       }
       else{
-        hideTab("tabs", target = "Feature selection")
+        hideTab("tabs", target = "feature selection")
       }
     })
 
 
     # OUTPUT HANDLING
-    output$file <- renderText({
-        ifelse(is.null(input$train_data),
-               "No file selected",
-               "File selected")
-    })
+    output$data <- DT::renderDataTable(
+      datatable(
+        cbind(train_data(), train_labels()),
+        filter = 'top',
+        options = list(pageLength = 20, sDom = '<"top">rt<"bottom">ip'),
+        selection = "none"
+      )
+    )
 
-    output$data <- DT::renderDataTable({
-        cbind(train_data(), train_labels())
-    })
+    output$features <- DT::renderDataTable(
+      datatable(
+        data.frame(
+            min = round(apply(train_data(), 2, min), 2),
+            mean = round(apply(train_data(), 2, mean), 2),
+            median = round(apply(train_data(), 2, median), 2),
+            max = round(apply(train_data(), 2, max), 2)
+        ),
+        filter = 'top',
+        options = list(pageLength = 10)
+      )
+    )
 
-    output$features <- DT::renderDataTable({
-        data.frame(names = colnames(train_data()),
-                   t(round(apply(train_data(), 2, summary), 2)))
-    })
+    output$params <- renderUI(
+      if(likelihood_complete()){
+        withMathJax(
+          sprintf('$$\\alpha= %.03f,~ \\lambda= %.03f$$
+                  $$K= %.03f,~ testsize= %.03f$$',
+                  input$alpha,input$lambda,input$K,input$testsize)
+        )
+      }
+      else{
+        paste0("No parameters set yet")
+      }
+    )
 
-    output$constraints <- DT::renderDataTable({
-        cbind(A(), b = b(), rho = rho())
-    })
+
+    output$constraints <- DT::renderDataTable(
+      datatable(
+        cbind(A = A(), b = b(), rho = rho()),
+        options = list(autoWidth = TRUE, pageLength = 10, sDom = '<"top">rt<"bottom">ip'),
+        rownames = FALSE,
+        selection = "none"
+      )
+    )
 
     output$selected_features <- renderText({
         paste0(names_feats()[which(sel_fs == 1)], collapse = ",")
+    })
+
+    output$probabilities <- DT::renderDataTable({
+        optim_probs()
     })
 })

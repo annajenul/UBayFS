@@ -7,8 +7,10 @@ selectFeatures <- function(RentABaymodel){
                       RentABaymodel$prior.params,
                       lower = 0,
                       upper = 1,
-                      nBits = ncol(RentABaymodel$data)
-                      )
+                      nBits = ncol(RentABaymodel$data),
+                      verbose = FALSE,
+                      monitor = FALSE
+                )
 
   return(opt_state)
 }

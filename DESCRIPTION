@@ -10,13 +10,15 @@ License: What license is it under?
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
-Imports: RENT,
-         GA,
+Imports: GA,
          matrixStats,
          shiny,
          shinyjs,
          DT,
          shinyWidgets,
          shinythemes,
-         ggplot2
+         ggplot2,
+         mRMRe,
+         Rdimtools,
+         caret
          

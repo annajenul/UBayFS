@@ -1,10 +1,13 @@
-#' @import RENT
+#' @import Rdimtools
+#' @import caret
+#' @import mRMRe
 #' @export
 
 
 build.model <- function(data, target, reg.param = NULL, K = 100,
                         testsize = 0.25, A = NULL, b = NULL, rho = NULL, verbose = TRUE,
-                        alpha0 = c(5,1), beta0 = c(1,5)){
+                        alpha0 = c(5,1), beta0 = c(1,5), nr_features = 10, ranking = TRUE,
+                        method = c("laplace", "fisher", "mrmr", "RENT")){
 
   if(!is.matrix(data)){
     data <- as.matrix(data)
@@ -14,23 +17,68 @@ build.model <- function(data, target, reg.param = NULL, K = 100,
     reg.param <- select.reg.param(data, target, model.type)
   }
 
+  rank_matrix = c()
 
-  RENT_model = RENT::build.model(data = data, target = target, reg.param = reg.param,
-                                 K = K, testsize = testsize,
-                                 verbose = verbose)
+  max_counts = ifelse(ranking, length(method) * K * nr_features, length(method) * K)
 
-  RENT_model = RENT::train.model(RENT_model)
+  for(i in 1:K){
+    train_index <- createDataPartition(target, p = .75, list = FALSE)
+    test_index <- setdiff(1:length(target), train_index)
 
-  counts = apply(RENT::get.weights.matrix(RENT_model) != 0, 2, sum)
+    train_data = data[train_index,]
+    train_labels = target[train_index]
+    for(f in method){
+      if(f == "laplace"){
+        ranks = do.lscore(train_data,ndim=nr_features, preprocess = 'cscale')$featidx
+      }
+      else if(f == "fisher"){
+        ranks = do.fscore(X = train_data, label = train_labels, ndim = nr_features, preprocess = 'cscale')$featidx
+      }
+      else if(f == "mrmr"){
+        dat = data.frame("class"=train_labels, train_data)
+        dat$class = factor(dat$class, ordered=TRUE)
+        rs = mRMR.classic(data=mRMR.data(dat), target_indices = c(1), feature_count = nr_features)
+        ranks = unlist(rs@filters)[order(unlist(rs@scores), decreasing = TRUE)]
+      }
+      else if(f == "RENT"){
+        mod <- glmnet(
+                      x = train_data,
+                      y = train_labels,
+                      family = 'binomial',
+                      lambda = 1 / (reg.param$lambda * nrow(train_data)),
+                      alpha = reg.param$alpha)
+
+        ranks=order(abs(as.vector(mod$beta)), decreasing = TRUE)[1:nr_features]
+      }
+      vec <- rep(0, ncol(train_data))
+      if(ranking){
+        vec[ranks] <- nr_features : 1
+      }
+      else{
+        vec[ranks] <- 1
+      }
+      rank_matrix <- rbind(rank_matrix, vec)
+      rownames(rank_matrix)[nrow(rank_matrix)] <- paste0(f, i, sep = "_")
+    }
+  }
+
+  counts = colSums(rank_matrix)
 
   obj <- list(
     data=data,
     target=target,
-    prior.params = list(A=A, b=b, rho=rho),
-    likelihood.params = list(testsize=testsize, K=K, reg.param=reg.param, counts = counts,
-                             alpha0=alpha0, beta0=beta0),
-    verbose=verbose,
-    RENT_model = RENT_model
+    prior.params = list(A=A,
+                        b=b,
+                        rho=rho),
+    likelihood.params = list(testsize=testsize,
+                             K=K,
+                             reg.param=reg.param,
+                             counts = counts,
+                             max_counts = max_counts,
+                             alpha0=alpha0,
+                             beta0=beta0,
+                             method=method),
+    verbose=verbose
   )
   class(obj) <- "RentABaymodel"
   return(obj)

@@ -5,6 +5,7 @@
 likelihood <- function(state, likelihood.params){
 
   counts = likelihood.params$counts
+  max_counts = likelihood.params$max_counts
 
   p = seq(0.01, 0.99, by=0.01)
   L = c()
@@ -13,7 +14,7 @@ likelihood <- function(state, likelihood.params){
     if(state[i] == 0){
       L = cbind(L, dbeta(x = (1-p),
                          shape1 = likelihood.params$alpha0[1] + counts[i],
-                         shape2 = likelihood.params$beta0[1] + length(counts) - counts[i],
+                         shape2 = likelihood.params$beta0[1] + max_counts - counts[i],
                          log = TRUE))
     }
     else{

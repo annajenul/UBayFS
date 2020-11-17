@@ -7,7 +7,7 @@ library(DT)
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
 
-    theme = shinytheme("spacelab"),
+    theme = shinytheme("readable"),
 
     useShinyjs(),
     withMathJax(),

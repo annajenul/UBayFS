@@ -6,7 +6,7 @@ likelihood <- function(state, likelihood.params){
 
   counts = likelihood.params$counts
 
-  p = seq(0, 1, by=0.01)
+  p = seq(0.01, 0.99, by=0.01)
   L = c()
 
   for(i in 1:length(counts)){

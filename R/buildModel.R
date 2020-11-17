@@ -1,5 +1,6 @@
 #' @import Rdimtools
 #' @import caret
+#' @import glmnet
 #' @import mRMRe
 #' @export
 
@@ -28,19 +29,19 @@ build.model <- function(data, target, reg.param = NULL, K = 100,
     train_data = data[train_index,]
     train_labels = target[train_index]
     for(f in method){
-      if(f == "laplace"){
+      if(f %in% c("laplace", "Laplacian score")){
         ranks = do.lscore(train_data,ndim=nr_features, preprocess = 'cscale')$featidx
       }
-      else if(f == "fisher"){
+      else if(f %in% c("fisher", "Fisher score")){
         ranks = do.fscore(X = train_data, label = train_labels, ndim = nr_features, preprocess = 'cscale')$featidx
       }
-      else if(f == "mrmr"){
+      else if(f %in% c("mrmr", "mRMR")){
         dat = data.frame("class"=train_labels, train_data)
         dat$class = factor(dat$class, ordered=TRUE)
         rs = mRMR.classic(data=mRMR.data(dat), target_indices = c(1), feature_count = nr_features)
         ranks = unlist(rs@filters)[order(unlist(rs@scores), decreasing = TRUE)]
       }
-      else if(f == "RENT"){
+      else if(f %in% c("RENT", "enet", "elastic net")){
         mod <- glmnet(
                       x = train_data,
                       y = train_labels,
@@ -50,6 +51,9 @@ build.model <- function(data, target, reg.param = NULL, K = 100,
 
         ranks=order(abs(as.vector(mod$beta)), decreasing = TRUE)[1:nr_features]
       }
+      else{
+        stop(paste0("Error: unknown method", f))
+      }
       vec <- rep(0, ncol(train_data))
       if(ranking){
         vec[ranks] <- nr_features : 1
@@ -58,10 +62,11 @@ build.model <- function(data, target, reg.param = NULL, K = 100,
         vec[ranks] <- 1
       }
       rank_matrix <- rbind(rank_matrix, vec)
-      rownames(rank_matrix)[nrow(rank_matrix)] <- paste0(f, i, sep = "_")
+      rownames(rank_matrix)[nrow(rank_matrix)] <- paste(f, i)
     }
   }
 
+  full_counts = rank_matrix
   counts = colSums(rank_matrix)
 
   obj <- list(
@@ -73,6 +78,7 @@ build.model <- function(data, target, reg.param = NULL, K = 100,
     likelihood.params = list(testsize=testsize,
                              K=K,
                              reg.param=reg.param,
+                             full_counts = full_counts,
                              counts = counts,
                              max_counts = max_counts,
                              alpha0=alpha0,

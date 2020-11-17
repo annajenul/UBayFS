@@ -83,14 +83,31 @@ shinyServer(function(input, output, session) {
       withProgress(min = 0, max = 1, value = 0, message = "building RENT model", {
         model(RentABay::build.model(train_data(),
                                      train_labels(),
-                                     reg.param = list(alpha = input$alpha, lambda = input$lambda),
+                                     reg.param = list(alpha = input$enet.alpha, lambda = input$enet.lambda),
                                      K = input$K,
                                      testsize = input$testsize,
                                      A = NULL,
                                      b = NULL,
                                      rho = NULL,
-                                     verbose = FALSE))
+                                     verbose = FALSE,
+                                     method = input$method,
+                                     ranking = input$ranking,
+                                     nr_features = input$n_feats))
       })
+    })
+
+    observe({
+      if("elastic net" %in% input$method){
+        showTab("single_model_parameters", target = "elastic net")
+      }
+      else{
+        hideTab("single_model_parameters", target = "elastic net")
+      }
+
+      if(length(input$method) > 0){
+        enable("confirmParam")
+      }
+      else{disable("confirmParam")}
     })
 
     # CONSTRAINT INPUT HANDLING
@@ -165,13 +182,14 @@ shinyServer(function(input, output, session) {
     observeEvent(data_complete(), {
       if(data_complete()){
         updatePrettyToggle(session, "status_data", "input ok", value = TRUE)
-        showTab("tabs", target = "input")
+        showTab("tabs", target = "data matrix")
         showTab("tabs", target = "likelihood parameters")
         showTab("tabs", target = "prior parameters")
         updateSliderInput(session, "maxsize", value = min(10, n_feats()), max = n_feats(), step = 1)
+        updateSliderInput(session, "n_feats", value = min(10, n_feats()), max = n_feats(), step = 1)
       }
       else{
-        hideTab("tabs", target = "input")
+        hideTab("tabs", target = "data matrix")
         hideTab("tabs", target = "likelihood parameters")
         hideTab("tabs", target = "prior parameters")
       }
@@ -180,12 +198,20 @@ shinyServer(function(input, output, session) {
     observeEvent(likelihood_complete(), {
       if(likelihood_complete()){
         updatePrettyToggle(session, "status_likelihood", "likelihood setting ok", value = TRUE)
+        showTab("tabs", target = "likelihood counts")
+      }
+      else{
+        hideTab("tabs", target = "likelihood counts")
       }
     })
 
     observeEvent(prior_complete(), {
       if(prior_complete()){
         updatePrettyToggle(session, "status_prior", "prior setting ok", value = TRUE)
+        showTab("tabs", target = "prior constraints")
+      }
+      else{
+        hideTab("tabs", target = "prior constraints")
       }
     })
 
@@ -211,45 +237,37 @@ shinyServer(function(input, output, session) {
 
     # OUTPUT HANDLING
     output$data <- DT::renderDataTable(
-      datatable(
-        cbind(train_data(), train_labels()),
-        filter = 'top',
-        options = list(pageLength = 10, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE),
-        selection = "none"
-      )
+      if(data_complete()){
+        datatable(
+          data.frame(train_data(), label = train_labels()),
+          filter = 'top',
+          options = list(paging = FALSE, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE, scrollY = "400px"),
+          selection = "none"
+        )
+      }
     )
 
     output$features <- DT::renderDataTable(
       datatable(
         data.frame(
-            min = round(apply(train_data(), 2, min), 2),
-            mean = round(apply(train_data(), 2, mean), 2),
-            median = round(apply(train_data(), 2, median), 2),
-            max = round(apply(train_data(), 2, max), 2)
+            feature = colnames(train_data())
+            #min = round(apply(train_data(), 2, min), 2),
+            #mean = round(apply(train_data(), 2, mean), 2),
+            #median = round(apply(train_data(), 2, median), 2),
+            #max = round(apply(train_data(), 2, max), 2)
         ),
-        filter = 'top',
-        options = list(pageLength = 5, scrollX = TRUE)
+        options = list(paging = FALSE, scrollX = TRUE, scrollY = "200px")
       )
     )
 
-    output$params <- renderUI(
-      if(likelihood_complete()){
-        withMathJax(
-          paste0("$$\\alpha= ",
-                input$alpha,
-                ",~\\lambda=",
-                input$lambda,
-                "$$",
-                "\n",
-                "$$K= ",
-                input$K,
-                ",~\\text{testsize}= ",
-                input$testsize,
-                "$$")
+    output$counts <- DT::renderDataTable(
+      if(!is.null(model())){
+        datatable(
+          rbind(model()$likelihood.params$full_counts,
+                sum = apply(model()$likelihood.params$full_counts, 2, sum)),
+          options = list(paging = FALSE, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE, scrollY = "400px"),
+          selection = "none"
         )
-      }
-      else{
-        paste0("no parameters set")
       }
     )
 
@@ -273,8 +291,6 @@ shinyServer(function(input, output, session) {
       }
     })
 
-
-
     output$feature_results <- DT::renderDataTable(
       datatable(
         data.frame(set = apply(optim_fs(), 1, FStoString),
@@ -282,7 +298,7 @@ shinyServer(function(input, output, session) {
                    posterior = round(apply(optim_fs(), 1, posterior, likelihood.params = model()$likelihood.params, prior.params = model()$prior.params),4),
                    likelihood = round(apply(optim_fs(), 1, likelihood, likelihood.params = model()$likelihood.params),4),
                    prior = round(apply(optim_fs(), 1, prior, prior.params = model()$prior.params),4)),
-        options = list(autoWidth = TRUE, pageLength = 10, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE),
+        options = list(paging = FALSE, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE, scrollY = "400px"),
         selection = "none"
       )
     )

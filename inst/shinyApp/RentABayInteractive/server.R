@@ -55,7 +55,14 @@ shinyServer(function(input, output, session) {
             NULL
         }
         else{
-            read.csv(input$train_data$datapath, row.names = 1)
+          header <- ifelse(input$input_colnames, TRUE, FALSE)
+          if(input$input_rownames){
+            rownames = 1
+          }
+          else{
+            rownames = NULL
+          }
+          read.csv(input$train_data$datapath, header = header, row.names = rownames)
         }
     })
 
@@ -64,10 +71,26 @@ shinyServer(function(input, output, session) {
             NULL
         }
         else{
-            unlist(read.csv(input$train_labels$datapath, row.names = 1))
+          header <- ifelse(input$input_colnames, TRUE, FALSE)
+          if(input$input_rownames){
+            rownames = 1
+          }
+          else{
+            rownames = NULL
+          }
+          unlist(read.csv(input$train_labels$datapath, header = header, row.names = rownames))
         }
     })
 
+
+    observeEvent(input$train_data,{
+      print(input$input_colnames)
+      print(input$input_rownames)
+    })
+    observeEvent(input$train_labels,{
+      print(input$input_colnames)
+      print(input$input_rownames)
+    })
 
 
     n_feats <- reactive({

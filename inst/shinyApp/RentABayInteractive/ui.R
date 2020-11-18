@@ -77,12 +77,17 @@ shinyUI(fluidPage(
                 tabsetPanel(id = "tabs",
                     tabPanel("input",
                         fluidRow(
-                            column(6,
+                            column(1,
+                                    checkboxInput("input_rownames", "rownames provided?"),
+                                   checkboxInput("input_colnames", "colnames provided?"),
+                                   style='border: 1px solid black'
+                            ),
+                            column(5,
                                 fileInput("train_data", "load training data", multiple = FALSE, accept = c(".csv")),
                                 align = "center",
                                 style='border: 1px solid black'
                             ),
-                            column(6,
+                            column(5,
                                 fileInput("train_labels", "load training labels", multiple = FALSE, accept = c(".csv")),
                                 align = "center",
                                 style='border: 1px solid black'

@@ -5,6 +5,8 @@ library(ggplot2)
 # Define server logic required to draw a histogram
 shinyServer(function(input, output, session) {
 
+    options(shiny.maxRequestSize=20*1024^2) # maximum upload size
+
     # help functions
     addConstraint <- function(A, b, rho){
         if(is.null(A())){
@@ -81,17 +83,6 @@ shinyServer(function(input, output, session) {
           unlist(read.csv(input$train_labels$datapath, header = header, row.names = rownames))
         }
     })
-
-
-    observeEvent(input$train_data,{
-      print(input$input_colnames)
-      print(input$input_rownames)
-    })
-    observeEvent(input$train_labels,{
-      print(input$input_colnames)
-      print(input$input_rownames)
-    })
-
 
     n_feats <- reactive({
         ncol(train_data())

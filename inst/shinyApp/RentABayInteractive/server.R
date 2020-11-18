@@ -149,7 +149,7 @@ shinyServer(function(input, output, session) {
 
     # FEATURE SELECTION
     observeEvent(input$run_RentABay, {
-      model(set_prior_params(model(), A(), b(), rho()))
+      model(RentABay::set_prior_params(model(), A(), b(), rho()))
 
       withProgress(min = 0, max = 1, value = 0, message = "optimizing posterior function", {
         fs <- RentABay::selectFeatures(model())
@@ -251,10 +251,6 @@ shinyServer(function(input, output, session) {
       datatable(
         data.frame(
             feature = colnames(train_data())
-            #min = round(apply(train_data(), 2, min), 2),
-            #mean = round(apply(train_data(), 2, mean), 2),
-            #median = round(apply(train_data(), 2, median), 2),
-            #max = round(apply(train_data(), 2, max), 2)
         ),
         options = list(paging = FALSE, scrollX = TRUE, scrollY = "200px")
       )
@@ -295,9 +291,9 @@ shinyServer(function(input, output, session) {
       datatable(
         data.frame(set = apply(optim_fs(), 1, FStoString),
                    cardinality = apply(optim_fs(), 1, sum),
-                   posterior = round(apply(optim_fs(), 1, posterior, likelihood.params = model()$likelihood.params, prior.params = model()$prior.params),4),
-                   likelihood = round(apply(optim_fs(), 1, likelihood, likelihood.params = model()$likelihood.params),4),
-                   prior = round(apply(optim_fs(), 1, prior, prior.params = model()$prior.params),4)),
+                   posterior = round(apply(optim_fs(), 1, RentABay::posterior, likelihood.params = model()$likelihood.params, prior.params = model()$prior.params),4),
+                   likelihood = round(apply(optim_fs(), 1, RentABay::likelihood, likelihood.params = model()$likelihood.params),4),
+                   prior = round(apply(optim_fs(), 1, RentABay::prior, prior.params = model()$prior.params),4)),
         options = list(paging = FALSE, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE, scrollY = "400px"),
         selection = "none"
       )

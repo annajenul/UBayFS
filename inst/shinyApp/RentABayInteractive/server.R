@@ -94,7 +94,7 @@ shinyServer(function(input, output, session) {
 
     # LIKELIHOOD INPUT HANDLING
     observeEvent(input$confirmParam, {
-      withProgress(min = 0, max = 1, value = 0, message = "building RENT model", {
+      withProgress(min = 0, max = 1, value = 0, message = "building elementary models", {
         model(RentABay::build.model(train_data(),
                                      train_labels(),
                                      reg.param = list(alpha = input$enet.alpha, lambda = input$enet.lambda),
@@ -162,7 +162,7 @@ shinyServer(function(input, output, session) {
 
 
     # FEATURE SELECTION
-    observeEvent(input$run_RentABay, {
+    observeEvent(input$run_UBay, {
       model(RentABay::set_prior_params(model(), A(), b(), rho()))
 
       withProgress(min = 0, max = 1, value = 0, message = "optimizing posterior function", {
@@ -231,10 +231,10 @@ shinyServer(function(input, output, session) {
 
     observeEvent(parameters_complete(), {
       if(parameters_complete()){
-        enable("run_RentABay")
+        enable("run_UBay")
       }
       else{
-        disable("run_RentABay")
+        disable("run_UBay")
       }
     })
 

@@ -14,7 +14,7 @@ shinyUI(fluidPage(
     withMathJax(),
 
     # Application title
-    titlePanel("RentABay - Bayesian Repeated Elastic Net Technique for User-Guided Feature Selection"),
+    titlePanel("A User-Guided Bayesian Framework for Ensemble Feature Selection (UBay)"),
 
     # Sidebar with a slider input for number of bins
     fluidPage(
@@ -66,9 +66,8 @@ shinyUI(fluidPage(
                     )
                 ),
                 hr(),
-                h4("RentABay"),
                 disabled(
-                    actionButton("run_RentABay", "run feature selection")
+                    actionButton("run_UBay", "run UBay feature selection")
                 )
             ),
 

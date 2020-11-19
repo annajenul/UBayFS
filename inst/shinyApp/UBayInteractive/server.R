@@ -95,7 +95,7 @@ shinyServer(function(input, output, session) {
     # LIKELIHOOD INPUT HANDLING
     observeEvent(input$confirmParam, {
       withProgress(min = 0, max = 1, value = 0, message = "building elementary models", {
-        model(RentABay::build.model(train_data(),
+        model(UBay::build.model(train_data(),
                                      train_labels(),
                                      reg.param = list(alpha = input$enet.alpha, lambda = input$enet.lambda),
                                      K = input$K,
@@ -163,10 +163,10 @@ shinyServer(function(input, output, session) {
 
     # FEATURE SELECTION
     observeEvent(input$run_UBay, {
-      model(RentABay::set_prior_params(model(), A(), b(), rho()))
+      model(UBay::set_prior_params(model(), A(), b(), rho()))
 
       withProgress(min = 0, max = 1, value = 0, message = "optimizing posterior function", {
-        fs <- RentABay::selectFeatures(model())
+        fs <- UBay::selectFeatures(model())
       })
 
       optim_fs(fs@solution)
@@ -305,9 +305,9 @@ shinyServer(function(input, output, session) {
       datatable(
         data.frame(set = apply(optim_fs(), 1, FStoString),
                    cardinality = apply(optim_fs(), 1, sum),
-                   posterior = round(apply(optim_fs(), 1, RentABay::posterior, likelihood.params = model()$likelihood.params, prior.params = model()$prior.params),4),
-                   likelihood = round(apply(optim_fs(), 1, RentABay::likelihood, likelihood.params = model()$likelihood.params),4),
-                   prior = round(apply(optim_fs(), 1, RentABay::prior, prior.params = model()$prior.params),4)),
+                   posterior = round(apply(optim_fs(), 1, UBay::posterior, likelihood.params = model()$likelihood.params, prior.params = model()$prior.params),4),
+                   likelihood = round(apply(optim_fs(), 1, UBay::likelihood, likelihood.params = model()$likelihood.params),4),
+                   prior = round(apply(optim_fs(), 1, UBay::prior, prior.params = model()$prior.params),4)),
         options = list(paging = FALSE, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE, scrollY = "400px"),
         selection = "none"
       )

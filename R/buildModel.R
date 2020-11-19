@@ -86,6 +86,6 @@ build.model <- function(data, target, reg.param = NULL, K = 100,
                              method=method),
     verbose=verbose
   )
-  class(obj) <- "RentABaymodel"
+  class(obj) <- "UBaymodel"
   return(obj)
 }

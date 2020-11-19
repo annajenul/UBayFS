@@ -2,9 +2,9 @@
 #' @export
 
 runInteractive <- function(){
-  appDir <- system.file("shinyApp", "RentABayInteractive", package = "RentABay")
+  appDir <- system.file("shinyApp", "UBayInteractive", package = "UBay")
   if (appDir == "") {
-    stop("Could not find app directory. Try re-installing `RentABay`.", call. = FALSE)
+    stop("Could not find app directory. Try re-installing `UBay`.", call. = FALSE)
   }
   shiny::runApp(appDir, display.mode = "normal")
 }

@@ -41,6 +41,14 @@ shinyServer(function(input, output, session) {
       return(y)
     }
 
+    tableInput = function(FUN, len) {
+      inputs = character(len)
+      for (i in seq_len(len)) {
+        inputs[i] = as.character(FUN(paste0("blockweight", i), label = NULL, value = 1, width = '50px'))
+      }
+      inputs
+    }
+
     # INITIAL SETTINGS
     A <- reactiveVal(NULL)
     b <- reactiveVal(NULL)
@@ -50,6 +58,7 @@ shinyServer(function(input, output, session) {
 
     optim_fs <- reactiveVal(NULL)
 
+    blocks <- reactiveValues(names = NULL, vector = NULL)
 
     # FILE INPUT HANDLING
     train_data <- reactive({
@@ -64,7 +73,15 @@ shinyServer(function(input, output, session) {
           else{
             rownames = NULL
           }
-          read.csv(input$train_data$datapath, header = header, row.names = rownames)
+
+          dat <- read.csv(input$train_data$datapath, header = header, row.names = rownames)
+
+          if(input$input_blocks){
+            blocks$vector <- unlist(dat[1,])
+            blocks$names <- unique(blocks$vector)
+            dat <- dat[-1,]
+          }
+          dat
         }
     })
 
@@ -80,8 +97,12 @@ shinyServer(function(input, output, session) {
           else{
             rownames = NULL
           }
-          unlist(read.csv(input$train_labels$datapath, header = header, row.names = rownames))
+          lab <- unlist(read.csv(input$train_labels$datapath, header = header, row.names = rownames))
         }
+        if(!is.null(train_data())){
+          names(lab) <- rownames(train_data())
+        }
+        lab
     })
 
     n_feats <- reactive({
@@ -160,6 +181,56 @@ shinyServer(function(input, output, session) {
         }
     })
 
+    observeEvent(input$add_xor, {
+      sel <- input$features_rows_selected
+
+      if(length(sel) > 1){
+        pairs <- expand.grid(sel, sel) # all pairs
+        pairs <- pairs[-which(pairs[,1] <= pairs[,2]),] # delete main diagonal & lower triangle
+
+        newA = t(apply(pairs, 1, function(x){return(((1:n_feats()) == x[1]) + ((1:n_feats()) == x[2]))}))
+        newA = rbind(newA, t(apply(pairs, 1, function(x){return(-((1:n_feats()) == x[1]) - ((1:n_feats()) == x[2]))})))
+        addConstraint(A = newA,
+                      b = rep(c(1,-1), each = nrow(newA) / 2),
+                      rho = rep(input$rho, nrow(newA)))
+      }
+    })
+
+    observeEvent(input$add_alo, {
+      sel <- input$features_rows_selected
+
+      if(length(sel) > 1){
+        pairs <- expand.grid(sel, sel) # all pairs
+        pairs <- pairs[-which(pairs[,1] <= pairs[,2]),] # delete main diagonal & lower triangle
+
+        newA = t(apply(pairs, 1, function(x){return(-((1:n_feats()) == x[1]) - ((1:n_feats()) == x[2]))}))
+        addConstraint(A = newA,
+                      b = rep(-1, nrow(newA)),
+                      rho = rep(input$rho, nrow(newA)))
+      }
+    })
+
+    observeEvent(input$add_block, {
+      sel <- input$features_rows_selected
+
+      input_names <- names(input)[which(grepl("blockweight", names(input)))]
+      blockweights <- c()
+      for(n in input_names){
+        blockweights <- c(blockweights, input$paste0(n))
+      }
+      print(input_names)
+      print(blockweights)
+
+      stop()
+      weight_order <- sapply(names(blockweights), function(x){return(strsplit(x,split = "blockweight")[[1]][2])})
+      blockweights <- unlist(blockweights)[order(weight_order)]
+
+      print(blockweights)
+      newA = - (blockweights[sapply(blocks$vector, function(x){return(which(blockweights == x))})])
+      addConstraint(A = newA,
+                      b = rep(1, nrow(newA)),
+                      rho = rep(input$rho, nrow(newA)))
+    })
 
     # FEATURE SELECTION
     observeEvent(input$run_UBay, {
@@ -253,9 +324,10 @@ shinyServer(function(input, output, session) {
     output$data <- DT::renderDataTable(
       if(data_complete()){
         datatable(
-          data.frame(train_data(), label = train_labels()),
+          data.frame(label = train_labels(), train_data()),
           filter = 'top',
-          options = list(paging = FALSE, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE, scrollY = "400px"),
+          extensions = "FixedColumns",
+          options = list(paging = FALSE, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE, scrollY = "400px", fixedColumns = list(leftColumns = 2)),
           selection = "none"
         )
       }
@@ -308,8 +380,21 @@ shinyServer(function(input, output, session) {
                    posterior = round(apply(optim_fs(), 1, UBay::posterior, likelihood.params = model()$likelihood.params, prior.params = model()$prior.params),4),
                    likelihood = round(apply(optim_fs(), 1, UBay::likelihood, likelihood.params = model()$likelihood.params),4),
                    prior = round(apply(optim_fs(), 1, UBay::prior, prior.params = model()$prior.params),4)),
-        options = list(paging = FALSE, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE, scrollY = "400px"),
+        options = list(paging = FALSE, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE, scrollY = "200px"),
         selection = "none"
+      )
+    )
+
+    output$blocks <- DT::renderDataTable(
+      datatable(
+        data.frame(weight = tableInput(textInput,length(blocks$names)),
+                   block = blocks$names,
+                   features = sapply(blocks$names, function(x){return(paste0(names(train_data())[blocks$vector == x], collapse = ","))})
+                   ),
+        escape = FALSE,
+        options = list(paging = FALSE, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE, scrollY = "300px"),
+        selection = "none",
+        rownames = FALSE
       )
     )
 
@@ -319,5 +404,9 @@ shinyServer(function(input, output, session) {
         geom_line() +
         xlab(label = "ax-b") +
         ylab(label = "prior prob.")
+    })
+
+    output$textbox <- renderText({
+      input$blockweight1
     })
 })

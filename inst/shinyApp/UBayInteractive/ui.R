@@ -77,8 +77,9 @@ shinyUI(fluidPage(
                     tabPanel("input",
                         fluidRow(
                             column(1,
-                                    checkboxInput("input_rownames", "rownames provided?"),
-                                   checkboxInput("input_colnames", "colnames provided?"),
+                                checkboxInput("input_rownames", "rownames provided?"),
+                                checkboxInput("input_colnames", "colnames provided?"),
+                                checkboxInput("input_blocks", "feature blocks provided?"),
                                    style='border: 1px solid black'
                             ),
                             column(5,
@@ -111,7 +112,7 @@ shinyUI(fluidPage(
                                           h4("ensemble parameters"),
                                           align="left"
                                    ),
-                                   selectizeInput("method", "select elementary filter(s)",
+                                   pickerInput("method", "select elementary filter(s)",
                                                choices = c("Laplacian score", "Fisher score", "mRMR", "elastic net"),
                                                multiple = TRUE),
                                    checkboxInput("ranking", "ranking", value = TRUE),
@@ -184,9 +185,30 @@ shinyUI(fluidPage(
                                             ),
                                             fluidRow(
                                               actionButton("add_cannot", "add cannot-link")
+                                            ),
+                                            fluidRow(
+                                                actionButton("add_alo", "add at-least-one-link")
+                                            ),
+                                            fluidRow(
+                                                actionButton("add_xor", "add XOR-link")
                                             )
                                        )
                                    ),
+                                   hr(),
+                                   fluidRow(
+                                       column(4,
+                                              h4("block weight constraint")
+                                       ),
+                                       column(4,
+                                              DT::dataTableOutput("blocks")
+                                       ),
+                                       column(4,
+                                              fluidRow(
+                                                  actionButton("add_block", "add block constraint")
+                                              )
+                                       )
+                                   ),
+                                   textOutput("textbox"),
                                    style='border: 1px solid black',
                                    align = 'center'
                             ),

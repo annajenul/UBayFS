@@ -67,6 +67,7 @@ build.model <- function(data, target, reg.param = NULL, K = 100,
   }
 
   full_counts = rank_matrix
+  colnames(full_counts) <- colnames(data)
   counts = colSums(rank_matrix)
 
   obj <- list(

@@ -6,7 +6,7 @@
 
 
 build.model <- function(data, target, reg.param = NULL, K = 100,
-                        testsize = 0.25, A = NULL, b = NULL, rho = NULL, verbose = TRUE,
+                        testsize = 0.25, A = NULL, b = NULL, rho = NULL, weights = NULL, verbose = TRUE,
                         alpha0 = c(5,1), beta0 = c(1,5), nr_features = 10, ranking = TRUE,
                         method = c("laplace", "fisher", "mrmr", "RENT")){
 
@@ -73,18 +73,21 @@ build.model <- function(data, target, reg.param = NULL, K = 100,
   obj <- list(
     data=data,
     target=target,
-    prior.params = list(A=A,
-                        b=b,
-                        rho=rho),
-    likelihood.params = list(testsize=testsize,
-                             K=K,
-                             reg.param=reg.param,
-                             full_counts = full_counts,
-                             counts = counts,
-                             max_counts = max_counts,
-                             alpha0=alpha0,
-                             beta0=beta0,
-                             method=method),
+    user.params = list(
+      constraints = list(A = A,
+                         b = b,
+                         rho = rho),
+      weights = weights
+    ),
+    ensemble.params = list(
+      input = list( testsize=testsize,
+                    K=K,
+                    reg.param=reg.param,
+                    method=method),
+      output = list(full_counts = full_counts,
+                    counts = counts,
+                    max_counts = max_counts)
+    ),
     verbose=verbose
   )
   class(obj) <- "UBaymodel"

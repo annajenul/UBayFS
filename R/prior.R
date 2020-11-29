@@ -1,9 +1,8 @@
-#' @importFrom matrixStats logSumExp
+#' @importFrom DirichletReg ddirichlet
 #' @export
 
-prior <- function(state, prior.params){
+prior <- function(state, user.params){
 
-  inner = (prior.params$b - prior.params$A %*% state) * prior.params$rho
-  inner = cbind(inner, 0)
-  return(sum(inner) - sum(apply(inner, 1, logSumExp)))
+  return(ddirichlet(state, user.params$weights, log = TRUE))
+
 }

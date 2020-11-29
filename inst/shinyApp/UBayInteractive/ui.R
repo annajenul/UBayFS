@@ -156,6 +156,21 @@ shinyUI(fluidPage(
                                  )
                              )
                     ),
+                    tabPanel("prior weighting",
+                             fluidRow(
+                                 column(4,
+                                        h4("block weights")
+                                 ),
+                                 column(4,
+                                        DT::dataTableOutput("blocks")
+                                 ),
+                                 column(4,
+                                        fluidRow(
+                                            actionButton("add_block", "confirm block weights")
+                                        )
+                                 )
+                             )
+                    ),
                     tabPanel("prior parameters",
                         fluidRow(
                             column(8,
@@ -194,21 +209,6 @@ shinyUI(fluidPage(
                                             )
                                        )
                                    ),
-                                   hr(),
-                                   fluidRow(
-                                       column(4,
-                                              h4("block weight constraint")
-                                       ),
-                                       column(4,
-                                              DT::dataTableOutput("blocks")
-                                       ),
-                                       column(4,
-                                              fluidRow(
-                                                  actionButton("add_block", "add block constraint")
-                                              )
-                                       )
-                                   ),
-                                   textOutput("textbox"),
                                    style='border: 1px solid black',
                                    align = 'center'
                             ),

@@ -41,14 +41,6 @@ shinyServer(function(input, output, session) {
       return(y)
     }
 
-    tableInput = function(FUN, len) {
-      inputs = character(len)
-      for (i in seq_len(len)) {
-        inputs[i] = as.character(FUN(paste0("blockweight", i), label = NULL, value = 1, width = '50px'))
-      }
-      inputs
-    }
-
     # INITIAL SETTINGS
     A <- reactiveVal(NULL)
     b <- reactiveVal(NULL)
@@ -58,7 +50,7 @@ shinyServer(function(input, output, session) {
 
     optim_fs <- reactiveVal(NULL)
 
-    blocks <- reactiveValues(names = NULL, vector = NULL)
+    blocks <- reactiveValues(names = NULL, vector = NULL, weights = NULL)
 
     # FILE INPUT HANDLING
     train_data <- reactive({
@@ -211,25 +203,9 @@ shinyServer(function(input, output, session) {
     })
 
     observeEvent(input$add_block, {
-      sel <- input$features_rows_selected
+      blockweights <- sapply(paste0("blockweight_", blocks$names), function(x){return(input[[x]])})
 
-      input_names <- names(input)[which(grepl("blockweight", names(input)))]
-      blockweights <- c()
-      for(n in input_names){
-        blockweights <- c(blockweights, input$paste0(n))
-      }
-      print(input_names)
-      print(blockweights)
-
-      stop()
-      weight_order <- sapply(names(blockweights), function(x){return(strsplit(x,split = "blockweight")[[1]][2])})
-      blockweights <- unlist(blockweights)[order(weight_order)]
-
-      print(blockweights)
-      newA = - (blockweights[sapply(blocks$vector, function(x){return(which(blockweights == x))})])
-      addConstraint(A = newA,
-                      b = rep(1, nrow(newA)),
-                      rho = rep(input$rho, nrow(newA)))
+      blocks$weights = blockweights[blocks$vector]
     })
 
     # FEATURE SELECTION
@@ -387,15 +363,19 @@ shinyServer(function(input, output, session) {
 
     output$blocks <- DT::renderDataTable(
       datatable(
-        data.frame(weight = tableInput(textInput,length(blocks$names)),
+        data.frame(weight = sapply(blocks$names, function(x){return(as.character(textInput(inputId = paste0("blockweight_", x),
+                                                                                 label = NULL, value = 1, width = '50px')))}),
                    block = blocks$names,
                    features = sapply(blocks$names, function(x){return(paste0(names(train_data())[blocks$vector == x], collapse = ","))})
                    ),
         escape = FALSE,
-        options = list(paging = FALSE, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE, scrollY = "300px"),
+        options = list(paging = FALSE, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE, scrollY = "300px",
+                       preDrawCallback = JS('function() {Shiny.unbindAll(this.api().table().node()); }'),
+                       drawCallback = JS('function() {Shiny.bindAll(this.api().table().node()); } ') ),
         selection = "none",
         rownames = FALSE
-      )
+      ),
+      server = FALSE
     )
 
     output$rho_plot <- renderPlot({
@@ -404,9 +384,5 @@ shinyServer(function(input, output, session) {
         geom_line() +
         xlab(label = "ax-b") +
         ylab(label = "prior prob.")
-    })
-
-    output$textbox <- renderText({
-      input$blockweight1
     })
 })

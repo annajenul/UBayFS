@@ -6,10 +6,10 @@ loss <- function(state, theta, user.params, log = TRUE){
   adm <- admissibility(state, A = user.params$constraints$A, b = user.params$constraints$b, rho = user.params$constraints$rho, log = log)
 
   if(log){
-    return(dmult + adm)
+    return(- dmult - adm)
   }
   else{
-    return(dmult * adm)
+    return(1 / (dmult * adm))
   }
 
 }

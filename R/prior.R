@@ -1,8 +1,9 @@
 #' @importFrom DirichletReg ddirichlet
 #' @export
 
-prior <- function(state, user.params){
+# deprecated
+prior <- function(state, user.params, log = TRUE){
 
-  return(ddirichlet(state, user.params$weights, log = TRUE))
+  return(ddirichlet(state, user.params$weights, log = log))
 
 }

@@ -236,9 +236,16 @@ shinyUI(fluidPage(
                     ),
                     tabPanel("feature selection",
                              fluidRow(
-                                 column(10,
-                                        h4("feature selection results"),
+                                 column(5,
+                                        h4("feature probabilities"),
                                         DT::dataTableOutput("feature_results"),
+                                        style='border: 1px solid black',
+                                        align = 'center'
+                                 ),
+                                 column(5,
+                                        h4("feature probabilities"),
+                                        plotOutput("result_barplot", height = "200px"),
+                                        textOutput("result_entropy"),
                                         style='border: 1px solid black',
                                         align = 'center'
                                  )

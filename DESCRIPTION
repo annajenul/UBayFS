@@ -19,5 +19,8 @@ Imports: GA,
          ggplot2,
          mRMRe,
          Rdimtools,
-         caret
+         caret,
+         parallel,
+         pbapply,
+         DirichletReg
          

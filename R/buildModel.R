@@ -6,15 +6,18 @@
 
 
 build.model <- function(data, target, reg.param = NULL, K = 100,
-                        testsize = 0.25, A = NULL, b = NULL, rho = NULL, weights = NULL, verbose = TRUE,
-                        alpha0 = c(5,1), beta0 = c(1,5), nr_features = 10, ranking = TRUE,
-                        method = c("laplace", "fisher", "mrmr", "RENT")){
+                        testsize = 0.25, A = NULL, b = NULL, rho = NULL,
+                        weights = NULL, verbose = TRUE,
+                        #alpha0 = c(5,1), beta0 = c(1,5),
+                        nr_features = 10, ranking = FALSE,
+                        method = c("laplace", "fisher", "mrmr", "RENT"),
+                        sample_size = 1e5){
 
   if(!is.matrix(data)){
     data <- as.matrix(data)
   }
   if(is.null(reg.param)){
-    print("auto-selecting regularization paramters")
+    print("auto-selecting regularization parameters")
     reg.param <- select.reg.param(data, target, model.type)
   }
 
@@ -71,8 +74,8 @@ build.model <- function(data, target, reg.param = NULL, K = 100,
   counts = colSums(rank_matrix)
 
   obj <- list(
-    data=data,
-    target=target,
+    data = data,
+    target = target,
     user.params = list(
       constraints = list(A = A,
                          b = b,
@@ -87,6 +90,9 @@ build.model <- function(data, target, reg.param = NULL, K = 100,
       output = list(full_counts = full_counts,
                     counts = counts,
                     max_counts = max_counts)
+    ),
+    sampling.params = list(
+      sample_size = sample_size
     ),
     verbose=verbose
   )

@@ -5,24 +5,25 @@
 #' @importFrom pbapply pbapply
 #' @export
 
-sample.prior <- function(user.params, n.samples){
+sample.prior <- function(user.params, sampling.params){
+
 
   # sample from Dirichlet prior distribution
-  sample <- rdirichlet(n.samples, user.params$weights)
+  sample <- rdirichlet(sampling.params$sample_size, user.params$weights)
 
   # acceptance-rejection w.r.t. admissibility
   ## create parallel cluster
   cl <- parallel::makeCluster(parallel::detectCores() - 1)
 
   ## create acceptance probabilities
-  acception_probs <- pbapply(sample, 1, admissibility,
+  acceptance_probs <- pbapply(sample, 1, admissibility,
                      A = user.params$constraints$A,
                      b = user.params$constraints$b,
                      rho = user.params$constraints$rho,
                      log = FALSE,
                      cl = cl)
   ## sample acceptance
-  sample_selected <- apply(cbind(acceptance_probs, 1-acceptance_probs), 1, sample, x = c(TRUE, FALSE), size = 1)
+  sample_selected <- apply(cbind(acceptance_probs, 1-acceptance_probs), 1, sample, x = c(TRUE, FALSE), size = 1, replace = TRUE)
 
   ## stop cluster
   parallel::stopCluster(cl)

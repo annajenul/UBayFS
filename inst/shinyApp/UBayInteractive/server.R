@@ -48,7 +48,7 @@ shinyServer(function(input, output, session) {
 
     model <- reactiveVal(NULL)
 
-    optim_fs <- reactiveVal(NULL)
+    #optim_fs <- reactiveVal(NULL)
 
     blocks <- reactiveValues(names = NULL, vector = NULL, weights = NULL)
 
@@ -119,7 +119,8 @@ shinyServer(function(input, output, session) {
                                      verbose = FALSE,
                                      method = input$method,
                                      ranking = input$ranking,
-                                     nr_features = input$n_feats))
+                                     nr_features = input$n_feats,
+                                     sample_size = 1e5))
       })
     })
 
@@ -206,17 +207,16 @@ shinyServer(function(input, output, session) {
       blockweights <- sapply(paste0("blockweight_", blocks$names), function(x){return(input[[x]])})
 
       blocks$weights = blockweights[blocks$vector]
+      model(set_weight_params(model(), blocks$weights))
     })
 
     # FEATURE SELECTION
     observeEvent(input$run_UBay, {
-      model(UBay::set_prior_params(model(), A(), b(), rho()))
+      model(UBay::set_constraint_params(model(), A(), b(), rho()))
 
       withProgress(min = 0, max = 1, value = 0, message = "optimizing posterior function", {
-        fs <- UBay::selectFeatures(model())
+        model(UBay::train_model(model()))
       })
-
-      optim_fs(fs@solution)
     })
 
     # STATUS SETTINGS
@@ -237,7 +237,7 @@ shinyServer(function(input, output, session) {
     })
 
     featureselection_complete <- reactive({
-      ifelse(!parameters_complete() | is.null(optim_fs()), FALSE, TRUE)
+      ifelse(!parameters_complete() | is.null(model()$output), FALSE, TRUE)
     })
 
     observeEvent(data_complete(), {
@@ -321,8 +321,8 @@ shinyServer(function(input, output, session) {
     output$counts <- DT::renderDataTable(
       if(!is.null(model())){
         datatable(
-          rbind(model()$likelihood.params$full_counts,
-                sum = apply(model()$likelihood.params$full_counts, 2, sum)),
+          rbind(model()$ensemble.params$output$full_counts,
+                sum = apply(model()$ensemble.params$output$full_counts, 2, sum)),
           options = list(paging = FALSE, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE, scrollY = "400px"),
           selection = "none"
         )
@@ -351,11 +351,12 @@ shinyServer(function(input, output, session) {
 
     output$feature_results <- DT::renderDataTable(
       datatable(
-        data.frame(set = apply(optim_fs(), 1, FStoString),
-                   cardinality = apply(optim_fs(), 1, sum),
-                   posterior = round(apply(optim_fs(), 1, UBay::posterior, likelihood.params = model()$likelihood.params, prior.params = model()$prior.params),4),
-                   likelihood = round(apply(optim_fs(), 1, UBay::likelihood, likelihood.params = model()$likelihood.params),4),
-                   prior = round(apply(optim_fs(), 1, UBay::prior, prior.params = model()$prior.params),4)),
+        data.frame(rbind(model()$output$map, model()$output$median), row.names = c("MAP", "median")),
+                   #set = apply(optim_fs(), 1, FStoString),
+                   #cardinality = apply(optim_fs(), 1, sum),
+                   #posterior = round(apply(optim_fs(), 1, UBay::posterior, likelihood.params = model()$likelihood.params, prior.params = model()$prior.params),4),
+                   #likelihood = round(apply(optim_fs(), 1, UBay::likelihood, likelihood.params = model()$likelihood.params),4),
+                   #prior = round(apply(optim_fs(), 1, UBay::prior, prior.params = model()$prior.params),4)),
         options = list(paging = FALSE, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE, scrollY = "200px"),
         selection = "none"
       )
@@ -384,5 +385,20 @@ shinyServer(function(input, output, session) {
         geom_line() +
         xlab(label = "ax-b") +
         ylab(label = "prior prob.")
+    })
+
+    output$result_barplot <- renderPlot({
+      x <- colnames(train_data())
+      y <- c(model()$output$map, model()$output$median)
+      z <- c(rep("MAP", length(x)), rep("median", length(x)))
+      ggplot2::ggplot(data = data.frame(feature = x, probability = y, estimator = z),
+                      aes(x = feature, y = probability, fill = estimator)) +
+        geom_bar(stat = "identity", position = position_dodge())+
+        theme(axis.text.x = element_text(angle = 90))
+    })
+
+
+    output$result_entropy <- renderText({
+      paste0("Entropy (MAP, median): ", paste0(UBay::evaluate_model(model())[,1], collapse = ", "))
     })
 })

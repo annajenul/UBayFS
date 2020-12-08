@@ -321,9 +321,9 @@ shinyServer(function(input, output, session) {
     output$counts <- DT::renderDataTable(
       if(!is.null(model())){
         datatable(
-          rbind(model()$ensemble.params$output$full_counts,
-                sum = apply(model()$ensemble.params$output$full_counts, 2, sum)),
-          options = list(paging = FALSE, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE, scrollY = "400px"),
+          rbind(sum = apply(model()$ensemble.params$output$full_counts, 2, sum),
+                model()$ensemble.params$output$full_counts),
+          options = list(paging = FALSE, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE, scrollY = "400px", fixedColumns = list(leftColumns = 1)),
           selection = "none"
         )
       }

@@ -23,7 +23,7 @@ sample.prior <- function(user.params, sampling.params){
                      log = FALSE,
                      cl = cl)
   ## sample acceptance
-  sample_selected <- apply(cbind(acceptance_probs, 1-acceptance_probs), 1, sample, x = c(FALSE, TRUE), size = 1, replace = TRUE)
+  sample_selected <- apply(cbind(acceptance_probs, 1-acceptance_probs), 1, sample, x = c(TRUE, FALSE), size = 1, replace = TRUE)
 
   ## stop cluster
   parallel::stopCluster(cl)
@@ -32,7 +32,8 @@ sample.prior <- function(user.params, sampling.params){
   if(!any(sample_selected)){
     stop("Error: no sample selected")
   }
-
+  print(sum(sample_selected))
+  print(length(sample_selected))
   return(sample[sample_selected,])
 
 }

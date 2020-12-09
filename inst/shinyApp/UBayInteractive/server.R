@@ -228,6 +228,10 @@ shinyServer(function(input, output, session) {
       ifelse(!data_complete() | is.null(model()), FALSE, TRUE)
     })
 
+    weighting_complete <- reactive({
+      ifelse(!data_complete() | is.null(blocks$weights), FALSE, TRUE)
+    })
+
     prior_complete <- reactive({
       ifelse(!data_complete() | is.null(A()) | is.null(b()) | is.null(rho()), FALSE, TRUE)
     })
@@ -266,9 +270,15 @@ shinyServer(function(input, output, session) {
       }
     })
 
+    observeEvent(weighting_complete(), {
+      if(weighting_complete()){
+        updatePrettyToggle(session, "status_weighting", "weight setting ok", value = TRUE)
+      }
+    })
+
     observeEvent(prior_complete(), {
       if(prior_complete()){
-        updatePrettyToggle(session, "status_prior", "prior setting ok", value = TRUE)
+        updatePrettyToggle(session, "status_prior", "constraint setting ok", value = TRUE)
         showTab("tabs", target = "prior constraints")
       }
       else{

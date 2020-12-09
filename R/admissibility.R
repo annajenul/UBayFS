@@ -2,11 +2,11 @@
 #' @export
 
 admissibility <- function(state, A, b, rho, log = TRUE){
+  state = state * length(state) # rescale parameter vector theta by length
+  z = (b - A %*% state) * rho
 
-  inner = (b - A %*% state) * rho
-  inner = cbind(inner, 0)
-
-  lterm <- sum(inner) - sum(apply(inner, 1, logSumExp))
+  lterm <- z - apply(cbind(z,0), 1, logSumExp)
+  lterm <- sum(lterm)
 
   if(log){
     return(lterm)

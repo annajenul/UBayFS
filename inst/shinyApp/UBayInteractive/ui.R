@@ -45,12 +45,23 @@ shinyUI(fluidPage(
                 ),
                 disabled(
                     prettyToggle(
-                        inputId = "status_prior",
-                        label_on = "prior setting ok",
+                        inputId = "status_weighting",
+                        label_on = "weight setting ok",
                         icon_on = icon("check"),
                         status_on = "info",
                         status_off = "warning",
-                        label_off = "no prior setting",
+                        label_off = "no weight setting",
+                        icon_off = icon("remove")
+                    )
+                ),
+                disabled(
+                    prettyToggle(
+                        inputId = "status_prior",
+                        label_on = "constraint setting ok",
+                        icon_on = icon("check"),
+                        status_on = "info",
+                        status_off = "warning",
+                        label_off = "no constraint setting",
                         icon_off = icon("remove")
                     )
                 ),
@@ -113,7 +124,7 @@ shinyUI(fluidPage(
                                           align="left"
                                    ),
                                    pickerInput("method", "select elementary filter(s)",
-                                               choices = c("Laplacian score", "Fisher score", "mRMR", "elastic net"),
+                                               choices = c("Laplacian score", "Fisher score", "mRMR", "elastic net", "WGCNA"),
                                                multiple = TRUE),
                                    checkboxInput("ranking", "ranking", value = TRUE),
                                    sliderInput("n_feats", "number of features", min = 1, max = 10, value = 10, step = 1),

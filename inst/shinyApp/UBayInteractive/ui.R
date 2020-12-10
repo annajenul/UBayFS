@@ -124,7 +124,7 @@ shinyUI(fluidPage(
                                           align="left"
                                    ),
                                    pickerInput("method", "select elementary filter(s)",
-                                               choices = c("Laplacian score", "Fisher score", "mRMR", "elastic net",
+                                               choices = c("Laplacian score", "Fisher score", "mRMR", "elastic net"
                                                            #"WGCNA"
                                                            ),
                                                multiple = TRUE),

@@ -124,7 +124,9 @@ shinyUI(fluidPage(
                                           align="left"
                                    ),
                                    pickerInput("method", "select elementary filter(s)",
-                                               choices = c("Laplacian score", "Fisher score", "mRMR", "elastic net", "WGCNA"),
+                                               choices = c("Laplacian score", "Fisher score", "mRMR", "elastic net",
+                                                           #"WGCNA"
+                                                           ),
                                                multiple = TRUE),
                                    checkboxInput("ranking", "ranking", value = FALSE),
                                    sliderInput("n_feats", "number of features", min = 1, max = 10, value = 10, step = 1),

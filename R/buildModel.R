@@ -2,7 +2,6 @@
 #' @import caret
 #' @import glmnet
 #' @import mRMRe
-#' @import WGCNA
 #' @export
 
 
@@ -55,15 +54,15 @@ build.model <- function(data, target, reg.param = NULL, K = 100,
 
         ranks=order(abs(as.vector(mod$beta)), decreasing = TRUE)[1:nr_features]
       }
-      else if(f %in% c("WGCNA", "wgcna")){
-        mod <- nearestCentroidPredictor(
-                x = train_data,
-                y = train_labels,
-                nFeatures.hi = 0,
-                nFeatures.lo = nr_features)
+      #else if(f %in% c("WGCNA", "wgcna")){
+      #  mod <- nearestCentroidPredictor(
+      #          x = train_data,
+      #          y = train_labels,
+      #          nFeatures.hi = 0,
+      #          nFeatures.lo = nr_features)
 
-        ranks = order(mod$featureSignificance)[1:nr_features]
-      }
+      #  ranks = order(mod$featureSignificance)[1:nr_features]
+      #}
       else{
         stop(paste0("Error: unknown method", f))
       }

@@ -250,6 +250,7 @@ shinyServer(function(input, output, session) {
         showTab("tabs", target = "data matrix")
         showTab("tabs", target = "likelihood parameters")
         showTab("tabs", target = "prior parameters")
+        showTab("tabs", target = "prior weighting")
         updateSliderInput(session, "maxsize", value = min(10, n_feats()), max = n_feats(), step = 1)
         updateSliderInput(session, "n_feats", value = min(10, n_feats()), max = n_feats(), step = 1)
       }
@@ -257,6 +258,7 @@ shinyServer(function(input, output, session) {
         hideTab("tabs", target = "data matrix")
         hideTab("tabs", target = "likelihood parameters")
         hideTab("tabs", target = "prior parameters")
+        hideTab("tabs", target = "prior weighting")
       }
     })
 
@@ -339,6 +341,11 @@ shinyServer(function(input, output, session) {
       }
     )
 
+    output$hist <- renderPlot(
+      if(!is.null(model())){
+        hist(apply(model()$ensemble.params$output$full_counts, 2, sum))
+      })
+
     output$constraints <- renderUI({
       if(is.null(A()) | is.null(b())){
         paste0("no constraints set")
@@ -360,6 +367,21 @@ shinyServer(function(input, output, session) {
     })
 
     output$feature_results <- DT::renderDataTable(
+      datatable(
+        data.frame(#rbind(model()$output$map, model()$output$median), row.names = c("MAP", "median"),
+          set = sapply(list(map = model()$output$map > (1/length(model()$output$map)),
+                            median = model()$output$median > (1/length(model()$output$median))), FStoString),
+          cardinality = sapply(list(map = model()$output$map > (1/length(model()$output$map)),
+                                    median = model()$output$median > (1/length(model()$output$median))), sum)),
+          #posterior = round(apply(optim_fs(), 1, UBay::posterior, likelihood.params = model()$likelihood.params, prior.params = model()$prior.params),4),
+          #likelihood = round(apply(optim_fs(), 1, UBay::likelihood, likelihood.params = model()$likelihood.params),4),
+          #prior = round(apply(optim_fs(), 1, UBay::prior, prior.params = model()$prior.params),4)),
+        options = list(paging = FALSE, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE, scrollY = "200px"),
+        selection = "none"
+      )
+    )
+
+    output$theta_results <- DT::renderDataTable(
       datatable(
         data.frame(rbind(model()$output$map, model()$output$median), row.names = c("MAP", "median")),
                    #set = apply(optim_fs(), 1, FStoString),
@@ -398,9 +420,9 @@ shinyServer(function(input, output, session) {
     })
 
     output$result_barplot <- renderPlot({
-      x <- colnames(train_data())
+      x <- rep(names_feats(),2)
       y <- c(model()$output$map, model()$output$median)
-      z <- c(rep("MAP", length(x)), rep("median", length(x)))
+      z <- rep(c("MAP","median"), each = length(names_feats()))
       ggplot2::ggplot(data = data.frame(feature = x, probability = y, estimator = z),
                       aes(x = feature, y = probability, fill = estimator)) +
         geom_bar(stat = "identity", position = position_dodge())+

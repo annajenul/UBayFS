@@ -2,17 +2,24 @@
 #' @export
 
 admissibility <- function(state, A, b, rho, log = TRUE){
-  state = state * length(state) # rescale parameter vector theta by length
-  z = (b - A %*% state) * rho
+  state = state > (1/length(state)) # rescale parameter vector theta by length
+  print(state)
 
-  lterm <- z - apply(cbind(z,0), 1, logSumExp)
-  lterm <- sum(lterm)
-
-  if(log){
-    return(lterm)
+  if(rho < Inf){
+    z = (b - A %*% state) * rho
+    lprob <- z - apply(cbind(z,0), 1, logSumExp)
+    lprob <- sum(lprob)
   }
   else{
-    return(exp(lterm))
+    z = (b - A %*% state) >= 0
+    lprob <- prod(z)
+  }
+
+  if(log){
+    return(lprob)
+  }
+  else{
+    return(exp(lprob))
   }
 
 }

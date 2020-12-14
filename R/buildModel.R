@@ -8,10 +8,9 @@
 build.model <- function(data, target, reg.param = NULL, K = 100,
                         testsize = 0.25, A = NULL, b = NULL, rho = NULL,
                         weights = NULL, verbose = TRUE,
-                        #alpha0 = c(5,1), beta0 = c(1,5),
                         nr_features = 10, ranking = FALSE,
                         method = c("laplace", "fisher", "mrmr", "RENT"),
-                        sample_size = 1e5){
+                        sample_size = 1e3, t_max = 1e2){
 
   if(!is.matrix(data)){
     data <- as.matrix(data)
@@ -93,7 +92,8 @@ build.model <- function(data, target, reg.param = NULL, K = 100,
                     max_counts = max_counts)
     ),
     sampling.params = list(
-      sample_size = sample_size
+      sample_size = sample_size,
+      t_max = t_max
     ),
     verbose=verbose
   )

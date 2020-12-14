@@ -36,8 +36,14 @@ shinyServer(function(input, output, session) {
     }
 
     rho_fct <- function(x, rho){
-      eterm <- exp(-rho * x)
-      y <- eterm / (1+eterm)
+      if(rho < Inf){
+        eterm <- exp(-rho * x)
+        y <- eterm / (1+eterm)
+        y[is.na(y)] <- ifelse(x[is.na(y)] < 0, 1, 0)
+      }
+      else{
+        y <- 1*(x < 0)
+      }
       return(y)
     }
 
@@ -119,8 +125,7 @@ shinyServer(function(input, output, session) {
                                      verbose = FALSE,
                                      method = input$method,
                                      ranking = input$ranking,
-                                     nr_features = input$n_feats,
-                                     sample_size = 1e5))
+                                     nr_features = input$n_feats))
       })
     })
 
@@ -431,6 +436,6 @@ shinyServer(function(input, output, session) {
 
 
     output$result_entropy <- renderText({
-      paste0("Entropy (MAP, median): ", paste0(UBay::evaluate_model(model())[,1], collapse = ", "))
+      paste0("Entropy (MAP, median): ", paste0(UBay::evaluate_model(model()), collapse = ", "))
     })
 })

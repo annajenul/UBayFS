@@ -3,11 +3,13 @@
 
 admissibility <- function(state, A, b, rho, log = TRUE){
   state = state > (1/length(state)) # rescale parameter vector theta by length
-  print(state)
+  cat("STATE:",state, "\n")
 
-  if(rho < Inf){
+  if(rho[1] < Inf){
     z = (b - A %*% state) * rho
     lprob <- z - apply(cbind(z,0), 1, logSumExp)
+#    cat("LPROP:",lprob , "\n")
+#    print(c(max(abs(lprob)), which.max(abs(lprob))))
     lprob <- sum(lprob)
   }
   else{

@@ -3,14 +3,17 @@
 #' @importFrom parallel stopCluster
 #' @importFrom pbapply pbapply
 #' @importFrom DirichletReg ddirichlet
+#' @importFrom shiny incProgress
 #' @export
 
-sample.posterior <- function(user.params, ensemble.params, sampling.params){
+sample.posterior <- function(user.params, ensemble.params, sampling.params, shiny = FALSE){
 
   # implements an independence-chain version of Metropolis Hastings algorithm
 
   # initialize parameters
+  fullSample <- matrix(, nrow = 0, ncol = length(user.params$weights))
   sample <- matrix(,nrow = sampling.params$sample_size, ncol = length(user.params$weights))
+  fullSampleVals <- c()
   f_theta_t <- rep(-Inf, nrow(sample))
   t <- 0
 
@@ -18,7 +21,7 @@ sample.posterior <- function(user.params, ensemble.params, sampling.params){
   cl <- parallel::makeCluster(parallel::detectCores() - 1)
 
   ## create acceptance probabilities
-  while(t < sampling.params$t_max){
+  for(t in 1:sampling.params$t_max){
     print(paste0("iteration ", t))
 
     # sample from prior as proposal density
@@ -47,15 +50,21 @@ sample.posterior <- function(user.params, ensemble.params, sampling.params){
     # update accepted entries
     sample[accept_inds,] <- sample0[accept_inds,]
     f_theta_t[accept_inds] <- f_theta_star[accept_inds]
-    t <- t+1
+    if(t > sampling.params$t_bi){
+      fullSample <- rbind(fullSample,sample)
+      fullSampleVals <- c(fullSampleVals,f_theta_t)
+    }
+    if(shiny){
+      incProgress(amount = 1/sampling.params$t_max, detail = "running MCMC")
+    }
   }
 
   ## stop cluster
   parallel::stopCluster(cl)
 
   return(list(
-    sample = sample,
-    vals = f_theta_t + ddirichlet(sample, alpha = user.params$weights, log = TRUE)
+    sample = fullSample,
+    vals = fullSampleVals + ddirichlet(fullSample, alpha = user.params$weights, log = TRUE)
   ))
 
 }

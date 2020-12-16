@@ -220,7 +220,7 @@ shinyServer(function(input, output, session) {
       model(UBay::set_constraint_params(model(), A(), b(), rho()))
 
       withProgress(min = 0, max = 1, value = 0, message = "optimizing posterior function", {
-        model(UBay::train_model(model()))
+        model(UBay::train_model(model(), shiny = TRUE))
       })
     })
 

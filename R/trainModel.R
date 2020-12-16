@@ -1,8 +1,8 @@
 #' @export
 
-train_model <- function(model){
+train_model <- function(model, shiny = FALSE){
 
-  posterior <- sample.posterior(model$user.params, model$ensemble.params, model$sampling.params)
+  posterior <- sample.posterior(model$user.params, model$ensemble.params, model$sampling.params, shiny = shiny)
 
   sample <- posterior$sample
   vals <- posterior$vals

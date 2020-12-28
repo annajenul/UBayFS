@@ -6,6 +6,7 @@
 #' @importFrom shiny incProgress
 #' @export
 
+# deprecated
 sample.posterior <- function(user.params, ensemble.params, sampling.params, shiny = FALSE){
 
   # implements an independence-chain version of Metropolis Hastings algorithm

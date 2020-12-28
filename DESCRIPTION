@@ -22,5 +22,6 @@ Imports: GA,
          caret,
          parallel,
          pbapply,
-         DirichletReg
+         DirichletReg,
+         GA
          

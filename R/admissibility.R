@@ -1,6 +1,7 @@
 #' @importFrom matrixStats logSumExp
 #' @export
 
+# deprecated
 admissibility <- function(state, A, b, rho, isState = FALSE, log = TRUE){
   if(!isState){
     # rescale parameter vector theta by length
@@ -9,8 +10,8 @@ admissibility <- function(state, A, b, rho, isState = FALSE, log = TRUE){
 
   if(rho[1] < Inf){
     z = (b - A %*% state) * rho
-    lprob <- z - apply(cbind(z,0), 1, logSumExp)
-    lprob <- sum(lprob)
+    lprob <- z - apply(cbind(z,0), 1, logSumExp) # 1 + exp(...)
+    lprob <- sum(lprob) # product
   }
   else{
     z = (b - A %*% state) >= 0

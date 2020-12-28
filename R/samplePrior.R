@@ -5,6 +5,8 @@
 #' @importFrom pbapply pbapply
 #' @export
 
+
+# deprecated
 sample.prior <- function(user.params, sampling.params){
 
 

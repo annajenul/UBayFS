@@ -45,12 +45,23 @@ shinyUI(fluidPage(
                 ),
                 disabled(
                     prettyToggle(
-                        inputId = "status_prior",
-                        label_on = "prior setting ok",
+                        inputId = "status_weighting",
+                        label_on = "weight setting ok",
                         icon_on = icon("check"),
                         status_on = "info",
                         status_off = "warning",
-                        label_off = "no prior setting",
+                        label_off = "no weight setting",
+                        icon_off = icon("remove")
+                    )
+                ),
+                disabled(
+                    prettyToggle(
+                        inputId = "status_prior",
+                        label_on = "constraint setting ok",
+                        icon_on = icon("check"),
+                        status_on = "info",
+                        status_off = "warning",
+                        label_off = "no constraint setting",
                         icon_off = icon("remove")
                     )
                 ),
@@ -77,9 +88,9 @@ shinyUI(fluidPage(
                     tabPanel("input",
                         fluidRow(
                             column(1,
-                                checkboxInput("input_rownames", "rownames provided?"),
-                                checkboxInput("input_colnames", "colnames provided?"),
-                                checkboxInput("input_blocks", "feature blocks provided?"),
+                                checkboxInput("input_rownames", "rownames provided?", value = TRUE),
+                                checkboxInput("input_colnames", "colnames provided?", value = TRUE),
+                                checkboxInput("input_blocks", "feature blocks provided?", value = TRUE),
                                    style='border: 1px solid black'
                             ),
                             column(5,
@@ -113,9 +124,11 @@ shinyUI(fluidPage(
                                           align="left"
                                    ),
                                    pickerInput("method", "select elementary filter(s)",
-                                               choices = c("Laplacian score", "Fisher score", "mRMR", "elastic net"),
+                                               choices = c("Laplacian score", "Fisher score", "mRMR", "elastic net"
+                                                           #"WGCNA"
+                                                           ),
                                                multiple = TRUE),
-                                   checkboxInput("ranking", "ranking", value = TRUE),
+                                   checkboxInput("ranking", "ranking", value = FALSE),
                                    sliderInput("n_feats", "number of features", min = 1, max = 10, value = 10, step = 1),
                                    sliderTextInput("K", withMathJax('$$K$$'), choices = c(10,20,50,100,200,500,1000)),
                                    sliderInput("testsize", "testsize", min = 0.1, max = 0.9, step = 0.05, value = 0.25),
@@ -154,6 +167,12 @@ shinyUI(fluidPage(
                                         style='border: 1px solid black',
                                         align = 'center'
                                  )
+                             ),
+                             hr(),
+                             fluidRow(
+                                 column(10,
+                                        h4("histogram"),
+                                        plotOutput("hist"))
                              )
                     ),
                     tabPanel("prior weighting",
@@ -215,7 +234,7 @@ shinyUI(fluidPage(
                             column(4,
                                    fluidRow(
                                        column(12,
-                                              sliderTextInput("rho", "constraint shape $$\\rho$$", choices = c(0.1,1,10,100,1000)),
+                                              sliderTextInput("rho", "constraint shape $$\\rho$$", choices = c(0.1,1,10,100,1000, Inf)),
                                               plotOutput("rho_plot", height = "200px")
                                        )
                                    ),
@@ -236,9 +255,17 @@ shinyUI(fluidPage(
                     ),
                     tabPanel("feature selection",
                              fluidRow(
-                                 column(10,
-                                        h4("feature selection results"),
+                                 column(5,
+                                        h4("selected features"),
                                         DT::dataTableOutput("feature_results"),
+                                        hidden(DT::dataTableOutput("theta_results")),
+                                        style='border: 1px solid black',
+                                        align = 'center'
+                                 ),
+                                 column(5,
+                                        h4("feature probabilities"),
+                                        plotOutput("result_barplot", height = "200px"),
+                                        textOutput("result_entropy"),
                                         style='border: 1px solid black',
                                         align = 'center'
                                  )

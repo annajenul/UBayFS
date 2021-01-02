@@ -1,10 +1,11 @@
 #' @importFrom GA ga
 #' @export
 
+# deprecated
 selectFeatures <- function(UBaymodel){
   opt_state <- GA::ga(type = "binary", fitness = posterior,
-                      UBaymodel$likelihood.params,
-                      UBaymodel$prior.params,
+                      UBaymodel$ensemble.params,
+                      UBaymodel$user.params,
                       lower = 0,
                       upper = 1,
                       nBits = ncol(UBaymodel$data),

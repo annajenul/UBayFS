@@ -36,8 +36,14 @@ shinyServer(function(input, output, session) {
     }
 
     rho_fct <- function(x, rho){
-      eterm <- exp(-rho * x)
-      y <- eterm / (1+eterm)
+      if(rho < Inf){
+        eterm <- exp(-rho * x)
+        y <- eterm / (1+eterm)
+        y[is.na(y)] <- ifelse(x[is.na(y)] < 0, 1, 0)
+      }
+      else{
+        y <- 1*(x < 0)
+      }
       return(y)
     }
 
@@ -48,7 +54,7 @@ shinyServer(function(input, output, session) {
 
     model <- reactiveVal(NULL)
 
-    optim_fs <- reactiveVal(NULL)
+    #optim_fs <- reactiveVal(NULL)
 
     blocks <- reactiveValues(names = NULL, vector = NULL, weights = NULL)
 
@@ -206,17 +212,16 @@ shinyServer(function(input, output, session) {
       blockweights <- sapply(paste0("blockweight_", blocks$names), function(x){return(input[[x]])})
 
       blocks$weights = blockweights[blocks$vector]
+      model(set_weight_params(model(), blocks$weights))
     })
 
     # FEATURE SELECTION
     observeEvent(input$run_UBay, {
-      model(UBay::set_prior_params(model(), A(), b(), rho()))
+      model(UBay::set_constraint_params(model(), A(), b(), rho()))
 
       withProgress(min = 0, max = 1, value = 0, message = "optimizing posterior function", {
-        fs <- UBay::selectFeatures(model())
+        model(UBay::train_model(model(), shiny = TRUE))
       })
-
-      optim_fs(fs@solution)
     })
 
     # STATUS SETTINGS
@@ -228,6 +233,10 @@ shinyServer(function(input, output, session) {
       ifelse(!data_complete() | is.null(model()), FALSE, TRUE)
     })
 
+    weighting_complete <- reactive({
+      ifelse(!data_complete() | is.null(blocks$weights), FALSE, TRUE)
+    })
+
     prior_complete <- reactive({
       ifelse(!data_complete() | is.null(A()) | is.null(b()) | is.null(rho()), FALSE, TRUE)
     })
@@ -237,7 +246,7 @@ shinyServer(function(input, output, session) {
     })
 
     featureselection_complete <- reactive({
-      ifelse(!parameters_complete() | is.null(optim_fs()), FALSE, TRUE)
+      ifelse(!parameters_complete() | is.null(model()$output), FALSE, TRUE)
     })
 
     observeEvent(data_complete(), {
@@ -246,6 +255,7 @@ shinyServer(function(input, output, session) {
         showTab("tabs", target = "data matrix")
         showTab("tabs", target = "likelihood parameters")
         showTab("tabs", target = "prior parameters")
+        showTab("tabs", target = "prior weighting")
         updateSliderInput(session, "maxsize", value = min(10, n_feats()), max = n_feats(), step = 1)
         updateSliderInput(session, "n_feats", value = min(10, n_feats()), max = n_feats(), step = 1)
       }
@@ -253,6 +263,7 @@ shinyServer(function(input, output, session) {
         hideTab("tabs", target = "data matrix")
         hideTab("tabs", target = "likelihood parameters")
         hideTab("tabs", target = "prior parameters")
+        hideTab("tabs", target = "prior weighting")
       }
     })
 
@@ -266,9 +277,15 @@ shinyServer(function(input, output, session) {
       }
     })
 
+    observeEvent(weighting_complete(), {
+      if(weighting_complete()){
+        updatePrettyToggle(session, "status_weighting", "weight setting ok", value = TRUE)
+      }
+    })
+
     observeEvent(prior_complete(), {
       if(prior_complete()){
-        updatePrettyToggle(session, "status_prior", "prior setting ok", value = TRUE)
+        updatePrettyToggle(session, "status_prior", "constraint setting ok", value = TRUE)
         showTab("tabs", target = "prior constraints")
       }
       else{
@@ -321,13 +338,18 @@ shinyServer(function(input, output, session) {
     output$counts <- DT::renderDataTable(
       if(!is.null(model())){
         datatable(
-          rbind(model()$likelihood.params$full_counts,
-                sum = apply(model()$likelihood.params$full_counts, 2, sum)),
-          options = list(paging = FALSE, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE, scrollY = "400px"),
+          rbind(sum = apply(model()$ensemble.params$output$full_counts, 2, sum),
+                model()$ensemble.params$output$full_counts),
+          options = list(paging = FALSE, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE, scrollY = "400px", fixedColumns = list(leftColumns = 1)),
           selection = "none"
         )
       }
     )
+
+    output$hist <- renderPlot(
+      if(!is.null(model())){
+        hist(apply(model()$ensemble.params$output$full_counts, 2, sum))
+      })
 
     output$constraints <- renderUI({
       if(is.null(A()) | is.null(b())){
@@ -351,11 +373,27 @@ shinyServer(function(input, output, session) {
 
     output$feature_results <- DT::renderDataTable(
       datatable(
-        data.frame(set = apply(optim_fs(), 1, FStoString),
-                   cardinality = apply(optim_fs(), 1, sum),
-                   posterior = round(apply(optim_fs(), 1, UBay::posterior, likelihood.params = model()$likelihood.params, prior.params = model()$prior.params),4),
-                   likelihood = round(apply(optim_fs(), 1, UBay::likelihood, likelihood.params = model()$likelihood.params),4),
-                   prior = round(apply(optim_fs(), 1, UBay::prior, prior.params = model()$prior.params),4)),
+        data.frame(#rbind(model()$output$map, model()$output$median), row.names = c("MAP", "median"),
+          set = sapply(list(map = model()$output$map > (1/length(model()$output$map)),
+                            median = model()$output$median > (1/length(model()$output$median))), FStoString),
+          cardinality = sapply(list(map = model()$output$map > (1/length(model()$output$map)),
+                                    median = model()$output$median > (1/length(model()$output$median))), sum)),
+          #posterior = round(apply(optim_fs(), 1, UBay::posterior, likelihood.params = model()$likelihood.params, prior.params = model()$prior.params),4),
+          #likelihood = round(apply(optim_fs(), 1, UBay::likelihood, likelihood.params = model()$likelihood.params),4),
+          #prior = round(apply(optim_fs(), 1, UBay::prior, prior.params = model()$prior.params),4)),
+        options = list(paging = FALSE, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE, scrollY = "200px"),
+        selection = "none"
+      )
+    )
+
+    output$theta_results <- DT::renderDataTable(
+      datatable(
+        data.frame(rbind(model()$output$map, model()$output$median), row.names = c("MAP", "median")),
+                   #set = apply(optim_fs(), 1, FStoString),
+                   #cardinality = apply(optim_fs(), 1, sum),
+                   #posterior = round(apply(optim_fs(), 1, UBay::posterior, likelihood.params = model()$likelihood.params, prior.params = model()$prior.params),4),
+                   #likelihood = round(apply(optim_fs(), 1, UBay::likelihood, likelihood.params = model()$likelihood.params),4),
+                   #prior = round(apply(optim_fs(), 1, UBay::prior, prior.params = model()$prior.params),4)),
         options = list(paging = FALSE, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE, scrollY = "200px"),
         selection = "none"
       )
@@ -384,5 +422,20 @@ shinyServer(function(input, output, session) {
         geom_line() +
         xlab(label = "ax-b") +
         ylab(label = "prior prob.")
+    })
+
+    output$result_barplot <- renderPlot({
+      x <- rep(names_feats(),2)
+      y <- c(model()$output$map, model()$output$median)
+      z <- rep(c("MAP","median"), each = length(names_feats()))
+      ggplot2::ggplot(data = data.frame(feature = x, probability = y, estimator = z),
+                      aes(x = feature, y = probability, fill = estimator)) +
+        geom_bar(stat = "identity", position = position_dodge())+
+        theme(axis.text.x = element_text(angle = 90))
+    })
+
+
+    output$result_entropy <- renderText({
+      paste0("Entropy (MAP, median): ", paste0(UBay::evaluate_model(model()), collapse = ", "))
     })
 })

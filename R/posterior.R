@@ -1,5 +1,9 @@
+#' @importFrom DirichletReg ddirichlet
 #' @export
 
-posterior <- function(state, likelihood.params, prior.params){
-  return(likelihood(state, likelihood.params) + prior(state, prior.params))
+# deprecated
+posterior <- function(state, ensemble.params, prior.params){
+
+  return(ddirichlet(state, user.params$weights + ensemble.params$output$counts, log = TRUE))
+
 }

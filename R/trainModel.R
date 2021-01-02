@@ -4,7 +4,7 @@
 
 train_model <- function(model, shiny = FALSE){
 
-  sample <- sample.posterior1(model$user.params, model$ensemble.params, model$sampling.params, shiny = shiny)
+  sample <- sample.posterior2(model$user.params, model$ensemble.params, model$sampling.params, shiny = shiny)
 
   feat_set <- sample > 1/ncol(sample)
   feat_set_binary <- apply(feat_set, 1, function(x){return(binary2decimal(x))})

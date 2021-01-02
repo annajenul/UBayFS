@@ -20,8 +20,10 @@ Imports: GA,
          mRMRe,
          Rdimtools,
          caret,
+         polyapost,
          parallel,
          pbapply,
          DirichletReg,
-         GA
+         GA,
+         glmnet
          

@@ -5,7 +5,7 @@
 #' @importFrom shiny incProgress
 #' @export
 
-sample.posterior2 <- function(user.params, ensemble.params, sampling.params, shiny = FALSE){
+sample.posterior2 <- function(user.params, ensemble.params, sampling.params, t_burn, shiny = FALSE){
 
   #features
   n = ncol(ensemble.params$output$full_counts)
@@ -16,22 +16,26 @@ sample.posterior2 <- function(user.params, ensemble.params, sampling.params, shi
   # input parameters
   A = user.params$constraints$A
   b = user.params$constraints$b
-  print(b)
   rho = user.params$constraints$rho[1]
 
-  weights = as.numeric(user.params$weights)
+  if(!is.numeric(user.params$weights)){
+  prior_weights = as.numeric(user.params$weights)
+  }
+  else{
+    prior_weights = user.params$weights
+  }
 
   # S1
-  alpha = weights
+  alpha = prior_weights
   delta = colSums(ensemble.params$output$full_counts)
-  param = alpha + delta
-  S1 = rdirichlet(n = N, alpha = param)
+  param = alpha + as.vector(delta)
+  S1 = rdirichlet(n = N, alpha = as.vector(param))
 
-
-
-  out = hitrun(alpha = alpha, a1=A, b1=b, nbatch=10000, blen = 1)
-  out = hitrun(out, nbatch = N+10000, blen=1)
+  out = hitrun(alpha = alpha, a1=A, b1=b, nbatch=t_burn, blen = 1)
+  print("Burnin simulation over")
+  out = hitrun(out, nbatch = N+t_burn, blen=1)
   theta2_prior = out$batch
+  print("Simulation complete")
 
   S2 = NULL
   x0 = theta2_prior[1,]
@@ -52,7 +56,7 @@ sample.posterior2 <- function(user.params, ensemble.params, sampling.params, shi
   }
 
 
-  S2 = S2[-c(1:10000),]
+  S2 = S2[-c(1:t_burn),]
 
 
   s_sample = sample(c(0,1), N, replace=TRUE, prob = c( (1/(1+rho)), (rho/(1+rho)) ))

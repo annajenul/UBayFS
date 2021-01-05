@@ -25,11 +25,10 @@ sample.posterior2 <- function(user.params, ensemble.params, sampling.params, t_b
     prior_weights = user.params$weights
   }
 
-  # S1
+  # Dirichlet prior parameters
   alpha = prior_weights
   delta = colSums(ensemble.params$output$full_counts)
   param = alpha + as.vector(delta)
-  S1 = rdirichlet(n = N, alpha = as.vector(param))
 
   out = hitrun(alpha = alpha, a1=A, b1=b, nbatch=t_burn, blen = 1)
   print("Burnin simulation over")
@@ -46,8 +45,10 @@ sample.posterior2 <- function(user.params, ensemble.params, sampling.params, t_b
     print(paste0(sum(size_admissible), " samples used"))
   }
   # additional constraint end
-
   print("Simulation complete")
+
+  # sample S1
+  S1 = rdirichlet(n = nrow(theta2_prior), alpha = as.vector(param))
 
   S2 = NULL
   x0 = theta2_prior[1,]

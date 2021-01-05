@@ -35,6 +35,18 @@ sample.posterior2 <- function(user.params, ensemble.params, sampling.params, t_b
   print("Burnin simulation over")
   out = hitrun(out, nbatch = N+t_burn, blen=1)
   theta2_prior = out$batch
+
+  # add additional constraint here
+  size_admissible <- apply(theta2_prior, 1, function(x){return(sum(x > length(x)) < b[1])})
+  theta2_prior <- theta2_prior[size_admissible,]
+  if(sum(size_admissibility) < 100){
+    stop("Size constraint too hard: fewer than 100 samples left")
+  }
+  else{
+    print(paste0(sum(size_admissible), " samples used"))
+  }
+  # additional constraint end
+
   print("Simulation complete")
 
   S2 = NULL

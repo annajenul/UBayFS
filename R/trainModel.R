@@ -1,5 +1,4 @@
-#' @importFrom GA binary2decimal
-#' @importFrom GA decimal2binary
+#' @import dplyr
 #' @export
 
 train_model <- function(model, shiny = FALSE){

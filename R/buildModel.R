@@ -41,9 +41,9 @@ build.model <- function(data, target, reg.param = NULL, K = 100,
         ranks = do.fscore(X = train_data, label = train_labels, ndim = nr_features, preprocess = 'cscale')$featidx
       }
       else if(f %in% c("mrmr", "mRMR")){
-        dat = data.frame("class"=train_labels, train_data)
+        dat = data.frame(train_data, "class"=train_labels)
         dat$class = factor(dat$class, ordered=TRUE)
-        rs = mRMR.classic(data=mRMR.data(dat), target_indices = c(1), feature_count = nr_features)
+        rs = mRMR.classic(data=mRMR.data(dat), target_indices = ncol(dat), feature_count = nr_features)
         ranks = unlist(rs@filters)[order(unlist(rs@scores), decreasing = TRUE)]
       }
       else if(f %in% c("RENT", "enet", "elastic net")){
@@ -71,6 +71,7 @@ build.model <- function(data, target, reg.param = NULL, K = 100,
       else{
         vec[ranks] <- 1
       }
+
       rank_matrix <- rbind(rank_matrix, vec)
       rownames(rank_matrix)[nrow(rank_matrix)] <- paste(f, i)
     }

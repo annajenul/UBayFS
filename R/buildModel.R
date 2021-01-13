@@ -2,6 +2,7 @@
 #' @import caret
 #' @import glmnet
 #' @import mRMRe
+#' @import rpart
 #' @export
 
 
@@ -10,7 +11,7 @@ build.model <- function(data, target, reg.param = NULL, K = 100,
                         weights = NULL, verbose = TRUE,
                         nr_features = 10, ranking = FALSE,
                         method = c("laplace", "fisher", "mrmr", "RENT"),
-                        sample_size = 1e2, t_max = 1e3, t_bi = 1e2){
+                        t_max = 1e3, t_bi = 1e2){
 
   if(!is.matrix(data)){
     data <- as.matrix(data)
@@ -21,11 +22,12 @@ build.model <- function(data, target, reg.param = NULL, K = 100,
     reg.param <- select.reg.param(data, target, model.type)
   }
 
-  rank_matrix = c()
+  rank_matrix = NULL
 
   max_counts = ifelse(ranking, length(method) * K * nr_features, length(method) * K)
-
+  print(K)
   for(i in 1:K){
+    print(i)
     train_index <- createDataPartition(target, p = .75, list = FALSE)
     test_index <- setdiff(1:length(target), train_index)
 
@@ -53,6 +55,11 @@ build.model <- function(data, target, reg.param = NULL, K = 100,
                       alpha = reg.param$alpha)
 
         ranks=order(abs(as.vector(mod$beta)), decreasing = TRUE)[1:nr_features]
+      }
+      else if(f %in% c("tree", "classification_tree")){
+        rf_data = cbind(train_labels, train_data)
+        fit = rpart(train_labels~., data= as.data.frame(rf_data), method = "class")
+        ranks = which(colnames(train_data) %in% names(fit$variable.importance))
       }
       else{
         stop(paste0("Error: unknown method", f))
@@ -92,7 +99,6 @@ build.model <- function(data, target, reg.param = NULL, K = 100,
                     max_counts = max_counts)
     ),
     sampling.params = list(
-      sample_size = sample_size,
       t_max = t_max,
       t_bi = t_bi
     ),

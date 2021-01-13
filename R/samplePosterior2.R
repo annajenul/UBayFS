@@ -5,12 +5,10 @@
 #' @importFrom shiny incProgress
 #' @export
 
-sample.posterior2 <- function(user.params, ensemble.params, sampling.params, t_burn, shiny = FALSE){
+sample.posterior2 <- function(user.params, ensemble.params, sampling.params, shiny = FALSE){
 
   #features
   n = ncol(ensemble.params$output$full_counts)
-  #samples
-  N = sampling.params$sample_size
 
 
   # input parameters
@@ -30,20 +28,53 @@ sample.posterior2 <- function(user.params, ensemble.params, sampling.params, t_b
   delta = colSums(ensemble.params$output$full_counts)
   param = alpha + as.vector(delta)
 
-  out = hitrun(alpha = alpha, a1=A, b1=b, nbatch=t_burn, blen = 1)
-  print("Burnin simulation over")
-  out = hitrun(out, nbatch = N+t_burn, blen=1)
-  theta2_prior = out$batch
+  # sampling parameters
+  N = sampling.params$t_max
+  t_bi <- sampling.params$t_bi
+  theta2_prior = matrix(, ncol = n, nrow=0)
+  batch_size = 100000
+  imax = 10000
+  i = 0
 
-  # add additional constraint here
-  size_admissible <- apply(theta2_prior, 1, function(x){return(sum(x > length(x)) < b[1])})
-  theta2_prior <- theta2_prior[size_admissible,]
-  if(sum(size_admissibility) < 100){
-    stop("Size constraint too hard: fewer than 100 samples left")
+  out = hitrun(alpha = alpha, a1=A, b1=b, nbatch=t_bi, blen = 1)
+
+  while ((nrow(theta2_prior) < N) & (i < imax)) {
+    print(nrow(theta2_prior))
+    out = hitrun(out, nbatch = batch_size, blen=1)
+
+
+    oT = t((out$batch > 1/ncol(out$batch)))
+    mat = A %*% oT - matrix(b, nrow = length(b), ncol = ncol(oT))
+    rows = out$batch[colSums(mat <= 0) == nrow(mat), ]
+
+    theta2_prior <- rbind(theta2_prior, rows)
+    i = i + 1
+
+    #admissible <- apply(out$batch, 1, function(x){return(
+    #  all( (A %*% (x > (1/length(x))) - b) <= 0) )})
+    #theta2_prior <- rbind(theta2_prior, out$batch[admissible,])
+    # i = i+1
   }
-  else{
-    print(paste0(sum(size_admissible), " samples used"))
-  }
+
+  if(nrow(theta2_prior) < N){stop("Constraint too hard.")}
+  else{ theta2_prior = theta2_prior[1:N, ]}
+
+
+  # out = hitrun(alpha = alpha, a1=A, b1=b, nbatch=t_burn, blen = 1)
+  # print("Burnin simulation over")
+  # out = hitrun(out, alpha = alpha, a1=A, b1=b, nbatch = N, blen=1)
+  # theta2_prior = out$batch
+  # # add additional constraint here
+  # size_admissibility <- apply(theta2_prior, 1, function(x){return(
+  #   all( (A %*% (x > (1/length(x))) - b) <= 0) )})
+  # theta2_prior <- theta2_prior[size_admissibility,]
+  # cat("Lenght of theta2_prior", dim(theta2_prior))
+  # if(sum(size_admissibility) < 100){
+  #   stop("Size constraint too hard: fewer than 100 samples left")
+  # }
+  # else{
+  #   print(paste0(sum(size_admissibility), " samples used \n"))
+  # }
   # additional constraint end
   print("Simulation complete")
 
@@ -69,10 +100,7 @@ sample.posterior2 <- function(user.params, ensemble.params, sampling.params, t_b
   }
 
 
-  S2 = S2[-c(1:t_burn),]
-
-
-  s_sample = sample(c(0,1), N, replace=TRUE, prob = c( (1/(1+rho)), (rho/(1+rho)) ))
+  s_sample = sample(c(0,1), nrow(S1), replace=TRUE, prob = c( (1/(1+rho)), (rho/(1+rho)) ))
 
   # attention: this is ordered!
   S = rbind(S1[s_sample==0, ], S2[s_sample==1, ])

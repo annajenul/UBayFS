@@ -5,7 +5,7 @@
 #' @importFrom shiny incProgress
 #' @export
 
-sample.posterior <- function(user.params, ensemble.params, sampling.params, shiny = FALSE){
+sample.posterior3 <- function(user.params, ensemble.params, sampling.params, shiny = FALSE){
 
   #features
   n = ncol(ensemble.params$output$full_counts)
@@ -30,44 +30,27 @@ sample.posterior <- function(user.params, ensemble.params, sampling.params, shin
 
   #out = hitrun(alpha = alpha, a1 = A, b1 = b, nbatch = t_bi, blen = 1)
 
-  while ((nrow(theta2_prior) < N) & (i < imax)) {
+  #while ((nrow(theta2_prior) < N) & (i < imax)) {
 
     #out = hitrun(out, nbatch = batch_size, blen = 1)
-    out <- list(batch = rdirichlet(n = batch_size, alpha = alpha))
+  theta2_prior <- rdirichlet(n = N, alpha = param)
 
-    feat_sample = t(out$batch > (1 / ncol(out$batch)))
-    mat = A %*% feat_sample - matrix(b, nrow = length(b), ncol = ncol(feat_sample))
-    rows = out$batch[colSums(mat <= 0) == nrow(mat), ]
+    #feat_sample = t(out$batch > (1 / ncol(out$batch)))
+    #mat = A %*% feat_sample - matrix(b, nrow = length(b), ncol = ncol(feat_sample))
+    #rows = out$batch[colSums(mat <= 0) == nrow(mat), ]
 
-    theta2_prior <- rbind(theta2_prior, rows)
-    i = i + 1
+    #theta2_prior <- rbind(theta2_prior, rows)
+    #i = i + 1
 
-  }
+  #}
 
   if(nrow(theta2_prior) < N){stop("Constraint too hard.")}
   else{ theta2_prior = theta2_prior[1:N, ]}
 
-
-  # out = hitrun(alpha = alpha, a1=A, b1=b, nbatch=t_burn, blen = 1)
-  # print("Burnin simulation over")
-  # out = hitrun(out, alpha = alpha, a1=A, b1=b, nbatch = N, blen=1)
-  # theta2_prior = out$batch
-  # # add additional constraint here
-  # size_admissibility <- apply(theta2_prior, 1, function(x){return(
-  #   all( (A %*% (x > (1/length(x))) - b) <= 0) )})
-  # theta2_prior <- theta2_prior[size_admissibility,]
-  # cat("Lenght of theta2_prior", dim(theta2_prior))
-  # if(sum(size_admissibility) < 100){
-  #   stop("Size constraint too hard: fewer than 100 samples left")
-  # }
-  # else{
-  #   print(paste0(sum(size_admissibility), " samples used \n"))
-  # }
-  # additional constraint end
   print("Simulation complete")
 
   # sample S1
-  S1 <- rdirichlet(n = nrow(theta2_prior), alpha = as.vector(param))
+  S1 <- rdirichlet(n = N, alpha = as.vector(param))
 
   # initialize S2
   x0 <- theta2_prior[1,]
@@ -81,13 +64,9 @@ sample.posterior <- function(user.params, ensemble.params, sampling.params, shin
       incProgress(amount = 1/nrow(theta2_prior), detail = "running MCMC")
     }
 
-    R = min(exp(dmultinom(x = delta, prob = theta2_prior[i,], log = TRUE)
-                - dmultinom(x = delta, prob = S2[(i-1), ], log = TRUE)),
+    R = min(exp(admissibility(theta2_prior[i,], A, b, rho, isState = FALSE, log = TRUE) -
+                  admissibility(S2[i-1,], A, b, rho, isState = FALSE, log = TRUE)),
             1)
-    if(i <3){print(dmultinom(x = delta, prob = theta2_prior[i,], log = TRUE))
-      print(dmultinom(x = delta, prob = S2[(i-1), ], log = TRUE))
-      print(R)
-    }
     trans = sample(c(TRUE, FALSE), size=1, prob=c(R, 1-R))
 
     if(trans){
@@ -102,8 +81,6 @@ sample.posterior <- function(user.params, ensemble.params, sampling.params, shin
       sum_trans[length(sum_trans)] <- sum_trans[length(sum_trans)] + 1
     }
   }
-  print(which(S2[nrow(S2),] > (1/ncol(S2))))
-  print(sum_trans)[sum_trans > 0]
 
   s_sample = sample(c(0,1), nrow(S1), replace=TRUE, prob = c( (1/(1+rho)), (rho/(1+rho)) ))
 

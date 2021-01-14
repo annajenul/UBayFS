@@ -3,7 +3,7 @@
 
 train_model <- function(model, shiny = FALSE){
 
-  sample <- sample.posterior(model$user.params, model$ensemble.params, model$sampling.params, shiny = shiny)
+  sample <- sample.posterior3(model$user.params, model$ensemble.params, model$sampling.params, shiny = shiny)
   cat("Sampling done")
   feat_set <- sample > 1/ncol(sample)
 

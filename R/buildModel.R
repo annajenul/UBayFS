@@ -7,7 +7,7 @@
 
 
 build.model <- function(data, target, reg.param = NULL, K = 100,
-                        testsize = 0.25, A = NULL, b = NULL, rho = NULL,
+                        trainsize = 0.75, A = NULL, b = NULL, rho = NULL,
                         weights = NULL, verbose = TRUE,
                         nr_features = 10, ranking = FALSE,
                         method = c("laplace", "fisher", "mrmr", "RENT"),
@@ -27,7 +27,7 @@ build.model <- function(data, target, reg.param = NULL, K = 100,
   max_counts = ifelse(ranking, length(method) * K * nr_features, length(method) * K)
   print(paste0("Running ",K, " elementary models"))
   for(i in 1:K){
-    train_index <- createDataPartition(target, p = .75, list = FALSE)
+    train_index <- createDataPartition(target, p = trainsize, list = FALSE)
     test_index <- setdiff(1:length(target), train_index)
 
     train_data = data[train_index,]
@@ -65,10 +65,10 @@ build.model <- function(data, target, reg.param = NULL, K = 100,
       }
       vec <- rep(0, ncol(train_data))
       if(ranking){
-        vec[ranks] <- nr_features : 1
+        vec[unique(ranks)[unique(ranks) <= ncol(train_data)]] <- nr_features : 1
       }
       else{
-        vec[ranks] <- 1
+        vec[unique(ranks)[unique(ranks) <= ncol(train_data)]] <- 1
       }
 
       rank_matrix <- rbind(rank_matrix, vec)
@@ -90,7 +90,7 @@ build.model <- function(data, target, reg.param = NULL, K = 100,
       weights = weights
     ),
     ensemble.params = list(
-      input = list( testsize=testsize,
+      input = list( trainsize=trainsize,
                     K=K,
                     reg.param=reg.param,
                     method=method),

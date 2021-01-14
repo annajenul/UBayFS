@@ -23,7 +23,7 @@ Imports: GA,
          polyapost,
          parallel,
          pbapply,
-         gtools,
+         DirichletReg,
          dplyr,
          glmnet
          

@@ -1,71 +1,106 @@
-#' @importFrom parallel detectCores
-#' @importFrom parallel makeCluster
-#' @importFrom parallel stopCluster
 #' @importFrom pbapply pbapply
-#' @importFrom DirichletReg ddirichlet
+#' @importFrom gtools ddirichlet
+#' @importFrom gtools rdirichlet
+#' @importFrom polyapost hitrun
 #' @importFrom shiny incProgress
 #' @export
 
-# deprecated
 sample.posterior <- function(user.params, ensemble.params, sampling.params, shiny = FALSE){
 
-  # implements an independence-chain version of Metropolis Hastings algorithm
+  #features
+  n = ncol(ensemble.params$output$full_counts)
 
-  # initialize parameters
-  fullSample <- matrix(, nrow = 0, ncol = length(user.params$weights))
-  sample <- matrix(,nrow = sampling.params$sample_size, ncol = length(user.params$weights))
-  fullSampleVals <- c()
-  f_theta_t <- rep(-Inf, nrow(sample))
-  t <- 0
+  # input parameters
+  A = user.params$constraints$A
+  b = user.params$constraints$b
+  rho = user.params$constraints$rho[1]
 
-  ## create parallel cluster
-  cl <- parallel::makeCluster(parallel::detectCores() - 1)
+  # Dirichlet prior parameters
+  alpha = as.numeric(user.params$weights)
+  delta = ensemble.params$output$counts
+  param = alpha + delta
 
-  ## create acceptance probabilities
-  for(t in 1:sampling.params$t_max){
-    print(paste0("iteration ", t))
+  # sampling parameters
+  N = sampling.params$t_max
+  t_bi <- sampling.params$t_bi
+  theta2_prior = matrix(, ncol = n, nrow = 0)
+  batch_size = 1e5
+  imax = 1e4
+  i = 0
 
-    # sample from prior as proposal density
-    sample0 <- sample.prior(user.params, sampling.params)
+  #out = hitrun(alpha = alpha, a1 = A, b1 = b, nbatch = t_bi, blen = 1)
 
-    # evaluate likelihood and kappa
-    likelihood_vals <- pbapply(sample0, 1, likelihood,
-                               ensemble.params = ensemble.params,
-                               log = TRUE,
-                               cl = cl)
-    kappa_vals <- pbapply(sample0, 1, admissibility,
-                          A = user.params$constraints$A,
-                          b = user.params$constraints$b,
-                          rho = user.params$constraints$rho,
-                          log = TRUE,
-                          cl = cl)
+  while ((nrow(theta2_prior) < N) & (i < imax)) {
 
-    f_theta_star <- likelihood_vals + kappa_vals # full nominator (in log-scale)
+    #out = hitrun(out, nbatch = batch_size, blen = 1)
+    out <- list(batch = rdirichlet(n = batch_size, alpha = alpha))
 
-    MH_ratio <- f_theta_star - f_theta_t # log-MH_ratio
-    MH_ratio <- apply(cbind(MH_ratio, 0), 1, min) # bound by 1 (0 in log scale) above
+    feat_sample = t(out$batch > (1 / ncol(out$batch)))
+    mat = A %*% feat_sample - matrix(b, nrow = length(b), ncol = ncol(feat_sample))
+    rows = out$batch[colSums(mat <= 0) == nrow(mat), ]
 
-    accept_inds <- apply(cbind(exp(MH_ratio), 1-exp(MH_ratio)), 1, sample, x = c(TRUE, FALSE), size = 1, replace = TRUE) # indices with accepted updates
-    print(sum(accept_inds) / length(accept_inds))
+    theta2_prior <- rbind(theta2_prior, rows)
+    i = i + 1
 
-    # update accepted entries
-    sample[accept_inds,] <- sample0[accept_inds,]
-    f_theta_t[accept_inds] <- f_theta_star[accept_inds]
-    if(t > sampling.params$t_bi){
-      fullSample <- rbind(fullSample,sample)
-      fullSampleVals <- c(fullSampleVals,f_theta_t)
-    }
+  }
+
+  if(nrow(theta2_prior) < N){stop("Constraint too hard.")}
+  else{ theta2_prior = theta2_prior[1:N, ]}
+
+
+  # out = hitrun(alpha = alpha, a1=A, b1=b, nbatch=t_burn, blen = 1)
+  # print("Burnin simulation over")
+  # out = hitrun(out, alpha = alpha, a1=A, b1=b, nbatch = N, blen=1)
+  # theta2_prior = out$batch
+  # # add additional constraint here
+  # size_admissibility <- apply(theta2_prior, 1, function(x){return(
+  #   all( (A %*% (x > (1/length(x))) - b) <= 0) )})
+  # theta2_prior <- theta2_prior[size_admissibility,]
+  # cat("Lenght of theta2_prior", dim(theta2_prior))
+  # if(sum(size_admissibility) < 100){
+  #   stop("Size constraint too hard: fewer than 100 samples left")
+  # }
+  # else{
+  #   print(paste0(sum(size_admissibility), " samples used \n"))
+  # }
+  # additional constraint end
+  print("Simulation complete")
+
+  # sample S1
+  S1 <- rdirichlet(n = nrow(theta2_prior), alpha = as.vector(param))
+
+  # initialize S2
+  x0 <- theta2_prior[1,]
+  S2 <- t(x0)
+
+  # help variable
+  sum_trans <- 0
+
+  for(i in 2:nrow(theta2_prior)) {
     if(shiny){
-      incProgress(amount = 1/sampling.params$t_max, detail = "running MCMC")
+      incProgress(amount = 1/nrow(theta2_prior), detail = "running MCMC")
+    }
+
+    R = min(exp(dmultinom(x = delta, prob = theta2_prior[i,], log = TRUE) + ddirichlet(x = S2[(i-1), ], alpha = alpha)
+                - dmultinom(x = delta, prob = S2[(i-1), ], log = TRUE) - ddirichlet(x = theta2_prior[i,], alpha = alpha)),
+            1)
+    trans = sample(c(TRUE, FALSE), size=1, prob=c(R, 1-R))
+
+    if(trans){
+      S2 = rbind(S2,theta2_prior[i,])
+      sum_trans[length(sum_trans)] <- sum_trans[length(sum_trans)] + 1
+    }
+    else{
+      S2 = rbind(S2, S2[(i-1),])
+      sum_trans <- c(sum_trans, 0)
     }
   }
 
-  ## stop cluster
-  parallel::stopCluster(cl)
+  s_sample = sample(c(0,1), nrow(S1), replace=TRUE, prob = c( (1/(1+rho)), (rho/(1+rho)) ))
 
-  return(list(
-    sample = fullSample,
-    vals = fullSampleVals + ddirichlet(fullSample, alpha = user.params$weights, log = TRUE)
-  ))
+  # attention: this is ordered!
+  S = rbind(S1[s_sample==0, ], S2[s_sample==1, ])
+
+  return(S)
 
 }

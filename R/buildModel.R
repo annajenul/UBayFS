@@ -25,9 +25,8 @@ build.model <- function(data, target, reg.param = NULL, K = 100,
   rank_matrix = NULL
 
   max_counts = ifelse(ranking, length(method) * K * nr_features, length(method) * K)
-  print(K)
+  print(paste0("Running ",K, " elementary models"))
   for(i in 1:K){
-    print(i)
     train_index <- createDataPartition(target, p = .75, list = FALSE)
     test_index <- setdiff(1:length(target), train_index)
 

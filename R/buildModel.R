@@ -6,7 +6,7 @@
 #' @export
 
 
-build.model <- function(data, target, reg.param = NULL, K = 100,
+build.model <- function(data, target, reg.param = list(alpha = 0.5, lambda = 1), K = 100,
                         trainsize = 0.75, A = NULL, b = NULL, rho = NULL,
                         weights = NULL, verbose = TRUE,
                         nr_features = 10, ranking = FALSE,
@@ -16,28 +16,26 @@ build.model <- function(data, target, reg.param = NULL, K = 100,
   if(!is.matrix(data)){
     data <- as.matrix(data)
   }
-  data = scale(data)
-  if(is.null(reg.param)){
-    print("auto-selecting regularization parameters")
-    reg.param <- select.reg.param(data, target, model.type)
-  }
+  # data = scale(data)
 
   rank_matrix = NULL
 
   max_counts = ifelse(ranking, length(method) * K * nr_features, length(method) * K)
-  print(paste0("Running ",K, " elementary models"))
+  print(paste0("Running ",K, " elementary ensemble models"))
   for(i in 1:K){
     train_index <- createDataPartition(target, p = trainsize, list = FALSE)
     test_index <- setdiff(1:length(target), train_index)
 
-    train_data = data[train_index,]
-    train_labels = target[train_index]
+    nconst_cols <- which(apply(data[train_index,], 2, function(x){return(length(unique(x)))}) > 1)
+    train_data <- scale(data[train_index,nconst_cols])
+    train_labels <- target[train_index]
+
     for(f in method){
       if(f %in% c("laplace", "Laplacian score")){
-        ranks = do.lscore(train_data,ndim=nr_features, preprocess = 'cscale')$featidx
+        ranks = do.lscore(train_data,ndim=nr_features)$featidx
       }
       else if(f %in% c("fisher", "Fisher score")){
-        ranks = do.fscore(X = train_data, label = train_labels, ndim = nr_features, preprocess = 'cscale')$featidx
+        ranks = do.fscore(X = train_data, label = train_labels, ndim = nr_features)$featidx
       }
       else if(f %in% c("mrmr", "mRMR")){
         dat = data.frame(train_data, "class"=train_labels)
@@ -58,17 +56,22 @@ build.model <- function(data, target, reg.param = NULL, K = 100,
       else if(f %in% c("tree", "classification_tree")){
         rf_data = cbind(train_labels, train_data)
         fit = rpart(train_labels~., data= as.data.frame(rf_data), method = "class")
-        ranks = which(colnames(train_data) %in% names(fit$variable.importance))
+        variables = fit$variable.importance[1:min(length(fit$variable.importance), nr_features)]
+        ranks = which(colnames(train_data) %in% names(variables))
       }
       else{
         stop(paste0("Error: unknown method", f))
       }
-      vec <- rep(0, ncol(train_data))
+      vec <- rep(0, ncol(data))
       if(ranking){
-        vec[unique(ranks)[unique(ranks) <= ncol(train_data)]] <- nr_features : 1
+        vec[
+          nconst_cols[unique(ranks)[unique(ranks) <= ncol(train_data)]]
+        ] <- nr_features : 1
       }
       else{
-        vec[unique(ranks)[unique(ranks) <= ncol(train_data)]] <- 1
+        vec[
+          nconst_cols[unique(ranks)[unique(ranks) <= ncol(train_data)]]
+        ] <- 1
       }
 
       rank_matrix <- rbind(rank_matrix, vec)

@@ -45,12 +45,15 @@ train_model1 <- function(model, shiny = FALSE){
   }
 
   print(target_fct(x_start))
+  print(x_start)
 
   optim <- ga(type = "binary",
                 fitness = target_fct,
                 lower = 0,
                 upper = 1,
                 nBits = n,
+                popSize = 100,
+                pcrossover = 0.5,
                 suggestions = t(x_start),
                 seed = 1
   )

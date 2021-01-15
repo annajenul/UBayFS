@@ -1,9 +1,9 @@
 #' @importFrom matrixStats logSumExp
 #' @export
 
-# deprecated
-admissibility <- function(state, A, b, rho, isState = FALSE, log = TRUE){
+admissibility <- function(state, A, b, rho, weights_sum, isState = FALSE, log = TRUE){
 
+  rho <- rho * weights_sum
 
   if(!isState){
     # rescale parameter vector theta by length

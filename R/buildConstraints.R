@@ -1,6 +1,6 @@
 #' @export
 
-generate_constraints = function(constraint_types, constraint_vars, num_features, rho){
+build_constraints = function(constraint_types, constraint_vars, num_features, rho){
 
   max_size = function(num_feats, smax){
 

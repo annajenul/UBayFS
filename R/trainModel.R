@@ -1,21 +1,65 @@
 #' @import dplyr
+#' @importFrom GA ga
+#' @importFrom DirichletReg ddirichlet
 #' @export
 
 train_model <- function(model, shiny = FALSE){
 
-  sample <- sample.posterior3(model$user.params, model$ensemble.params, model$sampling.params, shiny = shiny)
-  cat("Sampling done")
-  feat_set <- sample > 1/ncol(sample)
+  #features
+  n = ncol(model$ensemble.params$output$full_counts)
 
-  df = data.frame(feat_set) %>% group_by_all %>% count
-  best_set = as.vector(as.matrix(df[which(df$n == max(df$n)), -ncol(df)] * 1))
+  # input parameters
+  A = model$user.params$constraints$A
+  b = model$user.params$constraints$b
+  rho = model$user.params$constraints$rho
 
-  # welche zeilen haben das best_set (in inds)
-  inds = apply(feat_set, 1, function(x){return(all(x==best_set))})
-  success_probs = apply(sample[inds,], 2, mean)
-  print(paste0("best feature set (frequency abs/rel)", sum(inds), "/", sum(inds) / nrow(sample)))
+  # Dirichlet prior parameters
+  alpha = as.numeric(model$user.params$weights)
+  delta = model$ensemble.params$output$counts
+  param = alpha + delta
+  weights_sum = sum(param)
+  print(rho * weights_sum)
 
-  model$output <- list(map = best_set,
-                       success_probs = success_probs)
+  # select a starting point via Greedy algorithm
+  x_start = rep(0, n)
+  initial_importance = order(param, decreasing = TRUE)
+  i = 1
+  for(i in 1:n){
+    x_new <- x_start
+    x_new[initial_importance[i]] <- 1
+    if(all(A %*% x_new <= b)){
+      x_start <- x_new
+    }
+    i <- i+1
+  }
+
+  print(x_start)
+  print(admissibility(x_start, A, b, rho, weights_sum, isState = TRUE, log = TRUE))
+  print(ddirichlet(t(x_start + 0.01), alpha = param, log = TRUE))
+
+  target_fct <- function(state){
+    return(
+      admissibility(state, A, b, rho, weights_sum, isState = TRUE, log = TRUE) +
+      ddirichlet(t(state + 0.01), alpha = param, log = TRUE)
+    )
+  }
+
+  print(target_fct(x_start))
+
+  optim <- ga(type = "binary",
+                fitness = target_fct,
+                lower = 0,
+                upper = 1,
+                nBits = n,
+                suggestions = t(x_start)
+  )
+  x_optim <- optim@solution
+
+  print(x_optim)
+
+  model$output <- list(map = x_optim[1,],
+                       all_solutions = x_optim)
+
+
   return(model)
 }

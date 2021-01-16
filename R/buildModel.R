@@ -6,12 +6,11 @@
 #' @export
 
 
-build.model <- function(data, target, reg.param = list(alpha = 0.5, lambda = 1), K = 100,
+build.model <- function(data, target, reg.param = list(alpha = 0.5, lambda = 1), M = 100,
                         trainsize = 0.75, A = NULL, b = NULL, rho = NULL,
                         weights = NULL, verbose = TRUE,
                         nr_features = 10, ranking = FALSE,
-                        method = c("laplace", "fisher", "mrmr", "RENT"),
-                        t_max = 1e3, t_bi = 1e2){
+                        method = c("laplace", "fisher", "mrmr", "RENT", "tree")){
 
   if(!is.matrix(data)){
     data <- as.matrix(data)
@@ -20,9 +19,9 @@ build.model <- function(data, target, reg.param = list(alpha = 0.5, lambda = 1),
 
   rank_matrix = NULL
 
-  max_counts = ifelse(ranking, length(method) * K * nr_features, length(method) * K)
-  print(paste0("Running ",K, " elementary ensemble models"))
-  for(i in 1:K){
+  max_counts = ifelse(ranking, length(method) * M * nr_features, length(method) * M)
+  print(paste0("Running ",M, " elementary ensemble models"))
+  for(i in 1:M){
     train_index <- createDataPartition(target, p = trainsize, list = FALSE)
     test_index <- setdiff(1:length(target), train_index)
 
@@ -94,16 +93,12 @@ build.model <- function(data, target, reg.param = list(alpha = 0.5, lambda = 1),
     ),
     ensemble.params = list(
       input = list( trainsize=trainsize,
-                    K=K,
+                    M=M,
                     reg.param=reg.param,
                     method=method),
       output = list(full_counts = full_counts,
                     counts = counts,
                     max_counts = max_counts)
-    ),
-    sampling.params = list(
-      t_max = t_max,
-      t_bi = t_bi
     ),
     verbose=verbose
   )

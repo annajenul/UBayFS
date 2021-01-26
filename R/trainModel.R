@@ -2,64 +2,65 @@
 #' @importFrom GA ga
 #' @importFrom DirichletReg ddirichlet
 #' @export
+# function to perform UBayFS feature selection
+train_model = function(model){
 
-train_model <- function(model, shiny = FALSE){
+  #define parameters
+  n = length(model$ensemble.params$output$counts)			# number of features
 
-  #features
-  n = ncol(model$ensemble.params$output$full_counts)
-
-  # input parameters
+  # define constraints
   A = model$user.params$constraints$A
   b = model$user.params$constraints$b
   rho = model$user.params$constraints$rho
 
-  # Dirichlet prior parameters
+  # define prior weights
   alpha = as.numeric(model$user.params$weights)
-  delta = model$ensemble.params$output$counts
-  param = alpha + delta
-  weights_sum = sum(param)
-  print(rho * weights_sum)
 
-  # select a starting point via Greedy algorithm
-  x_start = rep(0, n)
-  initial_importance = order(param, decreasing = TRUE)
-  i = 1
+  # define ensemble counts
+  delta = as.numeric(model$ensemble.params$output$counts)
+
+  # calculate posterior parameter
+  post_param = alpha + delta
+  weights_sum = sum(post_param)								# sum of all posterior weights
+
+  # Greedy algorithm to select a starting vector
+  x_start = rep(0, n)										# initialize with empty feature set
+  initial_importance = order(post_param, decreasing = TRUE)	# order by importance (w.r.t. posterior weights)
+  i = 1														# iterate over features in descending order
   for(i in 1:n){
-    x_new <- x_start
-    x_new[initial_importance[i]] <- 1
-    if(all(A %*% x_new <= b)){
-      x_start <- x_new
+    x_new = x_start
+    x_new[initial_importance[i]] = 1						# try to add feature
+    if(all(A %*% x_new <= b)){								# verify if constraints are still satified
+      x_start = x_new										# if yes, accept feature
     }
-    i <- i+1
+    i = i+1
   }
 
-  print(x_start)
-  print(admissibility(x_start, A, b, rho, weights_sum, isState = TRUE, log = TRUE))
-  print(ddirichlet(t(x_start + 0.01), alpha = param, log = TRUE))
-
-  target_fct <- function(state){
+  # optimization using GA
+  target_fct = function(state){								# target function for optimization procedure
     return(
-      admissibility(state, A, b, rho, weights_sum, isState = TRUE, log = TRUE) +
-      ddirichlet(t(state + 0.01), alpha = param, log = TRUE)
+      admissibility(state, 									# log-admissibility function
+                    A,
+                    b,
+                    rho,
+                    weights_sum,
+                    log = TRUE) +
+        ddirichlet(t(state + 0.01), 							# log-dirichlet-density (with small epsilon to avoid errors from 0 probs)
+                   alpha = post_param,
+                   log = TRUE)
     )
   }
-
-  print(target_fct(x_start))
-
-  optim <- ga(type = "binary",
-                fitness = target_fct,
-                lower = 0,
-                upper = 1,
-                nBits = n,
-                suggestions = t(x_start)
+  optim = ga(type = "binary",								# use GA for optimization
+             fitness = target_fct,
+             lower = 0,
+             upper = 1,
+             nBits = n,
+             suggestions = t(x_start)
   )
-  x_optim <- optim@solution
+  x_optim = optim@solution									# extract solution
 
-  print(x_optim)
-
-  model$output <- list(map = x_optim[1,],
-                       all_solutions = x_optim)
-
+  # return result
+  model$output = list(map = x_optim[1,])					# return solution as vector
 
   return(model)
 }

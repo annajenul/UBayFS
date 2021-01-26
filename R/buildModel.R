@@ -3,86 +3,86 @@
 #' @import glmnet
 #' @import mRMRe
 #' @import rpart
+#' @import shiny
 #' @export
+# function to build elementary models
+build.model = function(data, target, 															# data + labels
+                       M = 100, tt_split = 0.75, 												# number of train-test-splits, split ratio
+                       A = NULL, b = NULL, rho = NULL,											# user constraints
+                       weights = NULL, 														# user weights
+                       nr_features = 10,														# number of features to select by elementary FS
+                       method = "mrmr",
+                       shiny = FALSE){														# elementary FS to use
 
-
-build.model <- function(data, target, reg.param = list(alpha = 0.5, lambda = 1), M = 100,
-                        trainsize = 0.75, A = NULL, b = NULL, rho = NULL,
-                        weights = NULL, verbose = TRUE,
-                        nr_features = 10, ranking = FALSE,
-                        method = c("laplace", "fisher", "mrmr", "RENT", "tree")){
-
+  # check if data is in matrix format
   if(!is.matrix(data)){
-    data <- as.matrix(data)
+    data = as.matrix(data)
   }
-  # data = scale(data)
 
-  rank_matrix = NULL
+  # theoretical maximum count that can be obtained by a single feature in ensemble (= number of elementary FS)
+  max_counts = length(method) * M
 
-  max_counts = ifelse(ranking, length(method) * M * nr_features, length(method) * M)
-  print(paste0("Running ",M, " elementary ensemble models"))
-  for(i in 1:M){
-    train_index <- createDataPartition(target, p = trainsize, list = FALSE)
-    test_index <- setdiff(1:length(target), train_index)
+  # initialize matrix
+  ensemble_matrix = c()
 
-    nconst_cols <- which(apply(data[train_index,], 2, function(x){return(length(unique(x)))}) > 1)
-    train_data <- scale(data[train_index,nconst_cols])
-    train_labels <- target[train_index]
+  for(i in 1:M){																				# perform M runs
 
+    # stratified train-test-split
+    train_index = caret::createDataPartition(target,
+                                             p = tt_split,
+                                             list = FALSE)
+    test_index = setdiff(1:length(target),
+                         train_index)
+
+    # data preprocessing
+    nconst_cols = which(apply(data[train_index,], 2, 											# identify columns with constant features
+                              function(x){return(length(unique(x)))}) > 1)
+    train_data = scale(data[train_index,nconst_cols])											# scale data
+    train_labels = target[train_index]															# prepare labels
+
+    # generate elementary FS
     for(f in method){
-      if(f %in% c("laplace", "Laplacian score")){
-        ranks = do.lscore(train_data,ndim=nr_features)$featidx
-      }
-      else if(f %in% c("fisher", "Fisher score")){
-        ranks = do.fscore(X = train_data, label = train_labels, ndim = nr_features)$featidx
-      }
-      else if(f %in% c("mrmr", "mRMR")){
-        dat = data.frame(train_data, "class"=train_labels)
-        dat$class = factor(dat$class, ordered=TRUE)
-        rs = mRMR.classic(data=mRMR.data(dat), target_indices = ncol(dat), feature_count = nr_features)
-        ranks = unlist(rs@filters)[order(unlist(rs@scores), decreasing = TRUE)]
-      }
-      else if(f %in% c("RENT", "enet", "elastic net")){
-        mod <- glmnet(
-                      x = train_data,
-                      y = train_labels,
-                      family = 'binomial',
-                      lambda = 1 / (reg.param$lambda * nrow(train_data)),
-                      alpha = reg.param$alpha)
 
-        ranks=order(abs(as.vector(mod$beta)), decreasing = TRUE)[1:nr_features]
+      if(f %in% c("laplace", "Laplacian score")){												# type: Laplacian score
+        ranks = do.lscore(train_data,ndim = nr_features)$featidx									# use do.lscore function (package Rdimtools)
       }
-      else if(f %in% c("tree", "classification_tree")){
-        rf_data = cbind(train_labels, train_data)
-        fit = rpart(train_labels~., data= as.data.frame(rf_data), method = "class")
-        variables = fit$variable.importance[1:min(length(fit$variable.importance), nr_features)]
-        ranks = which(colnames(train_data) %in% names(variables))
+      else if(f %in% c("mrmr", "mRMR")){														# type: mRMR
+        dat = data.frame(train_data, "class" = train_labels)									# change data format to data.frame
+        dat$class = factor(dat$class, 															# change label format to ordered factor
+                           ordered = TRUE)
+        rs = mRMR.classic(data = mRMR.data(dat), 												# use mRMR.classic function (package mRMRe)
+                          target_indices = ncol(dat),
+                          feature_count = nr_features)
+        ranks = unlist(rs@filters)[																# extract selected features
+          order(unlist(rs@scores),
+                decreasing = TRUE)]
       }
       else{
-        stop(paste0("Error: unknown method", f))
-      }
-      vec <- rep(0, ncol(data))
-      if(ranking){
-        vec[
-          nconst_cols[unique(ranks)[unique(ranks) <= ncol(train_data)]]
-        ] <- nr_features : 1
-      }
-      else{
-        vec[
-          nconst_cols[unique(ranks)[unique(ranks) <= ncol(train_data)]]
-        ] <- 1
+        stop(paste0("Error: unknown method", f))												# catch unknown methods
       }
 
-      rank_matrix <- rbind(rank_matrix, vec)
-      rownames(rank_matrix)[nrow(rank_matrix)] <- paste(f, i)
+      # remove unknown or duplicated features from feature set
+      vec = rep(0, ncol(data))
+      vec[
+        nconst_cols[unique(ranks)[unique(ranks) <= ncol(train_data)]]
+      ] = 1
+
+      # generate matrix of selected features
+      ensemble_matrix = rbind(ensemble_matrix, vec)
+      rownames(ensemble_matrix)[nrow(ensemble_matrix)] = paste(f, i)
+    }
+
+    if(shiny){
+      shiny::incProgress(amount = 1/M)
     }
   }
 
-  full_counts = rank_matrix
-  colnames(full_counts) <- colnames(data)
-  counts = colSums(rank_matrix)
+  # structure results
+  counts = colSums(ensemble_matrix)
+  names(counts) = colnames(data)
 
-  obj <- list(
+  # define return object
+  obj = list(
     data = data,
     target = target,
     user.params = list(
@@ -92,16 +92,13 @@ build.model <- function(data, target, reg.param = list(alpha = 0.5, lambda = 1),
       weights = weights
     ),
     ensemble.params = list(
-      input = list( trainsize=trainsize,
-                    M=M,
-                    reg.param=reg.param,
-                    method=method),
-      output = list(full_counts = full_counts,
-                    counts = counts,
+      input = list( tt_split = tt_split,
+                    M = M,
+                    method = method),
+      output = list(counts = counts,
                     max_counts = max_counts)
-    ),
-    verbose=verbose
+    )
   )
-  class(obj) <- "UBaymodel"
+  class(obj) = "UBaymodel"
   return(obj)
 }

@@ -24,7 +24,7 @@ shinyUI(fluidPage(
                 disabled(
                     prettyToggle(
                         inputId = "status_data",
-                        label_on = "data ok",
+                        label_on = "data loaded",
                         icon_on = icon("check"),
                         status_on = "info",
                         status_off = "warning",
@@ -35,240 +35,196 @@ shinyUI(fluidPage(
                 disabled(
                     prettyToggle(
                         inputId = "status_likelihood",
-                        label_on = "likelihood setting ok",
+                        label_on = "ensemble trained",
                         icon_on = icon("check"),
                         status_on = "info",
                         status_off = "warning",
-                        label_off = "no likelihood setting",
+                        label_off = "no ensemble trained",
                         icon_off = icon("remove")
                     )
                 ),
                 disabled(
                     prettyToggle(
                         inputId = "status_weighting",
-                        label_on = "weight setting ok",
+                        label_on = "weights set",
                         icon_on = icon("check"),
                         status_on = "info",
                         status_off = "warning",
-                        label_off = "no weight setting",
+                        label_off = "no weights set",
                         icon_off = icon("remove")
                     )
                 ),
                 disabled(
                     prettyToggle(
                         inputId = "status_prior",
-                        label_on = "constraint setting ok",
+                        label_on = "constraints set",
                         icon_on = icon("check"),
                         status_on = "info",
                         status_off = "warning",
-                        label_off = "no constraint setting",
+                        label_off = "no constraints set",
                         icon_off = icon("remove")
                     )
                 ),
                 disabled(
                     prettyToggle(
                         inputId = "status_featureselection",
-                        label_on = "optimal features calculated",
+                        label_on = "features selected",
                         icon_on = icon("check"),
                         status_on = "info",
                         status_off = "warning",
-                        label_off = "no optimal features calculated",
+                        label_off = "no features selected",
                         icon_off = icon("remove")
                     )
                 ),
-                hr(),
-                disabled(
-                    actionButton("run_UBay", "run UBay feature selection")
-                )
+                materialSwitch("showInput",
+                             label = "input mode",
+                             value = TRUE,
+                             status = "info"),
+                #downloadButton("saveConfig", "save configuration"),
+                #actionButton("loadConfig", "load configuration")
             ),
 
         # Show a plot of the generated distribution
-            column(10,
+            column(8,
                 tabsetPanel(id = "tabs",
-                    tabPanel("input",
-                        fluidRow(
-                            column(1,
-                                checkboxInput("input_rownames", "rownames provided?", value = TRUE),
-                                checkboxInput("input_colnames", "colnames provided?", value = TRUE),
-                                checkboxInput("input_blocks", "feature blocks provided?", value = TRUE),
-                                   style='border: 1px solid black'
-                            ),
-                            column(5,
-                                fileInput("train_data", "load training data", multiple = FALSE, accept = c(".csv")),
-                                align = "center",
-                                style='border: 1px solid black'
-                            ),
-                            column(5,
-                                fileInput("train_labels", "load training labels", multiple = FALSE, accept = c(".csv")),
-                                align = "center",
-                                style='border: 1px solid black'
-                            )
-                        )
-                    ),
-                    tabPanel("data matrix",
-                             fluidRow(
-                                 column(10,
-                                        h4("data overview"),
-                                        DT::dataTableOutput("data",
-                                                            width = "90%"),
-                                        style='border: 1px solid black',
-                                        align = 'center'
-                                 )
-                             )
-                    ),
-                    tabPanel("likelihood parameters",
-                        fluidRow(
-                            column(6,
-                                   column(12,
-                                          h4("ensemble parameters"),
-                                          align="left"
-                                   ),
-                                   pickerInput("method", "select elementary filter(s)",
-                                               choices = c("Laplacian score", "Fisher score", "mRMR", "elastic net"
-                                                           #"WGCNA"
-                                                           ),
-                                               multiple = TRUE),
-                                   checkboxInput("ranking", "ranking", value = FALSE),
-                                   sliderInput("n_feats", "number of features", min = 1, max = 10, value = 10, step = 1),
-                                   sliderTextInput("K", withMathJax('$$K$$'), choices = c(10,20,50,100,200,500,1000)),
-                                   sliderInput("testsize", "testsize", min = 0.1, max = 0.9, step = 0.05, value = 0.25),
-                                   style='border: 1px solid black',
-                                   align = 'center'
-                            ),
-                            column(6,
-                                   column(12,
-                                          h4("single model parameters"),
-                                          align="left"
-                                   ),
-                                    tabsetPanel(id = "single_model_parameters",
-                                        tabPanel("elastic net",
-                                                sliderInput("enet.alpha", withMathJax('$$\\alpha$$'), min = 0, max = 1, step = 0.1, value = 0.1),
-                                                sliderTextInput("enet.lambda", withMathJax('$$\\lambda$$'), choices = c(1e-3, 1e-2, 1e-1, 1e0, 1e1, 1e2, 1e3))
-                                        )
-                                    ),
-                                   style='border: 1px solid black',
-                                   align = 'center'
-                            )
-                        ),
-                        hr(),
+                    tabPanel("data",
+                        # tab input
                         fluidRow(
                             column(12,
-                                   disabled(actionButton("confirmParam", "confirm")),
+                                   h4("input data"),
                                    align = "center"
-                            )
-                        )
-                    ),
-                    tabPanel("likelihood counts",
-                             fluidRow(
-                                 column(10,
-                                        h4("count overview"),
-                                        DT::dataTableOutput("counts",
-                                                            width = "90%"),
-                                        style='border: 1px solid black',
-                                        align = 'center'
-                                 )
-                             ),
-                             hr(),
-                             fluidRow(
-                                 column(10,
-                                        h4("histogram"),
-                                        plotOutput("hist"))
-                             )
-                    ),
-                    tabPanel("prior weighting",
-                             fluidRow(
-                                 column(4,
-                                        h4("block weights")
-                                 ),
-                                 column(4,
-                                        DT::dataTableOutput("blocks")
-                                 ),
-                                 column(4,
-                                        fluidRow(
-                                            actionButton("add_block", "confirm block weights")
-                                        )
-                                 )
-                             )
-                    ),
-                    tabPanel("prior parameters",
-                        fluidRow(
-                            column(8,
-                                   fluidRow(
-                                       column(4,
-                                              h4("size constraint")
-                                       ),
-                                       column(4,
-                                              sliderInput("maxsize", "max. size", min = 0, max = 10, value = 10, step = 1),
-                                       ),
-                                       column(4,
-                                              actionButton("add_maxsize", "add size constraint")
-                                       )
-                                   ),
-                                   hr(),
-                                   fluidRow(
-                                       column(4,
-                                              h4("link constraint")
-                                       ),
-                                       column(4,
-                                              DT::dataTableOutput("features",
-                                                                  width = "90%")
-                                       ),
-                                       column(4,
-                                            fluidRow(
-                                              actionButton("add_must", "add must-link")
-                                            ),
-                                            fluidRow(
-                                              actionButton("add_cannot", "add cannot-link")
-                                            ),
-                                            fluidRow(
-                                                actionButton("add_alo", "add at-least-one-link")
-                                            ),
-                                            fluidRow(
-                                                actionButton("add_xor", "add XOR-link")
-                                            )
-                                       )
-                                   ),
-                                   style='border: 1px solid black',
-                                   align = 'center'
                             ),
-                            column(4,
-                                   fluidRow(
-                                       column(12,
-                                              sliderTextInput("rho", "constraint shape $$\\rho$$", choices = c(0.1,1,10,100,1000, Inf)),
-                                              plotOutput("rho_plot", height = "200px")
-                                       )
-                                   ),
-                                   style='border: 1px solid black',
-                                   align = 'center'
+                            conditionalPanel(
+                                condition = "input.showInput == true",
+                                column(3,
+                                    tabsetPanel(type = "pills",
+                                        tabPanel("upload",
+                                            h5("load training data"),
+                                            fileInput("train_data", NULL, multiple = FALSE, accept = c(".csv")),
+                                            h5("load training labels"),
+                                            fileInput("train_labels", NULL, multiple = FALSE, accept = c(".csv")),
+                                            checkboxInput("input_rownames", "rownames provided?", value = TRUE),
+                                            checkboxInput("input_colnames", "colnames provided?", value = TRUE),
+                                            checkboxInput("input_blocks", "feature blocks provided?", value = TRUE)
+                                        ),
+                                        tabPanel("demo",
+                                            h5("Wisconsin breast cancer"),
+                                            actionButton("demo_data","load data")
+                                        )
+                                    ),
+                                    #style='border: 1px solid black',
+                                    align = "left"
+                                )
+                            ),
+                            column(9,
+                                        DT::dataTableOutput("data",
+                                                            width = "90%"),
+                                        #style='border: 1px solid black',
+                                        align = 'center'
                             )
                         )
                     ),
-                    tabPanel("prior constraints",
+                    tabPanel("likelihood",
+                        fluidRow(
+                            column(12,
+                                   h4("ensemble feature selector (likelihood)"),
+                                   align = "center"
+                            ),
+                            conditionalPanel(
+                                condition = "input.showInput == true",
+                                column(3,
+                                   pickerInput("method", "select elementary filter(s)",
+                                               choices = c("mRMR","Laplacian score","Fisher score","elastic net"),
+                                               selected = "mRMR",
+                                               multiple = TRUE),
+                                   sliderTextInput("M", withMathJax('$$M$$'), choices = c(10,20,50,100,200,500,1000)),
+                                   sliderInput("tt_split", "train-test-split", min = 0.5, max = 0.9, step = 0.05, value = 0.75),
+                                   sliderInput("n_feats", "number of features", min = 1, max = 10, value = 10, step = 1),
+                                   disabled(actionButton("confirmParam", "confirm")),
+                                   #style='border: 1px solid black',
+                                   align = 'center'
+                                )
+                            ),
+                            column(9,
+                                   plotOutput("count_hist"),
+                                   #style='border: 1px solid black',
+                                   align = 'center'
+                             )
+                        )
+                    ),
+                    tabPanel("weights",
                              fluidRow(
-                                 column(10,
-                                        h4("constraint overview"),
-                                        uiOutput("constraints"),
-                                        style='border: 1px solid black',
-                                        align = 'center'
+                                 column(12,
+                                        h4("prior feature weights (block weights)"),
+                                        align = "center"
+                                 ),
+                                 conditionalPanel(
+                                     condition = "input.showInput == true",
+                                     column(3,
+                                            DT::dataTableOutput("blocks")
+                                     )
+                                 ),
+                                column(9,
+                                       plotOutput("weight_hist"),
+                                       #style='border: 1px solid black',
+                                       align = 'center'
                                  )
                              )
+                    ),
+                    tabPanel("constraints",
+                        fluidRow(
+                            column(12,
+                                   h4("prior constraints"),
+                                   align = "center"
+                            ),
+                            conditionalPanel(
+                                condition = "input.showInput == true",
+                                column(3,
+                                    tabsetPanel(type = "pills",
+                                                  tabPanel("size constraint",
+                                                        sliderInput("maxsize", "$$s_{max}$$", min = 0, max = 10, value = 10, step = 1),
+                                                        actionButton("add_maxsize", "add size constraint"),
+                                                  ),
+                                                 tabPanel("link constraint",
+                                                        DT::dataTableOutput("features"),
+                                                        actionButton("add_must", "add must-link"),
+                                                        actionButton("add_cannot", "add cannot-link"),
+                                                )
+                                    ),
+                                     hr(),
+                                     sliderTextInput("rho", "$$\\rho$$", choices = c(0.01,0.1,1,10,100,Inf)),
+                                     plotOutput("rho_plot", height = "200px"),
+                                    #style='border: 1px solid black',
+                                   align = 'center'
+                                )
+                            ),
+                            column(9,
+                                        uiOutput("constraints"),
+                                        #style='border: 1px solid black',
+                                        align = 'center'
+                             )
+                        )
                     ),
                     tabPanel("feature selection",
                              fluidRow(
-                                 column(5,
-                                        h4("selected features"),
-                                        DT::dataTableOutput("feature_results"),
-                                        hidden(DT::dataTableOutput("theta_results")),
-                                        style='border: 1px solid black',
-                                        align = 'center'
+                                 column(12,
+                                        h4("feature selection"),
+                                        align = "center"
                                  ),
-                                 column(5,
-                                        h4("feature probabilities"),
+                                 conditionalPanel(
+                                     condition = "input.showInput == true",
+                                     column(3,
+                                        disabled(
+                                         actionButton("run_UBay", "run UBayFS")
+                                        )
+                                     )
+                                 ),
+                                 column(9,
+                                        DT::dataTableOutput("feature_results"),
                                         plotOutput("result_barplot", height = "200px"),
-                                        textOutput("result_entropy"),
-                                        style='border: 1px solid black',
+                                        #style='border: 1px solid black',
                                         align = 'center'
-                                 )
+                                )
                              )
                     )
                 )

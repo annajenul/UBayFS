@@ -8,18 +8,18 @@ shinyServer(function(input, output, session) {
     options(shiny.maxRequestSize=20*1024^2) # maximum upload size
 
     # help functions
-    addConstraint <- function(A, b, rho){
+    addConstraint <- function(params){
         if(is.null(A())){
-            newA <- A
-            newb <- b
-            newrho <- rho
+            newA <- params$A
+            newb <- params$b
+            newrho <- params$rho
 
             colnames(newA) <- names_feats()
         }
         else{
-            newA <- rbind(A(), A)
-            newb <- c(b(), b)
-            newrho <- c(rho(), rho)
+            newA <- rbind(A(), params$A)
+            newb <- c(b(), params$b)
+            newrho <- c(rho(), params$rho)
         }
         A(newA)
         b(newb)
@@ -35,35 +35,21 @@ shinyServer(function(input, output, session) {
                     "}"))
     }
 
-    rho_fct <- function(x, rho){
-      if(rho < Inf){
-        eterm <- exp(-rho * x)
-        y <- eterm / (1+eterm)
-        y[is.na(y)] <- ifelse(x[is.na(y)] < 0, 1, 0)
-      }
-      else{
-        y <- 1*(x < 0)
-      }
-      return(y)
-    }
-
-    # INITIAL SETTINGS
+    # === INITIAL SETTINGS ===
     A <- reactiveVal(NULL)
     b <- reactiveVal(NULL)
     rho <- reactiveVal(NULL)
 
     model <- reactiveVal(NULL)
 
-    #optim_fs <- reactiveVal(NULL)
-
     blocks <- reactiveValues(names = NULL, vector = NULL, weights = NULL)
 
-    # FILE INPUT HANDLING
-    train_data <- reactive({
-        if(is.null(input$train_data)){
-            NULL
-        }
-        else{
+    train_data <- reactiveVal(NULL)
+    train_labels <- reactiveVal(NULL)
+
+    # === FILE INPUT HANDLING ===
+    observeEvent(input$train_data,{
+        if(!is.null(input$train_data)){
           header <- ifelse(input$input_colnames, TRUE, FALSE)
           if(input$input_rownames){
             rownames = 1
@@ -79,15 +65,16 @@ shinyServer(function(input, output, session) {
             blocks$names <- unique(blocks$vector)
             dat <- dat[-1,]
           }
-          dat
+          else{
+            blocks$vector <- 1:ncol(dat)
+            blocks$names <- 1:ncol(dat)
+          }
+          train_data(dat)
         }
     })
 
-    train_labels <- reactive({
-        if(is.null(input$train_labels)){
-            NULL
-        }
-        else{
+    observeEvent(input$train_labels, {
+       if(!is.null(input$train_labels)){
           header <- ifelse(input$input_colnames, TRUE, FALSE)
           if(input$input_rownames){
             rownames = 1
@@ -96,12 +83,21 @@ shinyServer(function(input, output, session) {
             rownames = NULL
           }
           lab <- unlist(read.csv(input$train_labels$datapath, header = header, row.names = rownames))
+          if(!is.null(train_data())){
+            names(lab) <- rownames(train_data())
+          }
+          train_labels(lab)
         }
-        if(!is.null(train_data())){
-          names(lab) <- rownames(train_data())
-        }
-        lab
     })
+
+    observeEvent(input$demo_data,{
+      dat <- load_wisconsin()
+      train_data(dat$data)
+      train_labels(dat$labels)
+      blocks$vector <- 1:ncol(train_data())
+      blocks$names <- 1:ncol(train_data())
+    }
+    )
 
     n_feats <- reactive({
         ncol(train_data())
@@ -111,57 +107,39 @@ shinyServer(function(input, output, session) {
         colnames(train_data())
     })
 
-    # LIKELIHOOD INPUT HANDLING
+    # === LIKELIHOOD INPUT HANDLING ===
     observeEvent(input$confirmParam, {
       withProgress(min = 0, max = 1, value = 0, message = "building elementary models", {
         model(UBay::build.model(train_data(),
                                      train_labels(),
-                                     reg.param = list(alpha = input$enet.alpha, lambda = input$enet.lambda),
-                                     K = input$K,
-                                     testsize = input$testsize,
+                                     M = input$M,
+                                     tt_split = input$tt_split,
                                      A = NULL,
                                      b = NULL,
                                      rho = NULL,
-                                     verbose = FALSE,
                                      method = input$method,
-                                     ranking = input$ranking,
-                                     nr_features = input$n_feats))
+                                     nr_features = input$n_feats,
+                                     shiny = TRUE))
       })
     })
 
     observe({
-      if("elastic net" %in% input$method){
-        showTab("single_model_parameters", target = "elastic net")
-      }
-      else{
-        hideTab("single_model_parameters", target = "elastic net")
-      }
-
       if(length(input$method) > 0){
         enable("confirmParam")
       }
       else{disable("confirmParam")}
     })
 
-    # CONSTRAINT INPUT HANDLING
+    # === CONSTRAINT INPUT HANDLING ===
     observeEvent(input$add_maxsize, {
-        addConstraint(A = matrix(1, nrow = 1, ncol = n_feats()),
-                      b = input$maxsize,
-                      rho = input$rho)
+        addConstraint(build_constraints("max_size", list(input$maxsize), num_features = n_feats(), rho = input$rho))
     })
 
     observeEvent(input$add_must, {
         sel <- input$features_rows_selected
 
         if(length(sel) > 1){
-          pairs <- expand.grid(sel, sel) # all pairs
-          pairs <- pairs[-which(pairs[,1] == pairs[,2]),] # delete main diagonal
-
-          newA <- t(apply(pairs, 1, function(x){return(((1:n_feats()) == x[1]) - ((1:n_feats()) == x[2]))}))
-
-          addConstraint(A = newA,
-                        b = rep(0, nrow(newA)),
-                        rho = rep(input$rho, nrow(newA)))
+          addConstraint(build_constraints("must_link", list(sel), num_features = n_feats(), rho = input$rho))
         }
     })
 
@@ -169,64 +147,32 @@ shinyServer(function(input, output, session) {
         sel <- input$features_rows_selected
 
         if(length(sel) > 1){
-          pairs <- expand.grid(sel, sel) # all pairs
-          pairs <- pairs[-which(pairs[,1] <= pairs[,2]),] # delete main diagonal & lower triangle
-
-          newA = t(apply(pairs, 1, function(x){return(((1:n_feats()) == x[1]) + ((1:n_feats()) == x[2]))}))
-          addConstraint(A = newA,
-                        b = rep(1, nrow(newA)),
-                        rho = rep(input$rho, nrow(newA)))
+          addConstraint(build_constraints("cannot_link", list(sel), num_features = n_feats(), rho = input$rho))
         }
     })
 
-    observeEvent(input$add_xor, {
-      sel <- input$features_rows_selected
-
-      if(length(sel) > 1){
-        pairs <- expand.grid(sel, sel) # all pairs
-        pairs <- pairs[-which(pairs[,1] <= pairs[,2]),] # delete main diagonal & lower triangle
-
-        newA = t(apply(pairs, 1, function(x){return(((1:n_feats()) == x[1]) + ((1:n_feats()) == x[2]))}))
-        newA = rbind(newA, t(apply(pairs, 1, function(x){return(-((1:n_feats()) == x[1]) - ((1:n_feats()) == x[2]))})))
-        addConstraint(A = newA,
-                      b = rep(c(1,-1), each = nrow(newA) / 2),
-                      rho = rep(input$rho, nrow(newA)))
-      }
-    })
-
-    observeEvent(input$add_alo, {
-      sel <- input$features_rows_selected
-
-      if(length(sel) > 1){
-        pairs <- expand.grid(sel, sel) # all pairs
-        pairs <- pairs[-which(pairs[,1] <= pairs[,2]),] # delete main diagonal & lower triangle
-
-        newA = t(apply(pairs, 1, function(x){return(-((1:n_feats()) == x[1]) - ((1:n_feats()) == x[2]))}))
-        addConstraint(A = newA,
-                      b = rep(-1, nrow(newA)),
-                      rho = rep(input$rho, nrow(newA)))
-      }
-    })
-
-    observeEvent(input$add_block, {
+    observe({
       blockweights <- sapply(paste0("blockweight_", blocks$names), function(x){return(input[[x]])})
 
-      blocks$weights = blockweights[blocks$vector]
-      model(set_weight_params(model(), blocks$weights))
+      if(!is.null(unlist(blockweights))){
+        blockweights <- as.numeric(unlist(blockweights))
+        blocks$weights = blockweights[blocks$vector]
+        model(set_weight_params(model(), blocks$weights))
+      }
     })
 
-    # FEATURE SELECTION
+    # === FEATURE SELECTION ====
     observeEvent(input$run_UBay, {
-      model(UBay::set_constraint_params(model(), A(), b(), rho()))
+      model(UBay::set_constraint_params(model(), A(), b(), as.numeric(rho())))
 
       withProgress(min = 0, max = 1, value = 0, message = "optimizing posterior function", {
-        model(UBay::train_model(model(), shiny = TRUE))
+        model(UBay::train_model(model()))
       })
     })
 
-    # STATUS SETTINGS
+    # === STATUS SETTINGS ===
     data_complete <- reactive({
-      ifelse(is.null(input$train_data) | is.null(input$train_labels), FALSE, TRUE)
+      ifelse(is.null(train_data()) | is.null(train_labels()), FALSE, TRUE)
     })
 
     likelihood_complete <- reactive({
@@ -252,28 +198,24 @@ shinyServer(function(input, output, session) {
     observeEvent(data_complete(), {
       if(data_complete()){
         updatePrettyToggle(session, "status_data", "input ok", value = TRUE)
-        showTab("tabs", target = "data matrix")
-        showTab("tabs", target = "likelihood parameters")
-        showTab("tabs", target = "prior parameters")
-        showTab("tabs", target = "prior weighting")
+        showTab("tabs", target = "likelihood")
+        showTab("tabs", target = "constraints")
+        showTab("tabs", target = "weights")
+        showTab("tabs", target = "feature selection")
         updateSliderInput(session, "maxsize", value = min(10, n_feats()), max = n_feats(), step = 1)
         updateSliderInput(session, "n_feats", value = min(10, n_feats()), max = n_feats(), step = 1)
       }
       else{
-        hideTab("tabs", target = "data matrix")
-        hideTab("tabs", target = "likelihood parameters")
-        hideTab("tabs", target = "prior parameters")
-        hideTab("tabs", target = "prior weighting")
+        hideTab("tabs", target = "likelihood")
+        hideTab("tabs", target = "constraints")
+        hideTab("tabs", target = "weights")
+        hideTab("tabs", target = "feature selection")
       }
     })
 
     observeEvent(likelihood_complete(), {
       if(likelihood_complete()){
         updatePrettyToggle(session, "status_likelihood", "likelihood setting ok", value = TRUE)
-        showTab("tabs", target = "likelihood counts")
-      }
-      else{
-        hideTab("tabs", target = "likelihood counts")
       }
     })
 
@@ -286,10 +228,6 @@ shinyServer(function(input, output, session) {
     observeEvent(prior_complete(), {
       if(prior_complete()){
         updatePrettyToggle(session, "status_prior", "constraint setting ok", value = TRUE)
-        showTab("tabs", target = "prior constraints")
-      }
-      else{
-        hideTab("tabs", target = "prior constraints")
       }
     })
 
@@ -305,15 +243,11 @@ shinyServer(function(input, output, session) {
     observeEvent(featureselection_complete(), {
       if(featureselection_complete()){
         updatePrettyToggle(session, "status_featureselection", "optimal features calculated", value = TRUE)
-        showTab("tabs", target = "feature selection")
-      }
-      else{
-        hideTab("tabs", target = "feature selection")
       }
     })
 
 
-    # OUTPUT HANDLING
+    # === OUTPUT HANDLING ====
     output$data <- DT::renderDataTable(
       if(data_complete()){
         datatable(
@@ -335,29 +269,37 @@ shinyServer(function(input, output, session) {
       )
     )
 
-    output$counts <- DT::renderDataTable(
-      if(!is.null(model())){
-        datatable(
-          rbind(sum = apply(model()$ensemble.params$output$full_counts, 2, sum),
-                model()$ensemble.params$output$full_counts),
-          options = list(paging = FALSE, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE, scrollY = "400px", fixedColumns = list(leftColumns = 1)),
-          selection = "none"
-        )
+    output$count_hist <- renderPlot(
+      if(!is.null(model()$ensemble.params)){
+        ggplot2::ggplot(
+          data = data.frame(features = factor(names_feats(), levels = names_feats()),
+                            counts = model()$ensemble.params$output$counts),
+          aes(x = features,
+              y = counts))+
+        geom_bar(stat = "identity", position = position_dodge(),
+                 fill = "red")+
+        theme(axis.text.x = element_text(angle = 90))
       }
     )
 
-    output$hist <- renderPlot(
-      if(!is.null(model())){
-        hist(apply(model()$ensemble.params$output$full_counts, 2, sum))
-      })
+    output$weight_hist <- renderPlot(
+      if(!is.null(blocks$weights)){
+        ggplot2::ggplot(
+          data = data.frame(features = factor(names_feats(), levels = names_feats()),
+                            counts = as.numeric(blocks$weights)),
+          aes(x = features,
+              y = counts))+
+          geom_bar(stat = "identity", position = position_dodge(),
+                   fill = "blue")+
+          theme(axis.text.x = element_text(angle = 90))
+      }
+    )
 
     output$constraints <- renderUI({
-      if(is.null(A()) | is.null(b())){
-        paste0("no constraints set")
-      }
-      else{
+      if(!is.null(A()) & !is.null(b())){
         matA <- paste0(apply(A(), 1, function(x){paste0(x, collapse = " & ")}), collapse = "\\\\")
         matb <- paste0(b(), collapse = "\\\\")
+        matrho <- paste0(ifelse(rho() == Inf, "\\infty", rho()), collapse = "\\\\")
 
         withMathJax(
           paste0("$$\\begin{pmatrix}",
@@ -366,43 +308,31 @@ shinyServer(function(input, output, session) {
           \\leq
           \\begin{pmatrix}",
           matb,
+          "\\end{pmatrix},~ \\\\",
+          "\\rho = ",
+          "\\begin{pmatrix}",
+          matrho,
           "\\end{pmatrix}$$")
         )
       }
     })
 
     output$feature_results <- DT::renderDataTable(
-      datatable(
-        data.frame(#rbind(model()$output$map, model()$output$median), row.names = c("MAP", "median"),
-          set = sapply(list(map = model()$output$map > (1/length(model()$output$map)),
-                            median = model()$output$median > (1/length(model()$output$median))), FStoString),
-          cardinality = sapply(list(map = model()$output$map > (1/length(model()$output$map)),
-                                    median = model()$output$median > (1/length(model()$output$median))), sum)),
-          #posterior = round(apply(optim_fs(), 1, UBay::posterior, likelihood.params = model()$likelihood.params, prior.params = model()$prior.params),4),
-          #likelihood = round(apply(optim_fs(), 1, UBay::likelihood, likelihood.params = model()$likelihood.params),4),
-          #prior = round(apply(optim_fs(), 1, UBay::prior, prior.params = model()$prior.params),4)),
-        options = list(paging = FALSE, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE, scrollY = "200px"),
-        selection = "none"
-      )
-    )
-
-    output$theta_results <- DT::renderDataTable(
-      datatable(
-        data.frame(rbind(model()$output$map, model()$output$median), row.names = c("MAP", "median")),
-                   #set = apply(optim_fs(), 1, FStoString),
-                   #cardinality = apply(optim_fs(), 1, sum),
-                   #posterior = round(apply(optim_fs(), 1, UBay::posterior, likelihood.params = model()$likelihood.params, prior.params = model()$prior.params),4),
-                   #likelihood = round(apply(optim_fs(), 1, UBay::likelihood, likelihood.params = model()$likelihood.params),4),
-                   #prior = round(apply(optim_fs(), 1, UBay::prior, prior.params = model()$prior.params),4)),
-        options = list(paging = FALSE, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE, scrollY = "200px"),
-        selection = "none"
-      )
+      if(!is.null(model()$output$map)){
+        datatable(
+          data.frame(
+            map = FStoString(model()$output$map),
+            cardinality = sum(model()$output$map)),
+          options = list(paging = FALSE, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE, scrollY = "200px"),
+          selection = "none"
+        )
+      }
     )
 
     output$blocks <- DT::renderDataTable(
       datatable(
         data.frame(weight = sapply(blocks$names, function(x){return(as.character(textInput(inputId = paste0("blockweight_", x),
-                                                                                 label = NULL, value = 1, width = '50px')))}),
+                                                                                           label = NULL, value = 1, width = '50px')))}),
                    block = blocks$names,
                    features = sapply(blocks$names, function(x){return(paste0(names(train_data())[blocks$vector == x], collapse = ","))})
                    ),
@@ -417,25 +347,28 @@ shinyServer(function(input, output, session) {
     )
 
     output$rho_plot <- renderPlot({
-      x <- seq(-1,1,by = 0.01)
-      ggplot2::ggplot(data = data.frame(x = x, y = rho_fct(x, input$rho)), aes(x = x, y = y, group = 1)) +
+      x <- seq(-10,10,by = 0.01)
+      ggplot2::ggplot(data = data.frame(x = x, y = sapply(x, admissibility, A = matrix(1, nrow = 1, ncol = 1), b = 0, rho = input$rho, log = FALSE)),
+                      aes(x = x, y = y, group = 1)) +
         geom_line() +
         xlab(label = "ax-b") +
         ylab(label = "prior prob.")
     })
 
     output$result_barplot <- renderPlot({
-      x <- rep(names_feats(),2)
-      y <- c(model()$output$map, model()$output$median)
-      z <- rep(c("MAP","median"), each = length(names_feats()))
-      ggplot2::ggplot(data = data.frame(feature = x, probability = y, estimator = z),
-                      aes(x = feature, y = probability, fill = estimator)) +
-        geom_bar(stat = "identity", position = position_dodge())+
-        theme(axis.text.x = element_text(angle = 90))
+      if(!is.null(model()$output$map)){
+        df <- data.frame(
+          feature = factor(rep(names_feats(),3), levels = names_feats()),
+          value = c(model()$output$map,
+                    model()$ensemble.params$output$counts / max(model()$ensemble.params$output$counts),
+                    model()$user.params$weights / max(model()$user.params$weights)),
+          type = factor(rep(c("map", "ensemble", "prior"),each = length(names_feats())), levels = c("map", "ensemble", "prior"))
+        )
+        ggplot2::ggplot(data = df,
+                      aes(x = feature, y = value, group = type, fill = type)) +
+          geom_bar(stat = "identity", position = position_dodge())+
+          theme(axis.text.x = element_text(angle = 90))
+      }
     })
 
-
-    output$result_entropy <- renderText({
-      paste0("Entropy (MAP, median): ", paste0(UBay::evaluate_model(model()), collapse = ", "))
-    })
 })

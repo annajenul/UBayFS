@@ -1,32 +1,36 @@
 #' @importFrom matrixStats logSumExp
 #' @export
+# function to evaluate composite admissibility (kappa)
 
-admissibility <- function(state, A, b, rho, weights_sum = NULL, isState = FALSE, log = TRUE){
+admissibility = function(state, A, b, rho, weights_sum = NULL, log = TRUE){
 
-  if(!is.null(weights_sum)){
+  if(!is.null(weights_sum)){        			# scale rho by weights_sum
     rho <- rho * weights_sum
   }
 
-  if(!isState){
-    # rescale parameter vector theta by length
-    state = state > (1/length(state))
-  }
+  ind_inf = (rho == Inf)
 
-  if(rho[1] < Inf){
-    z = (b + 0.5 - A %*% state) * rho
-    lprob <- z - apply(cbind(z,0), 1, logSumExp) # 1 + exp(...)
-    lprob <- sum(lprob) # product
+  # case 1: rho < Inf
+  if(any(!ind_inf)){
+    z = (b[!ind_inf] + 0.5 - A[!ind_inf,] %*% state) * rho[!ind_inf]			# compute exponential term (nom) for each constraint (in log-scale)
+    lprob1 = z - apply(cbind(z,0), 1, logSumExp) # log(nom) - log(1 + nom)
+    lprob1 = sum(lprob1)							# product over all constraints
   }
   else{
-    z = (b - A %*% state) >= 0
-    lprob <- prod(z)
+    lprob1 = 0
   }
 
-  if(log){
-    return(lprob)
+  # case 2: rho = Inf
+  if(any(ind_inf)){
+    z = (b[ind_inf] - A[ind_inf,] %*% state) >= 0
+    lprob2 = log(prod(z))						# 1, if all constraints are fulfilled, 0 else
+  }
+  else{lprob2 = 0}
+
+  if(log){										# return admissibility in log or original scale
+    return(lprob1 + lprob2)
   }
   else{
-    return(exp(lprob))
+    return(exp(lprob1 + lprob2))
   }
-
 }

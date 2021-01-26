@@ -8,13 +8,13 @@ library(UBay)
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
 
-    theme = shinytheme("readable"),
+    theme = shinytheme("flatly"),
 
     useShinyjs(),
     withMathJax(),
 
     # Application title
-    titlePanel("A User-Guided Bayesian Framework for Ensemble Feature Selection (UBay)"),
+    titlePanel("A User-Guided Bayesian Framework for Ensemble Feature Selection in Life Science Applications (UBayFS)"),
 
     # Sidebar with a slider input for number of bins
     fluidPage(
@@ -81,11 +81,13 @@ shinyUI(fluidPage(
                              value = TRUE,
                              status = "info"),
                 #downloadButton("saveConfig", "save configuration"),
-                #actionButton("loadConfig", "load configuration")
+                #actionButton("loadConfig", "load configuration"),
+                style='background-color: #222222; color: white; padding: 10px; border-radius: 30px; margin: 10px'
             ),
 
         # Show a plot of the generated distribution
             column(8,
+                style = 'padding: 10px',
                 tabsetPanel(id = "tabs",
                     tabPanel("data",
                         # tab input
@@ -112,14 +114,14 @@ shinyUI(fluidPage(
                                             actionButton("demo_data","load data")
                                         )
                                     ),
-                                    #style='border: 1px solid black',
+                                    style='border: 1px solid black; border-radius: 30px; padding: 10px; margin: 10px',
                                     align = "left"
                                 )
                             ),
-                            column(9,
+                            column(8,
                                         DT::dataTableOutput("data",
                                                             width = "90%"),
-                                        #style='border: 1px solid black',
+                                        #style='border: 1px solid black; padding: 10px',
                                         align = 'center'
                             )
                         )
@@ -141,13 +143,13 @@ shinyUI(fluidPage(
                                    sliderInput("tt_split", "train-test-split", min = 0.5, max = 0.9, step = 0.05, value = 0.75),
                                    sliderInput("n_feats", "number of features", min = 1, max = 10, value = 10, step = 1),
                                    disabled(actionButton("confirmParam", "confirm")),
-                                   #style='border: 1px solid black',
+                                   style='border: 1px solid black; border-radius: 30px; padding: 10px; margin: 10px',
                                    align = 'center'
                                 )
                             ),
-                            column(9,
+                            column(8,
                                    plotOutput("count_hist"),
-                                   #style='border: 1px solid black',
+                                   #style='border: 1px solid black; padding: 10px',
                                    align = 'center'
                              )
                         )
@@ -161,12 +163,13 @@ shinyUI(fluidPage(
                                  conditionalPanel(
                                      condition = "input.showInput == true",
                                      column(3,
-                                            DT::dataTableOutput("blocks")
+                                            DT::dataTableOutput("blocks"),
+                                            style='border: 1px solid black; border-radius: 30px; padding: 10px; margin: 10px'
                                      )
                                  ),
-                                column(9,
+                                column(8,
                                        plotOutput("weight_hist"),
-                                       #style='border: 1px solid black',
+                                       #style='border: 1px solid black; padding: 10px',
                                        align = 'center'
                                  )
                              )
@@ -194,13 +197,13 @@ shinyUI(fluidPage(
                                      hr(),
                                      sliderTextInput("rho", "$$\\rho$$", choices = c(0.01,0.1,1,10,100,Inf)),
                                      plotOutput("rho_plot", height = "200px"),
-                                    #style='border: 1px solid black',
-                                   align = 'center'
+                                    style='border: 1px solid black; border-radius: 30px; padding: 10px; margin: 10px',
+                                    align = 'center'
                                 )
                             ),
-                            column(9,
+                            column(8,
                                         uiOutput("constraints"),
-                                        #style='border: 1px solid black',
+                                        #style='border: 1px solid black; padding: 10px',
                                         align = 'center'
                              )
                         )
@@ -216,13 +219,15 @@ shinyUI(fluidPage(
                                      column(3,
                                         disabled(
                                          actionButton("run_UBay", "run UBayFS")
-                                        )
+                                        ),
+                                        style='border: 1px solid black; border-radius: 30px; padding: 10px; margin: 10px',
+                                        align = 'center'
                                      )
                                  ),
-                                 column(9,
+                                 column(8,
                                         DT::dataTableOutput("feature_results"),
                                         plotOutput("result_barplot", height = "200px"),
-                                        #style='border: 1px solid black',
+                                        #style='border: 1px solid black; padding: 10px',
                                         align = 'center'
                                 )
                              )

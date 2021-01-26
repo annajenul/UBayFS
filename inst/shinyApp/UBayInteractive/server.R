@@ -323,7 +323,7 @@ shinyServer(function(input, output, session) {
           data.frame(
             map = FStoString(model()$output$map),
             cardinality = sum(model()$output$map)),
-          options = list(paging = FALSE, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE, scrollY = "200px"),
+          options = list(paging = FALSE, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE, scrollY = "75px"),
           selection = "none"
         )
       }

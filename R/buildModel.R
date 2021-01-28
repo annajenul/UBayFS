@@ -12,6 +12,8 @@ build.model = function(data, target, 															# data + labels
                        weights = NULL, 														# user weights
                        nr_features = 10,														# number of features to select by elementary FS
                        method = "mrmr",
+                       popsize = 1000,
+                       maxiter = 100,
                        shiny = FALSE){														# elementary FS to use
 
   # check if data is in matrix format
@@ -94,9 +96,14 @@ build.model = function(data, target, 															# data + labels
     ensemble.params = list(
       input = list( tt_split = tt_split,
                     M = M,
-                    method = method),
+                    method = method,
+                    nr_features = nr_features),
       output = list(counts = counts,
                     max_counts = max_counts)
+    ),
+    optim.params = list(
+      maxiter = maxiter,
+      popsize = popsize
     )
   )
   class(obj) = "UBaymodel"

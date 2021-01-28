@@ -4,6 +4,15 @@
 
 admissibility = function(state, A, b, rho, weights_sum = NULL, log = TRUE){
 
+  if(is.null(A)){
+    if(log){
+      return(0)
+    }
+    else{
+      return(1)
+    }
+  }
+
   if(!is.null(weights_sum)){        			# scale rho by weights_sum
     rho <- rho * weights_sum
   }

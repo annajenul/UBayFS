@@ -30,7 +30,7 @@ train_model = function(model){
   for(i in 1:n){
     x_new = x_start
     x_new[initial_importance[i]] = 1						# try to add feature
-    if(all(A %*% x_new <= b)){								# verify if constraints are still satified
+    if(admissibility(x_new, A, b, rep(Inf, length(b)), log = FALSE) == 1){# verify if constraints are still satified
       x_start = x_new										# if yes, accept feature
     }
     i = i+1
@@ -55,6 +55,8 @@ train_model = function(model){
              lower = 0,
              upper = 1,
              nBits = n,
+             maxiter = model$optim.params$maxiter,
+             popSize = model$optim.params$popsize,
              suggestions = t(x_start)
   )
   x_optim = optim@solution									# extract solution

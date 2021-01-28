@@ -3,8 +3,6 @@
 
 set_constraint_params = function(model, A, b, rho){
 
-  print(rho)
-
   model$user.params$constraints = list(A=A,
                                        b=b,
                                        rho=rho)

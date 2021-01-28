@@ -1,29 +1,28 @@
-Package: UBay
+Package: UBayFS
 Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.1.0
+Title: A User-Guided Bayesian Framework for Ensemble Feature Selection (UBayFS)
+Version: 1.0
 Author: Anna Jenul, Stefan Schrunner
 Maintainer: Anna Jenul <anna.jenul@nmbu.no>
-Description: This package implements the user-guided Bayesian framework for ensemble feature selection (UBay)
-License: MIT
+Description: This package implements the user-guided Bayesian framework for ensemble feature selection (UBayFS) presented in the according research paper.
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
 Imports: GA,
          matrixStats,
          shiny,
-         shinyjs,
-         DT,
-         shinyWidgets,
-         shinythemes,
-         ggplot2,
          mRMRe,
          Rdimtools,
          caret,
-         polyapost,
-         parallel,
-         pbapply,
          DirichletReg,
          dplyr,
-         glmnet
+         glmnet,
+         utils
+Suggests: shinyWidgets,
+          DT,
+          ggplot2,
+          tcltk,
+          shinyjs,
+          shinythemes
          

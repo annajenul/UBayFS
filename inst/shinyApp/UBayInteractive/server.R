@@ -476,9 +476,6 @@ shinyServer(function(input, output, session) {
       sel_popsize <- ifelse(is.null(model()$optim.params$popsize), 1000, model()$optim.params$popsize)
       sel_maxiter <- ifelse(is.null(model()$optim.params$maxiter), 100, model()$optim.params$maxiter)
 
-      print(model())
-
-
       column(12,
         sliderTextInput("popsize", withMathJax('$$q$$'), choices = c(10, 50, 100, 500, 1000, 5000, 10000),
                       selected = sel_popsize),

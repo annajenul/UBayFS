@@ -1,5 +1,4 @@
 #' @importFrom matrixStats logSumExp
-#' @export
 # function to evaluate composite admissibility (kappa)
 
 admissibility = function(state, A, b, rho, weights_sum = NULL, log = TRUE){

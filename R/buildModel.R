@@ -1,24 +1,77 @@
+#' Build an ensemble for UBayFS
+#' @description builds a data structure for UBayFS and trains an ensemble of elementary feature selectors
+#' @details The function aggregates input parameters for UBayFS - including data, parameters defining ensemble and user knowledge and parameters specifying the optimization procedure - and trains the ensemble model
+#' @param data a matrix of input data
+#' @param target a vector (factor) of labels for data
+#' @param M the number of elementary models in the ensemble
+#' @param tt_split the ratio of samples drawn for building an elementary model (train-test-split)
+#' @param nr_features number of features to select in each elementary model
+#' @param method a vector denoting the method(s) used as elementary models; options: "mRMR", "Laplacian score"
+#' @param A the matrix defining the constraint system Ax<=b
+#' @param b the vector defining the constraint system Ax<=b
+#' @param rho the vector of relaxation parameters for the constraint system Ax<=b
+#' @param weights the vector of user-defined prior weights for each feature
+#' @param popsize size of the initial population of the genetic algorithm for model optimization
+#' @param maxiter maximum number of iterations of the genetic algorithm for model optimization
+#' @param shiny TRUE indicates that the function is called from Shiny dashboard
+#' @return a UBaymodel object containing the following list elements: data, target, user.params (parameters representing user knowledge), ensemble.params (parameters representing the likelihood) and optim.params (parameters for genetic algorithm)
+#' @examples
+#' # build a UBayFS model using Wisconsin breast cancer dataset
+#' d <- load_wisconsin() # dataset
+#' c <- build_constraints("max_size", list("10"), ncol(d$data), rho = 1) # prior constraints
+#' w <- rep(1, ncol(d$data)) # weights
+#' model <- build.model(
+#'                      data = d$data,
+#'                      target = d$labels,
+#'                      A = c$A,
+#'                      b = c$b,
+#'                      rho = c$rho,
+#'                      weights = w
+#' )
 #' @import Rdimtools
 #' @import caret
 #' @import glmnet
 #' @import mRMRe
-#' @import rpart
 #' @import shiny
 #' @export
-# function to build elementary models
+
 build.model = function(data, target, 															# data + labels
                        M = 100, tt_split = 0.75, 												# number of train-test-splits, split ratio
-                       A = NULL, b = NULL, rho = NULL,											# user constraints
-                       weights = NULL, 														# user weights
                        nr_features = 10,														# number of features to select by elementary FS
                        method = "mrmr",
+                       A = NULL, b = NULL, rho = NULL,											# user constraints
+                       weights = NULL, 														# user weights
                        popsize = 1000,
                        maxiter = 100,
                        shiny = FALSE){														# elementary FS to use
 
-  # check if data is in matrix format
+  # check input
   if(!is.matrix(data)){
     data = as.matrix(data)
+  }
+  if(nrow(data) != length(target)){
+    stop("Error: number of labels must match number of data rows")
+  }
+  if(M%%1 != 0 | M <= 0){
+    stop("Error: M must be a positive integer")
+  }
+  if(tt_split < 0 | tt_split > 1){
+    stop("Error: tt_split must be between 0 and 1")
+  }
+  else if(tt_split < 0.5 | tt_split > 0.99){
+    warning("Warning: tt_split should not be outside [0.5,0.99]")
+  }
+  if(!all(method %in% c("mRMR", "mrmr", "Laplacian score", "laplace"))){
+    stop("Error: unknown method")
+  }
+  if(ncol(A) != ncol(data) | nrow(A) != length(b) | length(b) != length(rho)){
+    stop("Error: dimensions of constraints do not match")
+  }
+  if(length(weights) != ncol(data)){
+    stop("Error: length of prior weights does not match data matrix")
+  }
+  if(popsize < 10 | maxiter < 10){
+    stop("Error: popsize or maxiter < 10 does not make sense")
   }
 
   # theoretical maximum count that can be obtained by a single feature in ensemble (= number of elementary FS)

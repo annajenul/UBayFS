@@ -59,7 +59,7 @@ The function aggregates input parameters for UBayFS - including data, parameters
 \examples{
 # build a UBayFS model using Wisconsin breast cancer dataset
 d <- load_wisconsin() # dataset
-c <- build_constraints("max_size", list("10"), ncol(d$data), rho = 1) # prior constraints
+c <- build_constraints("max_size", list(10), ncol(d$data), rho = 1) # prior constraints
 w <- rep(1, ncol(d$data)) # weights
 model <- build.model(
                      data = d$data,

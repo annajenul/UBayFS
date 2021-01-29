@@ -28,7 +28,7 @@ The function transforms user information about relations between features (must-
 # given a dataset with 10 features, we create a max-size constraint limiting
 # the set to 5 features and a cannot-link constraint between features 1 and 2
 build_constraints(constraint_types = c("max_size","cannot_link"),
-constraint_vars = list("5", c(1,2)),
+constraint_vars = list(5, c(1,2)),
 num_features = 10,
 rho = 1)
 }

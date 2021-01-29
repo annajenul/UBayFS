@@ -179,7 +179,7 @@ shinyServer(function(input, output, session) {
     # === LIKELIHOOD INPUT HANDLING ===
     observeEvent(input$confirmParam, {
       withProgress(min = 0, max = 1, value = 0, message = "building elementary models", {
-        model(UBay::build.model(model()$data,
+        model(UBayFS::build.model(model()$data,
                                      model()$target,
                                      M = input$M,
                                      tt_split = input$tt_split,
@@ -229,7 +229,7 @@ shinyServer(function(input, output, session) {
 
     observeEvent(input$run_UBay, {
       withProgress(min = 0, max = 1, value = 0, message = "optimizing posterior function", {
-        model(UBay::train_model(model()))
+        model(UBayFS::train_model(model()))
       })
     })
 
@@ -446,9 +446,9 @@ shinyServer(function(input, output, session) {
                   selected = sel_method,
                   multiple = TRUE),
         sliderTextInput("M", withMathJax('$$M$$'), choices = c(10, 20, 30, 40, 50,
-                                                             60, 70, 80, 90, 100,
-                                                             150, 200, 250, 300, 350, 400, 450, 500,
-                                                             600, 700, 800, 900, 1000),
+                                                               60, 70, 80, 90, 100,
+                                                               150, 200, 250, 300, 350, 400, 450, 500,
+                                                               600, 700, 800, 900, 1000),
                       selected = sel_M),
         sliderInput("n_feats", "number of features", min = 1, max = max_nr_features, step = 1, value = sel_nr_features),
         sliderInput("tt_split", "train-test-split", min = 0.5, max = 0.95, step = 0.05, value = sel_tt_split)
@@ -480,17 +480,17 @@ shinyServer(function(input, output, session) {
         sliderTextInput("popsize", withMathJax('$$q$$'), choices = c(10, 50, 100, 500, 1000, 5000, 10000),
                       selected = sel_popsize),
         sliderTextInput("maxiter", withMathJax('$$T$$'), choices = c(10, 20, 30, 40, 50,
-                                                                   60, 70, 80, 90, 100,
-                                                                   150, 200, 250, 300, 350, 400, 450, 500,
-                                                                   600, 700, 800, 900, 1000),
+                                                                     60, 70, 80, 90, 100,
+                                                                     150, 200, 250, 300, 350, 400, 450, 500,
+                                                                     600, 700, 800, 900, 1000),
                       selected = sel_maxiter)
       )
     })
 
     output$output_fs <- renderUI({
       column(output_width(),
-             DT::dataTableOutput("feature_results"),
              plotOutput("result_barplot", height = "300px"),
+             DT::dataTableOutput("feature_results"),
              align = 'center'
       )
     })
@@ -508,19 +508,8 @@ shinyServer(function(input, output, session) {
     )
 
     output$result_barplot <- renderPlot({
-      if(!is.null(model()$output$map)){
-        df <- data.frame(
-          feature = factor(rep(names_feats(),3), levels = names_feats()),
-          value = c(model()$output$map,
-                    model()$ensemble.params$output$counts / max(model()$ensemble.params$output$counts),
-                    model()$user.params$weights / max(model()$user.params$weights)),
-          type = factor(rep(c("map", "ensemble", "prior"),each = length(names_feats())), levels = c("map", "ensemble", "prior"))
-        )
-        ggplot2::ggplot(data = df,
-                        aes(x = feature, y = value, group = type, fill = type)) +
-          geom_bar(stat = "identity", position = position_dodge())+
-          theme(axis.text.x = element_text(angle = 90))+
-          scale_fill_manual(values=c("green", "red", "blue"))
+      if(!is.null(model())){
+        plot(model())
       }
     })
 

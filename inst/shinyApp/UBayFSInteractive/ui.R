@@ -3,7 +3,7 @@ library(shinyWidgets)
 library(shinyjs)
 library(shinythemes)
 library(DT)
-library(UBay)
+library(UBayFS)
 
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(

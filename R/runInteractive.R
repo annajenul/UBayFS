@@ -4,9 +4,9 @@
 #' @export
 
 runInteractive = function(){
-  appDir <- system.file("shinyApp", "UBayInteractive", package = "UBay")
+  appDir <- system.file("shinyApp", "UBayFSInteractive", package = "UBayFS")
   if (appDir == "") {
-    stop("Could not find app directory. Try re-installing `UBay`.", call. = FALSE)
+    stop("Could not find app directory. Try re-installing `UBayFS`.", call. = FALSE)
   }
   shiny::runApp(appDir, display.mode = "normal")
 }

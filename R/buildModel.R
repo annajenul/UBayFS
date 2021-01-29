@@ -18,7 +18,7 @@
 #' @examples
 #' # build a UBayFS model using Wisconsin breast cancer dataset
 #' d <- load_wisconsin() # dataset
-#' c <- build_constraints("max_size", list("10"), ncol(d$data), rho = 1) # prior constraints
+#' c <- build_constraints("max_size", list(10), ncol(d$data), rho = 1) # prior constraints
 #' w <- rep(1, ncol(d$data)) # weights
 #' model <- build.model(
 #'                      data = d$data,
@@ -64,11 +64,18 @@ build.model = function(data, target, 															# data + labels
   if(!all(method %in% c("mRMR", "mrmr", "Laplacian score", "laplace"))){
     stop("Error: unknown method")
   }
-  if(ncol(A) != ncol(data) | nrow(A) != length(b) | length(b) != length(rho)){
-    stop("Error: dimensions of constraints do not match")
+  if(!is.null(A)){
+    if(ncol(A) != ncol(data) | nrow(A) != length(b) | length(b) != length(rho)){
+      stop("Error: dimensions of constraints do not match")
+    }
   }
-  if(length(weights) != ncol(data)){
-    stop("Error: length of prior weights does not match data matrix")
+  if(!is.null(weights)){
+    if(length(weights) != ncol(data)){
+      stop("Error: length of prior weights does not match data matrix")
+    }
+  }
+  else{
+    weights = rep(1, ncol(data))
   }
   if(popsize < 10 | maxiter < 10){
     stop("Error: popsize or maxiter < 10 does not make sense")

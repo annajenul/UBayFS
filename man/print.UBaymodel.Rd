@@ -4,10 +4,12 @@
 \alias{print.UBaymodel}
 \title{prints a UBayFS model}
 \usage{
-\method{print}{UBaymodel}(model)
+\method{print}{UBaymodel}(x, ...)
 }
 \arguments{
-\item{model}{a UBaymodel object created using build.model}
+\item{x}{a UBaymodel object created using build.model}
+
+\item{...}{unused}
 }
 \description{
 print details of an UBayFS model

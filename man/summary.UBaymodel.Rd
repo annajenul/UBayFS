@@ -4,10 +4,12 @@
 \alias{summary.UBaymodel}
 \title{summarizes a UBayFS model}
 \usage{
-\method{summary}{UBaymodel}(model)
+\method{summary}{UBaymodel}(object, ...)
 }
 \arguments{
-\item{model}{a UBaymodel object created using build.model}
+\item{object}{a UBaymodel object created using build.model}
+
+\item{...}{unused}
 }
 \description{
 a summary of an UBayFS model

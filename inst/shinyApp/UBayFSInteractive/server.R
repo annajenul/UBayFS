@@ -2,6 +2,7 @@ library(shiny)
 library(DT)
 library(ggplot2)
 library(tcltk)
+library(RColorBrewer)
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output, session) {
@@ -93,7 +94,6 @@ shinyServer(function(input, output, session) {
           else{
             blocks(1:ncol(dat))
           }
-          hideTab("input_type", target = "demo")
           model(append(model(), list(data = dat)))
         },
         error = function(cond){
@@ -120,7 +120,6 @@ shinyServer(function(input, output, session) {
           if(!is.null(model()$data)){
             names(lab) <- rownames(model()$data)
           }
-          hideTab("input_type", target = "demo")
           model(append(model(), list(target = lab)))
         },
         error = function(cond){
@@ -140,8 +139,6 @@ shinyServer(function(input, output, session) {
 
       model(append(model(), list(data = dat$data)))
       model(append(model(), list(target = dat$labels)))
-
-      hideTab("input_type", target = "upload")
 
       blocks(1:ncol(model()$data))
       }
@@ -214,16 +211,22 @@ shinyServer(function(input, output, session) {
     })
 
     observe({
-      if(any(sapply(names(input), grepl, pattern = "blockweight"))){
-        blockweights <- sapply(paste0("blockweight_", unique(blocks())), function(x){return(input[[x]])})
-        addWeights(as.numeric(blockweights)[blocks()])
+      if(!is.null(model())){
+        if(class(model()) == "UBaymodel"){
+          if(any(sapply(names(input), grepl, pattern = "blockweight"))){
+          blockweights <- sapply(paste0("blockweight_", unique(blocks())), function(x){return(input[[x]])})
+          addWeights(as.numeric(blockweights)[blocks()])
+          }
+        }
       }
     })
 
     # === FEATURE SELECTION ====
     observeEvent(input$popsize | input$maxiter, {
       if(!is.null(model())){
-        model(set_optim_params(model(), popsize = input$popsize, maxiter = input$maxiter))
+        if(class(model()) == "UBaymodel"){
+          model(set_optim_params(model(), popsize = input$popsize, maxiter = input$maxiter))
+        }
       }
     })
 
@@ -261,9 +264,6 @@ shinyServer(function(input, output, session) {
     observeEvent(data_complete(), {
       if(data_complete()){
         updatePrettyToggle(session, "status_data", "input ok", value = TRUE)
-        enable("add_maxsize")
-        enable("add_must")
-        enable("add_cannot")
         updateSliderInput(session, "maxsize", min = 0, max = n_feats(), value = min(10, n_feats()))
       }
     })
@@ -272,12 +272,43 @@ shinyServer(function(input, output, session) {
       if(data_complete() & length(input$method) > 0){
         enable("confirmParam")
       }
-      else{disable("confirmParam")}
+      else{
+        disable("confirmParam")
+      }
+
+      if(data_complete()){
+        disable("input_rownames")
+        disable("input_rownames")
+        disable("input_colnames")
+        disable("input_blocks")
+
+        disable("upload_data")
+        disable("upload_labels")
+        disable("demo_data")
+      }
+      else{
+        enable("input_rownames")
+        enable("input_rownames")
+        enable("input_colnames")
+        enable("input_blocks")
+
+        enable("upload_data")
+        enable("upload_labels")
+        enable("demo_data")
+      }
     })
 
     observeEvent(likelihood_complete(), {
       if(likelihood_complete()){
         updatePrettyToggle(session, "status_likelihood", "likelihood setting ok", value = TRUE)
+        enable("add_maxsize")
+        enable("add_must")
+        enable("add_cannot")
+      }
+      else{
+        disable("add_maxsize")
+        disable("add_must")
+        disable("add_cannot")
       }
     })
 
@@ -338,8 +369,8 @@ shinyServer(function(input, output, session) {
                             counts = model()$ensemble.params$output$counts),
           aes(x = features,
               y = counts))+
-        geom_bar(stat = "identity", position = position_dodge(),
-                 fill = "red")+
+        geom_bar(stat = "identity", position = position_dodge(), fill = RColorBrewer::brewer.pal(3,"Blues")[2])+
+        theme_classic()+
         theme(axis.text.x = element_text(angle = 90))
       }
     )
@@ -351,8 +382,8 @@ shinyServer(function(input, output, session) {
                             counts = model()$user.params$weights),
           aes(x = features,
               y = counts))+
-          geom_bar(stat = "identity", position = position_dodge(),
-                   fill = "blue")+
+          geom_bar(stat = "identity", position = position_dodge(), , fill = RColorBrewer::brewer.pal(3,"Blues")[3])+
+          theme_classic()+
           theme(axis.text.x = element_text(angle = 90))
       }
     )
@@ -386,13 +417,13 @@ shinyServer(function(input, output, session) {
       lapply(unique(blocks()), function(block_no){
         block_name <- unique(blocks())[block_no]
         fluidRow(
-          column(3,
+          column(4,
                 textInput(inputId = paste0("blockweight_", block_name),
-                  label = NULL,
-                  value = ifelse(is.null(blockweights[block_no]), 1, blockweights[block_no]),
-                  width = '50px')
+                    label = NULL,
+                    value = ifelse(is.null(blockweights[block_no]), 1, blockweights[block_no]),
+                    width = '100px')
           ),
-          column(9,
+          column(8,
                  paste0(names_feats()[blocks() == block_name], collapse = ", "),
                  align = "left"
           )
@@ -477,7 +508,7 @@ shinyServer(function(input, output, session) {
       sel_maxiter <- ifelse(is.null(model()$optim.params$maxiter), 100, model()$optim.params$maxiter)
 
       column(12,
-        sliderTextInput("popsize", withMathJax('$$q$$'), choices = c(10, 50, 100, 500, 1000, 5000, 10000),
+        sliderTextInput("popsize", withMathJax('$$q$$'), choices = c(10, 20, 50, 100, 500, 1000, 5000),
                       selected = sel_popsize),
         sliderTextInput("maxiter", withMathJax('$$T$$'), choices = c(10, 20, 30, 40, 50,
                                                                      60, 70, 80, 90, 100,
@@ -499,17 +530,20 @@ shinyServer(function(input, output, session) {
       if(!is.null(model()$output$map)){
         datatable(
           data.frame(
-            map = FStoString(model()$output$map),
-            cardinality = sum(model()$output$map)),
-          options = list(paging = FALSE, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE, scrollY = "75px"),
-          selection = "none"
+            no = 1:sum(model()$output$map),
+            features = names_feats()[model()$output$map == 1]),
+          options = list(paging = FALSE, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE, scrollY = "150px"),
+          selection = "none",
+          rownames = FALSE
         )
       }
     )
 
     output$result_barplot <- renderPlot({
       if(!is.null(model())){
-        plot(model())
+        if(class(model()) == "UBaymodel"){
+          plot(model())
+        }
       }
     })
 

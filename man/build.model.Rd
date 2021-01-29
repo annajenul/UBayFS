@@ -15,7 +15,7 @@ build.model(
   b = NULL,
   rho = NULL,
   weights = NULL,
-  popsize = 1000,
+  popsize = 50,
   maxiter = 100,
   shiny = FALSE
 )

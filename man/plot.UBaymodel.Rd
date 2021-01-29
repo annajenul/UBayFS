@@ -4,10 +4,12 @@
 \alias{plot.UBaymodel}
 \title{plot a UBayFS model}
 \usage{
-\method{plot}{UBaymodel}(model)
+\method{plot}{UBaymodel}(x, ...)
 }
 \arguments{
-\item{model}{a UBaymodel object created using build.model}
+\item{x}{a UBaymodel object created using build.model}
+
+\item{...}{unused}
 }
 \description{
 a barplot of an UBayFS model containing prior weights, ensemble counts and the selected features and map estimate

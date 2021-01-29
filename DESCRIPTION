@@ -18,10 +18,11 @@ Imports: GA,
          DirichletReg,
          dplyr,
          glmnet,
-         utils
+         utils,
+         ggplot2
 Suggests: shinyWidgets,
           DT,
-          ggplot2,
+          RColorBrewer,
           tcltk,
           shinyjs,
           shinythemes

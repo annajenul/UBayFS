@@ -41,7 +41,7 @@ build.model = function(data, target, 															# data + labels
                        method = "mrmr",
                        A = NULL, b = NULL, rho = NULL,											# user constraints
                        weights = NULL, 														# user weights
-                       popsize = 1000,
+                       popsize = 50,
                        maxiter = 100,
                        shiny = FALSE){														# elementary FS to use
 

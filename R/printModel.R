@@ -1,26 +1,27 @@
 #' prints a UBayFS model
 #' @description print details of an UBayFS model
-#' @param model a UBaymodel object created using build.model
+#' @param x a UBaymodel object created using build.model
+#' @param ... unused
 #' @export
 
-print.UBaymodel <- function(model){
+print.UBaymodel <- function(x,...){
 
-  if(class(model) != "UBaymodel"){
-    stop("Wrong class of model")
+  if(class(x) != "UBaymodel"){
+    stop("Wrong class of x")
   }
 
   print("data")
-  print(str(model$data))
-  print(str(model$target))
+  print(str(x$data))
+  print(str(x$target))
   print("user.params")
-  print(model$user.params)
+  print(x$user.params)
   print("ensemble.params")
-  print(model$ensemble.params)
+  print(x$ensemble.params)
   print("optim.params")
-  print(model$optim.params)
-  if(!is.null(model$output)){
+  print(x$optim.params)
+  if(!is.null(x$output)){
     print("MAP")
-    print(model$output$map)
+    print(x$output$map)
   }
 
 }

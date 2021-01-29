@@ -20,7 +20,7 @@ admissibility(state, A, b, rho, weights_sum = NULL, log = TRUE)
 \item{log}{whether the admissibility should be returned on log scale}
 }
 \value{
-a value in between 0 and 1 (if log == FALSE) or between -Inf and 0 (if log == TRUE)
+an admissibility value
 }
 \description{
 evaluates the value of the admissibility function kappa

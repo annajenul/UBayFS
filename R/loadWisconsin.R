@@ -4,7 +4,7 @@
 #' @import utils
 #' @export
 
-load_wisconsin <- function(){
+loadWisconsin <- function(){
   # load Wisconsin breast cancer dataset directly from UCI
   dat <- utils::read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/wdbc.data",
                   header = FALSE,

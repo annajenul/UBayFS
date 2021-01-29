@@ -1,12 +1,12 @@
 #' set weights in UBaymodel object
 #' @description sets the prior weights in a UBaymodel object
-#' @param model a UBaymodel object created using build.model
+#' @param model a UBaymodel object created using build.UBaymodel
 #' @param weights the vector of user-defined prior weights for each feature
 #' @return a UBaymodel object with updated prior weights
-#' @seealso build.model
+#' @seealso build.UBaymodel
 #' @export
 
-set_weight_params = function(model, weights){
+setWeights = function(model, weights){
 
   if(class(model) != "UBaymodel"){
     stop("Wrong class of model")

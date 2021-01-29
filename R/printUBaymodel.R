@@ -1,6 +1,6 @@
 #' prints a UBayFS model
 #' @description print details of an UBayFS model
-#' @param x a UBaymodel object created using build.model
+#' @param x a UBaymodel object created using build.UBaymodel
 #' @param ... unused
 #' @export
 

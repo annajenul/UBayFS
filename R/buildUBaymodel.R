@@ -17,10 +17,10 @@
 #' @return a UBaymodel object containing the following list elements: data, target, user.params (parameters representing user knowledge), ensemble.params (parameters representing the likelihood) and optim.params (parameters for genetic algorithm)
 #' @examples
 #' # build a UBayFS model using Wisconsin breast cancer dataset
-#' d <- load_wisconsin() # dataset
-#' c <- build_constraints("max_size", list(10), ncol(d$data), rho = 1) # prior constraints
+#' d <- loadWisconsin() # dataset
+#' c <- buildConstraints("max_size", list(10), ncol(d$data), rho = 1) # prior constraints
 #' w <- rep(1, ncol(d$data)) # weights
-#' model <- build.model(
+#' model <- build.UBaymodel(
 #'                      data = d$data,
 #'                      target = d$labels,
 #'                      A = c$A,
@@ -35,7 +35,7 @@
 #' @import shiny
 #' @export
 
-build.model = function(data, target, 															# data + labels
+build.UBaymodel = function(data, target, 															# data + labels
                        M = 100, tt_split = 0.75, 												# number of train-test-splits, split ratio
                        nr_features = 10,														# number of features to select by elementary FS
                        method = "mrmr",

@@ -24,20 +24,14 @@ shinyServer(function(input, output, session) {
             newrho <- c(model()$user.params$constraints$rho, params$rho)
         }
 
-        model(set_constraint_params(model(), A = newA, b = newb, rho = as.numeric(newrho)))
+        model(setConstraints(model(), A = newA, b = newb, rho = as.numeric(newrho)))
 
         proxy = dataTableProxy('features')
         selectRows(proxy, c())
     }
 
     addWeights <- function(weights){
-      model(set_weight_params(model(), weights))
-    }
-
-    FStoString <- function(vec){
-      return(paste0("{",
-                    paste0(names_feats()[which(vec == 1)], collapse = ","),
-                    "}"))
+      model(setWeights(model(), weights))
     }
 
     # error messages
@@ -133,7 +127,7 @@ shinyServer(function(input, output, session) {
     })
 
     observeEvent(input$demo_data,{
-      dat <- load_wisconsin()
+      dat <- loadWisconsin()
 
       colnames(dat$data) <- paste0("F", 1:ncol(dat$data))
 
@@ -154,12 +148,12 @@ shinyServer(function(input, output, session) {
 
     output$save_model <- downloadHandler(
       filename <- function(){
-        paste0("UBay_model_",Sys.Date(),".Rdata")
+        paste0("UBaymodel_",Sys.Date(),".Rdata")
       },
 
       content <- function(file){
-        isolate(UBay_model <<- model())
-        save(UBay_model, file = file)
+        isolate(UBaymodel <<- model())
+        save(UBaymodel, file = file)
       }
     )
 
@@ -168,7 +162,7 @@ shinyServer(function(input, output, session) {
       if(!is.null(path) & length(path) > 0){
         env = new.env()
         load(path, env)
-        model(env[["UBay_model"]])
+        model(env[["UBaymodel"]])
         blocks(1:ncol(model()$data))
       }
     })
@@ -176,7 +170,7 @@ shinyServer(function(input, output, session) {
     # === LIKELIHOOD INPUT HANDLING ===
     observeEvent(input$confirmParam, {
       withProgress(min = 0, max = 1, value = 0, message = "building elementary models", {
-        model(UBayFS::build.model(model()$data,
+        model(UBayFS::build.UBaymodel(model()$data,
                                      model()$target,
                                      M = input$M,
                                      tt_split = input$tt_split,
@@ -225,14 +219,14 @@ shinyServer(function(input, output, session) {
     observeEvent(input$popsize | input$maxiter, {
       if(!is.null(model())){
         if(class(model()) == "UBaymodel"){
-          model(set_optim_params(model(), popsize = input$popsize, maxiter = input$maxiter))
+          model(setOptim(model(), popsize = input$popsize, maxiter = input$maxiter))
         }
       }
     })
 
     observeEvent(input$run_UBay, {
       withProgress(min = 0, max = 1, value = 0, message = "optimizing posterior function", {
-        model(UBayFS::train_model(model()))
+        model(UBayFS::train.UBaymodel(model()))
       })
     })
 

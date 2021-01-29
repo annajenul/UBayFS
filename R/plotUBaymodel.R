@@ -1,6 +1,6 @@
 #' plot a UBayFS model
 #' @description a barplot of an UBayFS model containing prior weights, ensemble counts and the selected features and map estimate
-#' @param x a UBaymodel object created using build.model
+#' @param x a UBaymodel object created using build.UBaymodel
 #' @param ... unused
 #' @import ggplot2
 #' @export

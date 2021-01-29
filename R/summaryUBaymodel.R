@@ -1,6 +1,6 @@
 #' summarizes a UBayFS model
 #' @description a summary of an UBayFS model
-#' @param object a UBaymodel object created using build.model
+#' @param object a UBaymodel object created using build.UBaymodel
 #' @param ... unused
 #' @export
 

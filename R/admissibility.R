@@ -6,7 +6,7 @@
 #' @param rho the vector of relaxation parameters for the constraint system Ax<=b
 #' @param weights_sum a scalar denoting the sum of all feature weights to scale rho; if NULL, no weighting is performed
 #' @param log whether the admissibility should be returned on log scale
-#' @return a value in between 0 and 1 (if log == FALSE) or between -Inf and 0 (if log == TRUE)
+#' @return an admissibility value
 #' @importFrom matrixStats logSumExp
 #' @export
 

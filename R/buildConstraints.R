@@ -9,13 +9,13 @@
 #' @examples
 #' # given a dataset with 10 features, we create a max-size constraint limiting
 #' # the set to 5 features and a cannot-link constraint between features 1 and 2
-#' build_constraints(constraint_types = c("max_size","cannot_link"),
+#' buildConstraints(constraint_types = c("max_size","cannot_link"),
 #' constraint_vars = list(5, c(1,2)),
 #' num_features = 10,
 #' rho = 1)
 #' @export
 
-build_constraints = function(constraint_types, constraint_vars, num_features, rho = 1){
+buildConstraints = function(constraint_types, constraint_vars, num_features, rho = 1){
 
   # check input
   if(!all(constraint_types %in% c("max_size", "must_link", "cannot_link"))){

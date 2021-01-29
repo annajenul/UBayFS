@@ -1,13 +1,20 @@
-#' perform UBayFS feature selection
-#' @description runs a genetic algorithm to perform UBayFS feature selection
-#' @param model a UBaymodel created by build.model
+#' UBayFS feature selection
+#' @description genetic algorithm to train UBayFS feature selection model using genetic algorithm
+#' @param x a UBaymodel created by build.UBaymodel
 #' @return a UBaymodel with an additional list element output containing the maximum a-posteriori estimate (map)
 #' @import dplyr
 #' @importFrom GA ga
 #' @importFrom DirichletReg ddirichlet
+#' @export train
+
+train <- function(x){
+  UseMethod("train")
+}
+
+#' @method train UBaymodel
 #' @export
 
-train_model = function(model){
+train.UBaymodel = function(x){
 
   if(class(model) != "UBaymodel"){
     stop("Wrong class of model")

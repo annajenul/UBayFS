@@ -19,11 +19,17 @@ Imports: GA,
          dplyr,
          glmnet,
          utils,
-         ggplot2
-Suggests: shinyWidgets,
-          DT,
-          RColorBrewer,
-          tcltk,
-          shinyjs,
-          shinythemes
-         
+         ggplot2,
+         ggpubr
+Suggests: 
+    shinyWidgets,
+    DT,
+    RColorBrewer,
+    tcltk,
+    shinyjs,
+    shinythemes,
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown
+Config/testthat/edition: 3
+VignetteBuilder: knitr

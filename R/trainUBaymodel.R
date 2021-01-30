@@ -16,23 +16,23 @@ train <- function(x){
 
 train.UBaymodel = function(x){
 
-  if(class(model) != "UBaymodel"){
+  if(class(x) != "UBaymodel"){
     stop("Wrong class of model")
   }
 
   #define parameters
-  n = length(model$ensemble.params$output$counts)			# number of features
+  n = length(x$ensemble.params$output$counts)			# number of features
 
   # define constraints
-  A = model$user.params$constraints$A
-  b = model$user.params$constraints$b
-  rho = model$user.params$constraints$rho
+  A = x$user.params$constraints$A
+  b = x$user.params$constraints$b
+  rho = x$user.params$constraints$rho
 
   # define prior weights
-  alpha = as.numeric(model$user.params$weights)
+  alpha = as.numeric(x$user.params$weights)
 
   # define ensemble counts
-  delta = as.numeric(model$ensemble.params$output$counts)
+  delta = as.numeric(x$ensemble.params$output$counts)
 
   # calculate posterior parameter
   post_param = alpha + delta
@@ -70,14 +70,14 @@ train.UBaymodel = function(x){
              lower = 0,
              upper = 1,
              nBits = n,
-             maxiter = model$optim.params$maxiter,
-             popSize = model$optim.params$popsize,
+             maxiter = x$optim.params$maxiter,
+             popSize = x$optim.params$popsize,
              suggestions = t(x_start)
   )
   x_optim = optim@solution									# extract solution
 
   # return result
-  model$output = list(map = x_optim[1,])					# return solution as vector
+  x$output = list(map = x_optim[1,])					# return solution as vector
 
-  return(model)
+  return(x)
 }

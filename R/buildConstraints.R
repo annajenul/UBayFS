@@ -80,14 +80,13 @@ buildConstraints = function(constraint_types, constraint_vars, num_features, rho
     A = rbind(A, l$A)									# add new constraint to A
     b = c(b, l$b)										# add new constraint to b
   }
+
+  const <- list(A = A,
+                b = b,
+                rho = rep(rho, length(b)))
+  class(const) <- "UBayconstraint"
+
   return(
-    list(A = A,
-         b = b,
-         rho = rep(rho, length(b)))
+    const
   )
 }
-
-
-
-
-

@@ -53,6 +53,15 @@ shinyServer(function(input, output, session) {
       )
     }
 
+    build_error <- function(x){
+      show_alert(
+        title = "Error",
+        text = "An error occured during application of UBayFS methods - please check data and parameters and try again.",
+        type = 'error',
+        btn_labels = "Ok"
+      )
+    }
+
     # === INITIAL SETTINGS ===
 
     model <- reactiveVal(NULL)
@@ -170,7 +179,7 @@ shinyServer(function(input, output, session) {
     # === LIKELIHOOD INPUT HANDLING ===
     observeEvent(input$confirmParam, {
       withProgress(min = 0, max = 1, value = 0, message = "building elementary models", {
-        model(UBayFS::build.UBaymodel(model()$data,
+        tryCatch({model(UBayFS::build.UBaymodel(model()$data,
                                      model()$target,
                                      M = input$M,
                                      tt_split = input$tt_split,
@@ -179,20 +188,23 @@ shinyServer(function(input, output, session) {
                                      rho = model()$user.params$constraints$rho,
                                      method = input$method,
                                      nr_features = input$n_feats,
-                                     shiny = TRUE))
+                                     shiny = TRUE))},
+                 error = function(cond){build_error(cond)},
+                 warning = function(cond){build_error(cond)}
+        )
       })
     })
 
     # === PRIOR INPUT HANDLING ===
     observeEvent(input$add_maxsize, {
-        addConstraint(build_constraints("max_size", list(input$maxsize), num_features = n_feats(), rho = input$rho))
+        addConstraint(buildConstraints("max_size", list(input$maxsize), num_features = n_feats(), rho = input$rho))
     })
 
     observeEvent(input$add_must, {
         sel <- input$features_rows_selected
 
         if(length(sel) > 1){
-          addConstraint(build_constraints("must_link", list(sel), num_features = n_feats(), rho = input$rho))
+          addConstraint(buildConstraints("must_link", list(sel), num_features = n_feats(), rho = input$rho))
         }
     })
 
@@ -200,7 +212,7 @@ shinyServer(function(input, output, session) {
         sel <- input$features_rows_selected
 
         if(length(sel) > 1){
-          addConstraint(build_constraints("cannot_link", list(sel), num_features = n_feats(), rho = input$rho))
+          addConstraint(buildConstraints("cannot_link", list(sel), num_features = n_feats(), rho = input$rho))
         }
     })
 
@@ -226,7 +238,12 @@ shinyServer(function(input, output, session) {
 
     observeEvent(input$run_UBay, {
       withProgress(min = 0, max = 1, value = 0, message = "optimizing posterior function", {
-        model(UBayFS::train.UBaymodel(model()))
+        tryCatch({
+          model(UBayFS::train(model()))
+        },
+                 error = function(cond){build_error(cond)},
+                 warning = function(cond){build_error(cond)}
+        )
       })
     })
 
@@ -445,7 +462,7 @@ shinyServer(function(input, output, session) {
 
     output$output_likelihood <- renderUI({
       column(output_width(),
-             plotOutput("count_hist", height = '300px'),
+             plotOutput("count_hist", height = '400px'),
              align = 'center'
       )
     })
@@ -482,7 +499,7 @@ shinyServer(function(input, output, session) {
 
     output$output_weights <- renderUI({
       column(output_width(),
-             plotOutput("weight_hist", height = '300px'),
+             plotOutput("weight_hist", height = '400px'),
              align = 'center'
       )
     })
@@ -514,19 +531,25 @@ shinyServer(function(input, output, session) {
 
     output$output_fs <- renderUI({
       column(output_width(),
-             plotOutput("result_barplot", height = "300px"),
-             DT::dataTableOutput("feature_results"),
+             column(9,
+                    plotOutput("result_barplot", height = "400px"),
+             ),
+             column(3,
+                    DT::dataTableOutput("feature_results")
+             ),
              align = 'center'
       )
     })
 
     output$feature_results <- DT::renderDataTable(
       if(!is.null(model()$output$map)){
+        df <- data.frame(
+          no = 1:sum(model()$output$map),
+          features = names_feats()[model()$output$map == 1])
+        colnames(df) <- c("no", "selected features")
         datatable(
-          data.frame(
-            no = 1:sum(model()$output$map),
-            features = names_feats()[model()$output$map == 1]),
-          options = list(paging = FALSE, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE, scrollY = "150px"),
+          df,
+          options = list(paging = FALSE, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE, scrollY = "400px"),
           selection = "none",
           rownames = FALSE
         )

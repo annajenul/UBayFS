@@ -38,7 +38,7 @@
 build.UBaymodel = function(data, target, 															# data + labels
                        M = 100, tt_split = 0.75, 												# number of train-test-splits, split ratio
                        nr_features = 10,														# number of features to select by elementary FS
-                       method = "mrmr",
+                       method = "mRMR",
                        A = NULL, b = NULL, rho = NULL,											# user constraints
                        weights = NULL, 														# user weights
                        popsize = 50,

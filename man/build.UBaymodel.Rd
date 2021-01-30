@@ -10,7 +10,7 @@ build.UBaymodel(
   M = 100,
   tt_split = 0.75,
   nr_features = 10,
-  method = "mrmr",
+  method = "mRMR",
   A = NULL,
   b = NULL,
   rho = NULL,

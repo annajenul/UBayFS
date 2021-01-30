@@ -89,7 +89,7 @@ shinyUI(fluidPage(
             ),
 
         # Show a plot of the generated distribution
-            column(8,
+            column(9,
                 style = 'padding: 10px',
                 tabsetPanel(id = "tabs",
                     tabPanel("data",

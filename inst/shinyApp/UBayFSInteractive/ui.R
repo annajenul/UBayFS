@@ -2,101 +2,77 @@ library(shiny)
 library(shinyWidgets)
 library(shinyjs)
 library(shinythemes)
+library(shinyBS)
 library(DT)
 library(UBayFS)
 
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
 
-    theme = shinytheme("flatly"),
+    #theme = shinytheme("flatly"),
 
     useShinyjs(),
     withMathJax(),
 
+    tags$head(
+        tags$style("body{color: #2E75B6, font-family: Constantia}
+                   label{color: #2E75B6, font-family: Constantia}"),
+    ),
+
     # Application title
-    titlePanel("A User-Guided Bayesian Framework for Ensemble Feature Selection in Life Science Applications (UBayFS)"),
+    div(
+        style = "margin-top: 10px",
+        fluidRow(
+
+            column(1,
+                   img(src = "logo.png", width = "100px"),
+            ),
+            column(11,
+                   h2("A User-Guided Bayesian Framework for Ensemble Feature Selection in Life Science Applications"),
+                   align = "right",
+                   style = "background-color: #2E75B6;
+                            color:white;
+                            font-family: Constantia;
+                            padding: 30px;
+                            border-radius: 30px;
+                            height: 100px"),
+            windowTitle = "UBayFS"
+        )
+    ),
 
     # Sidebar with a slider input for number of bins
-    fluidPage(
+    div(
         fluidRow(
-            column(2,
-                h4("status"),
-                disabled(
-                    prettyToggle(
-                        inputId = "status_data",
-                        label_on = "data loaded",
-                        icon_on = icon("check"),
-                        status_on = "info",
-                        status_off = "warning",
-                        label_off = "no data loaded",
-                        icon_off = icon("remove")
-                    )
-                ),
-                disabled(
-                    prettyToggle(
-                        inputId = "status_likelihood",
-                        label_on = "ensemble trained",
-                        icon_on = icon("check"),
-                        status_on = "info",
-                        status_off = "warning",
-                        label_off = "no ensemble trained",
-                        icon_off = icon("remove")
-                    )
-                ),
-                disabled(
-                    prettyToggle(
-                        inputId = "status_weighting",
-                        label_on = "weights set",
-                        icon_on = icon("check"),
-                        status_on = "info",
-                        status_off = "warning",
-                        label_off = "no weights set",
-                        icon_off = icon("remove")
-                    )
-                ),
-                disabled(
-                    prettyToggle(
-                        inputId = "status_prior",
-                        label_on = "constraints set",
-                        icon_on = icon("check"),
-                        status_on = "info",
-                        status_off = "warning",
-                        label_off = "no constraints set",
-                        icon_off = icon("remove")
-                    )
-                ),
-                disabled(
-                    prettyToggle(
-                        inputId = "status_featureselection",
-                        label_on = "features selected",
-                        icon_on = icon("check"),
-                        status_on = "info",
-                        status_off = "warning",
-                        label_off = "no features selected",
-                        icon_off = icon("remove")
-                    )
-                ),
-                materialSwitch("showInput",
-                             label = "input mode",
-                             value = TRUE,
-                             status = "info"),
-                fluidRow(
-                    downloadButton("save_model", "save model"),
-                    actionButton("load_model", "load model"),
-                    align = "center"
-                ),
-                style='background-color: #222222; color: white; padding: 10px; border-radius: 30px; margin: 10px'
-            ),
-
         # Show a plot of the generated distribution
-            column(9,
+            column(1,
+                   dropdownButton(
+                       label = NULL,
+                       icon = icon("tools"),
+                       circle = TRUE,
+                       materialSwitch("showInput",
+                                      label = "input mode",
+                                      value = TRUE,
+                                      status = "info"),
+                       actionButton("load_model", "load model", style = "width: 150px"),
+                       downloadButton("save_model", "save model", style = "width: 150px"),
+                       margin = "10px",
+                       width = "200px"
+                   ),
+                  style = "padding: 30px"
+            ),
+            column(11,
                 style = 'padding: 10px',
-                tabsetPanel(id = "tabs",
-                    tabPanel("data",
+                verticalTabsetPanel(id = "tabs",
+                                    color = "#2E75B6",
+                                    contentWidth = 10,
+                    verticalTabPanel(
+                        box_height = "60px",
+                        title = NULL,
+                        icon = uiOutput("lab_data_tab"),
+
                         # tab input
                         fluidRow(
                             column(12,
-                                   h4("input data"),
                                    align = "center"
                             ),
                             conditionalPanel(
@@ -129,10 +105,12 @@ shinyUI(fluidPage(
                             uiOutput("output_data")
                         )
                     ),
-                    tabPanel("likelihood",
+                    verticalTabPanel(
+                        box_height = "60px",
+                        title = NULL,
+                        icon = uiOutput("lab_ensemble_tab"),
                         fluidRow(
                             column(12,
-                                   h4("ensemble feature selector (likelihood)"),
                                    align = "center"
                             ),
                             conditionalPanel(
@@ -147,27 +125,33 @@ shinyUI(fluidPage(
                             uiOutput("output_likelihood")
                         )
                     ),
-                    tabPanel("weights",
+                    verticalTabPanel(
+                            box_height = "60px",
+                             title = NULL,
+                             icon = uiOutput("lab_weights_tab"),
                              fluidRow(
                                  column(12,
-                                        h4("prior feature weights (block weights)"),
                                         align = "center"
                                  ),
                                  conditionalPanel(
                                      condition = "input.showInput == true",
+                                     hidden(
                                      column(3,
+                                            id = "blocktable_container",
                                             uiOutput("blocktable"),
                                             style='border: 1px solid black; border-radius: 30px; padding: 10px; margin: 10px;
                                             height: 400px; overflow-y: scroll; overflow-x: hidden'
-                                     )
+                                     ))
                                  ),
                                 uiOutput("output_weights")
                              )
                     ),
-                    tabPanel("constraints",
+                    verticalTabPanel(
+                        box_height = "60px",
+                        title = NULL,
+                        icon = uiOutput("lab_constraints_tab"),
                         fluidRow(
                             column(12,
-                                   h4("prior constraints"),
                                    align = "center"
                             ),
                             conditionalPanel(
@@ -195,10 +179,12 @@ shinyUI(fluidPage(
 
                         )
                     ),
-                    tabPanel("feature selection",
+                    verticalTabPanel(
+                            box_height = "60px",
+                             title = NULL,
+                             icon = uiOutput("lab_results_tab"),
                              fluidRow(
                                  column(12,
-                                        h4("feature selection"),
                                         align = "center"
                                  ),
                                  conditionalPanel(
@@ -217,6 +203,24 @@ shinyUI(fluidPage(
                     )
                 )
             )
-        )
+        ),
+        style = "height: calc(100%-260px),
+                 overflow-y: scroll,
+                width : 100%"
+    ),
+    div(
+        hr(),
+        column(4,img(src = "logo_nmbu.gif", height = "80px"),img(src = "logo_cheads.png", height = "80px")),
+        column(8, div(strong("Anna Jenul"), "<", a("anna.jenul@nmbu.no", href = "mailto:anna.jenul@nmbu.no"),">"),
+               div(strong("Stefan Schrunner"), "<", a("stefan.schrunner@nmbu.no", href = "mailto:stefan.schrunner@nmbu.no"),">"),
+               div(strong("Oliver Tomic"), "<", a("oliver.tomic@nmbu.no", href = "mailto:oliver.tomic@nmbu.no"),">"),
+               div(strong("Jürgen Pilz"), "<", a("juergen.pilz@aau.at", href = "mailto:juergen.pilz@aau.at"),">"),
+               align = "right",
+               style = "padding-right: 30px"),
+        style = "z-index: 1000;
+                position:fixed;
+                bottom:0;
+                width: 100%;
+                height: 150px"
     )
 ))

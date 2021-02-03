@@ -274,7 +274,7 @@ shinyServer(function(input, output, session) {
 
     observeEvent(data_complete(), {
       if(data_complete()){
-        updatePrettyToggle(session, "status_data", "input ok", value = TRUE)
+        updatePrettyToggle(session, "status_data", value = TRUE)
         updateSliderInput(session, "maxsize", min = 0, max = n_feats(), value = min(10, n_feats()))
       }
     })
@@ -282,6 +282,7 @@ shinyServer(function(input, output, session) {
     observe({
       if(data_complete() & length(input$method) > 0){
         enable("confirmParam")
+        show("blocktable_container")
       }
       else{
         disable("confirmParam")
@@ -311,7 +312,7 @@ shinyServer(function(input, output, session) {
 
     observeEvent(likelihood_complete(), {
       if(likelihood_complete()){
-        updatePrettyToggle(session, "status_likelihood", "likelihood setting ok", value = TRUE)
+        updatePrettyToggle(session, "status_likelihood", value = TRUE)
         enable("add_maxsize")
         enable("add_must")
         enable("add_cannot")
@@ -325,13 +326,13 @@ shinyServer(function(input, output, session) {
 
     observeEvent(weighting_complete(), {
       if(weighting_complete()){
-        updatePrettyToggle(session, "status_weighting", "weight setting ok", value = TRUE)
+        updatePrettyToggle(session, "status_weighting", value = TRUE)
       }
     })
 
     observeEvent(prior_complete(), {
       if(prior_complete()){
-        updatePrettyToggle(session, "status_prior", "constraint setting ok", value = TRUE)
+        updatePrettyToggle(session, "status_prior", value = TRUE)
       }
     })
 
@@ -346,7 +347,7 @@ shinyServer(function(input, output, session) {
 
     observeEvent(featureselection_complete(), {
       if(featureselection_complete()){
-        updatePrettyToggle(session, "status_featureselection", "optimal features calculated", value = TRUE)
+        updatePrettyToggle(session, "status_featureselection", value = TRUE)
       }
     })
 
@@ -563,5 +564,107 @@ shinyServer(function(input, output, session) {
         }
       }
     })
+
+    # vertical tabs
+    output$lab_data_tab <- renderUI({
+      div(align = "left",
+      disabled(
+            prettyToggle(
+              inputId = "status_data",
+              label_on = strong("data"),#"data loaded",
+              icon_on = icon("thumbs-up"),
+              status_on = "default",
+              status_off = "default",
+              label_off = strong("data"),#"no data loaded",
+              icon_off = icon("hand-point-right"),
+              animation = "smooth",
+              bigger = TRUE,
+              fill = FALSE,
+              plain = TRUE
+            )
+        )
+      )
+    })
+
+    output$lab_ensemble_tab <- renderUI({
+     div(align = "left",
+     disabled(
+            prettyToggle(
+              inputId = "status_likelihood",
+              label_on = strong("likelihood"),#"ensemble trained",
+              icon_on = icon("thumbs-up"),
+              status_on = "default",
+              status_off = "default",
+              label_off = strong("likelihood"),#"no ensemble trained",
+              icon_off = icon("hand-point-right"),
+              animation = "smooth",
+              bigger = TRUE,
+              fill = FALSE,
+              plain = TRUE
+          )
+      )
+      )
+    })
+
+    output$lab_weights_tab <- renderUI({
+      div(align = "left",
+      disabled(
+        prettyToggle(
+          inputId = "status_weighting",
+          label_on = strong("weights"),#"weights set",
+          icon_on = icon("thumbs-up"),
+          status_on = "default",
+          status_off = "default",
+          label_off = strong("weights"),#"no weights set",
+          icon_off = icon("hand-point-right"),
+          animation = "smooth",
+          bigger = TRUE,
+          fill = FALSE,
+          plain = TRUE
+        )
+      )
+      )
+    })
+
+    output$lab_constraints_tab <- renderUI({
+     div(align = "left",
+     disabled(
+        prettyToggle(
+          inputId = "status_prior",
+          label_on = strong("constraints"),#"constraints set",
+          icon_on = icon("thumbs-up"),
+          status_on = "default",
+          status_off = "default",
+          label_off = strong("constraints"),#"no constraints set",
+          icon_off = icon("hand-point-right"),
+          animation = "smooth",
+          bigger = TRUE,
+          fill = FALSE,
+          plain = TRUE
+        )
+      )
+      )
+    })
+
+    output$lab_results_tab <- renderUI({
+      div(align = "left",
+      disabled(
+        prettyToggle(
+          inputId = "status_featureselection",
+          label_on = strong("feature selection"),#"features selected",
+          icon_on = icon("thumbs-up"),
+          status_on = "default",
+          status_off = "default",
+          label_off = strong("feature selection"),#"no features selected",
+          icon_off = icon("hand-point-right"),
+          animation = "smooth",
+          bigger = TRUE,
+          fill = FALSE,
+          plain = TRUE
+        )
+      )
+      )
+    })
+
 
 })

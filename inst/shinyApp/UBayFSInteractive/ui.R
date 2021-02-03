@@ -17,11 +17,13 @@ shinyUI(fluidPage(
     tags$head(
         tags$style("body{color: #2E75B6, font-family: Constantia}
                    label{color: #2E75B6, font-family: Constantia}"),
+        tags$title("UBayFS")
     ),
 
     # Application title
     div(
-        style = "margin-top: 10px",
+        style = "margin-top: 10px;
+                 margin-right: 10px",
         fluidRow(
 
             column(1,
@@ -33,10 +35,12 @@ shinyUI(fluidPage(
                    style = "background-color: #2E75B6;
                             color:white;
                             font-family: Constantia;
-                            padding: 30px;
+                            padding-top: 10px;
+                            padding-bottom: 10px;
+                            padding-right: 20px;
                             border-radius: 30px;
-                            height: 100px"),
-            windowTitle = "UBayFS"
+                            height: 100px;
+                            top: 0")
         )
     ),
 
@@ -203,24 +207,32 @@ shinyUI(fluidPage(
                     )
                 )
             )
-        ),
-        style = "height: calc(100%-260px),
-                 overflow-y: scroll,
-                width : 100%"
+        )
     ),
+    div(style = "height: 130px"),
     div(
-        hr(),
-        column(4,img(src = "logo_nmbu.gif", height = "80px"),img(src = "logo_cheads.png", height = "80px")),
-        column(8, div(strong("Anna Jenul"), "<", a("anna.jenul@nmbu.no", href = "mailto:anna.jenul@nmbu.no"),">"),
-               div(strong("Stefan Schrunner"), "<", a("stefan.schrunner@nmbu.no", href = "mailto:stefan.schrunner@nmbu.no"),">"),
-               div(strong("Oliver Tomic"), "<", a("oliver.tomic@nmbu.no", href = "mailto:oliver.tomic@nmbu.no"),">"),
-               div(strong("Jürgen Pilz"), "<", a("juergen.pilz@aau.at", href = "mailto:juergen.pilz@aau.at"),">"),
-               align = "right",
-               style = "padding-right: 30px"),
+        column(6,
+            div(strong("Anna Jenul"), "<", a("anna.jenul@nmbu.no", href = "mailto:anna.jenul@nmbu.no"),">"),
+            div(strong("Stefan Schrunner"), "<", a("stefan.schrunner@nmbu.no", href = "mailto:stefan.schrunner@nmbu.no"),">"),
+            div(strong("Oliver Tomic"), "<", a("oliver.tomic@nmbu.no", href = "mailto:oliver.tomic@nmbu.no"),">"),
+            div(strong("Jürgen Pilz"), "<", a("juergen.pilz@aau.at", href = "mailto:juergen.pilz@aau.at"),">"),
+            align = "left",
+            style = "padding-top: 10px"
+        ),
+        column(6,
+            img(src = "logo_nmbu.gif", height = "100px"),img(src = "logo_ceheads.png", height = "100px"),
+            align = "right"
+        ),
         style = "z-index: 1000;
-                position:fixed;
-                bottom:0;
-                width: 100%;
-                height: 150px"
+                 position:fixed;
+                 bottom:0;
+                 left:0;
+                 width: 100%;
+                 height: 130px;
+                 background-color: white;
+                 padding-top: 15px;
+                 padding-bottom: 15px;
+                 padding-left: 0px;
+                 border-top: 1px solid black"
     )
 ))

@@ -92,7 +92,10 @@ shinyUI(fluidPage(
                                             fileInput("upload_labels", NULL, multiple = FALSE, accept = c(".csv")),
                                             checkboxInput("input_rownames", "rownames provided?", value = TRUE),
                                             checkboxInput("input_colnames", "colnames provided?", value = TRUE),
-                                            checkboxInput("input_blocks", "feature blocks provided?", value = TRUE)
+                                            checkboxInput("input_blocks", "feature blocks provided?", value = TRUE),
+                                            bsTooltip("input_rownames", "Are rownames provided in column 1 of your input files?"),
+                                            bsTooltip("input_colnames", "Are colnames provided in row 1 of your input files?"),
+                                            bsTooltip("input_blocks", "Are block names provided in row 1 (without rownames) or row 2 (with rownames) of your input files?")
                                         ),
                                         tabPanel("demo",
                                             h5("Wisconsin breast cancer"),
@@ -164,16 +167,19 @@ shinyUI(fluidPage(
                                     tabsetPanel(type = "pills",
                                                   tabPanel("size constraint",
                                                         sliderInput("maxsize", "$$s_{max}$$", min = 0, max = 10, value = 10, step = 1),
+                                                        bsTooltip("maxsize", "Select the maximum number of features to be selected (max-size constraint)"),
                                                         disabled(actionButton("add_maxsize", "add size constraint")),
                                                   ),
                                                  tabPanel("link constraint",
                                                         DT::dataTableOutput("features"),
+                                                        bsTooltip("features", "Select the features to be linked by must-link / cannot link constraint"),
                                                         disabled(actionButton("add_must", "add must-link")),
                                                         disabled(actionButton("add_cannot", "add cannot-link")),
                                                 )
                                     ),
                                      hr(),
                                      sliderTextInput("rho", "$$\\rho$$", choices = c(0.01,0.1,1,10,100,Inf), selected = 1),
+                                    bsTooltip("rho", "Select the relaxation parameter $$\\rho$, specifying the level of penalization if the constraint is violated"),
                                      plotOutput("rho_plot", height = "200px"),
                                     style='border: 1px solid black; border-radius: 30px; padding: 10px; margin: 10px',
                                     align = 'center'
@@ -220,7 +226,7 @@ shinyUI(fluidPage(
             style = "padding-top: 10px"
         ),
         column(6,
-            img(src = "logo_nmbu.gif", height = "100px"),img(src = "logo_ceheads.png", height = "100px"),
+            img(src = "logo_nmbu.png", height = "80px"),img(src = "logo_ceheads.png", height = "100px"),
             align = "right"
         ),
         style = "z-index: 1000;

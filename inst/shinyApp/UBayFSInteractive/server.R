@@ -359,7 +359,7 @@ shinyServer(function(input, output, session) {
           data.frame(label = model()$target, model()$data),
           filter = 'top',
           extensions = "FixedColumns",
-          options = list(paging = FALSE, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE, scrollY = "400px", fixedColumns = list(leftColumns = 2)),
+          options = list(paging = FALSE, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE, scrollY = "300px", fixedColumns = list(leftColumns = 2)),
           selection = "none"
         )
       }
@@ -488,13 +488,17 @@ shinyServer(function(input, output, session) {
                               "Laplacian score"),
                   selected = sel_method,
                   multiple = TRUE),
+        bsTooltip("method", "Select the feature selection method type(s) to be used for elementary feature selector"),
         sliderTextInput("M", withMathJax('$$M$$'), choices = c(10, 20, 30, 40, 50,
                                                                60, 70, 80, 90, 100,
                                                                150, 200, 250, 300, 350, 400, 450, 500,
                                                                600, 700, 800, 900, 1000),
-                      selected = sel_M),
+                        selected = sel_M),
+       bsTooltip("M", "Select the number of elementary feature selector to be trained"),
         sliderInput("n_feats", "number of features", min = 1, max = max_nr_features, step = 1, value = sel_nr_features),
-        sliderInput("tt_split", "train-test-split", min = 0.5, max = 0.95, step = 0.05, value = sel_tt_split)
+       bsTooltip("n_feats", "Select the number of features to be selected by each elementary feature selector"),
+        sliderInput("tt_split", "train-test-split", min = 0.5, max = 0.95, step = 0.05, value = sel_tt_split),
+       bsTooltip("tt_split", "Select size of the subset sampled to train each elementary feature selector")
       )
     })
 
@@ -522,20 +526,22 @@ shinyServer(function(input, output, session) {
       column(12,
         sliderTextInput("popsize", withMathJax('$$q$$'), choices = c(10, 20, 50, 100, 500, 1000, 5000),
                       selected = sel_popsize),
+        bsTooltip("popsize", "Select the size of the initial population in the genetic algorithm"),
         sliderTextInput("maxiter", withMathJax('$$T$$'), choices = c(10, 20, 30, 40, 50,
                                                                      60, 70, 80, 90, 100,
                                                                      150, 200, 250, 300, 350, 400, 450, 500,
                                                                      600, 700, 800, 900, 1000),
-                      selected = sel_maxiter)
+                      selected = sel_maxiter),
+        bsTooltip("maxiter", "Select the maximum number of iterations used in the genetic algorithm")
       )
     })
 
     output$output_fs <- renderUI({
       column(output_width(),
-             column(9,
+             column(8,
                     plotOutput("result_barplot", height = "400px"),
              ),
-             column(3,
+             column(4,
                     DT::dataTableOutput("feature_results")
              ),
              align = 'center'
@@ -550,7 +556,7 @@ shinyServer(function(input, output, session) {
         colnames(df) <- c("no", "selected features")
         datatable(
           df,
-          options = list(paging = FALSE, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE, scrollY = "400px"),
+          options = list(paging = FALSE, sDom = '<"top">rt<"bottom">ip', scrollX = TRUE, scrollY = "300px"),
           selection = "none",
           rownames = FALSE
         )

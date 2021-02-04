@@ -28,6 +28,7 @@ Suggests:
     tcltk,
     shinyjs,
     shinythemes,
+    shinyBS,
     testthat (>= 3.0.0),
     knitr,
     rmarkdown

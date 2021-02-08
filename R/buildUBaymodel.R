@@ -7,9 +7,7 @@
 #' @param tt_split the ratio of samples drawn for building an elementary model (train-test-split)
 #' @param nr_features number of features to select in each elementary model
 #' @param method a vector denoting the method(s) used as elementary models; options: "mRMR", "Laplacian score"
-#' @param A the matrix defining the constraint system Ax<=b
-#' @param b the vector defining the constraint system Ax<=b
-#' @param rho the vector of relaxation parameters for the constraint system Ax<=b
+#' @param constraints a list containing a relaxed system Ax<=b of user constraints, given as matrix A, vector b and vector or scalar rho (relaxation parameters); see buildConstraints function
 #' @param weights the vector of user-defined prior weights for each feature
 #' @param popsize size of the initial population of the genetic algorithm for model optimization
 #' @param maxiter maximum number of iterations of the genetic algorithm for model optimization
@@ -23,9 +21,7 @@
 #' model <- build.UBaymodel(
 #'                      data = d$data,
 #'                      target = d$labels,
-#'                      A = c$A,
-#'                      b = c$b,
-#'                      rho = c$rho,
+#'                      constraints = c,
 #'                      weights = w
 #' )
 #' @import Rdimtools
@@ -39,8 +35,8 @@ build.UBaymodel = function(data, target, 															# data + labels
                        M = 100, tt_split = 0.75, 												# number of train-test-splits, split ratio
                        nr_features = 10,														# number of features to select by elementary FS
                        method = "mRMR",
-                       A = NULL, b = NULL, rho = NULL,											# user constraints
-                       weights = NULL, 														# user weights
+                       constraints = NULL,
+                       weights = 1, 														# user weights
                        popsize = 50,
                        maxiter = 100,
                        shiny = FALSE){														# elementary FS to use
@@ -63,22 +59,6 @@ build.UBaymodel = function(data, target, 															# data + labels
   }
   if(!all(method %in% c("mRMR", "mrmr", "Laplacian score", "laplace"))){
     stop("Error: unknown method")
-  }
-  if(!is.null(A)){
-    if(ncol(A) != ncol(data) | nrow(A) != length(b) | length(b) != length(rho)){
-      stop("Error: dimensions of constraints do not match")
-    }
-  }
-  if(!is.null(weights)){
-    if(length(weights) != ncol(data)){
-      stop("Error: length of prior weights does not match data matrix")
-    }
-  }
-  else{
-    weights = rep(1, ncol(data))
-  }
-  if(popsize < 10 | maxiter < 10){
-    stop("Error: popsize or maxiter < 10 does not make sense")
   }
 
   # theoretical maximum count that can be obtained by a single feature in ensemble (= number of elementary FS)
@@ -147,12 +127,6 @@ build.UBaymodel = function(data, target, 															# data + labels
   obj = list(
     data = data,
     target = target,
-    user.params = list(
-      constraints = list(A = A,
-                         b = b,
-                         rho = rho),
-      weights = weights
-    ),
     ensemble.params = list(
       input = list( tt_split = tt_split,
                     M = M,
@@ -160,12 +134,16 @@ build.UBaymodel = function(data, target, 															# data + labels
                     nr_features = nr_features),
       output = list(counts = counts,
                     max_counts = max_counts)
-    ),
-    optim.params = list(
-      maxiter = maxiter,
-      popsize = popsize
     )
   )
   class(obj) = "UBaymodel"
+
+  obj = setConstraints(obj, constraints)
+  obj = setWeights(obj, weights)
+  obj = setOptim(obj,
+            maxiter = maxiter,
+            popsize = popsize
+        )
+
   return(obj)
 }

@@ -12,11 +12,22 @@ setWeights = function(model, weights){
     stop("Wrong class of model")
   }
 
-  if(length(weights) != ncol(model$data)){
-    stop("Error: length of prior weights does not match data matrix")
+  if(is.null(weights)){
+    stop("Error: weights cannot be empty")
   }
 
-  model$user.params$weights <- weights
+  if((length(weights) > 1) & (length(weights) != ncol(model$data))){
+    stop("Error: length of prior weights does not match data matrix")
+  }
+  else if(length(weights) == 1){
+    weights = rep(weights, ncol(model$data))
+  }
+
+  if(any(weights <= 0)){
+    stop("Error: weights must be positive")
+  }
+
+  model$user.params$weights = weights
 
   return(model)
 }

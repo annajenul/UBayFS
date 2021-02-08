@@ -27,8 +27,17 @@ buildConstraints = function(constraint_types, constraint_vars, num_features, rho
   if(num_features <= 0 | num_features %%1 != 0){
     stop("Error: num_features must be a positive integer")
   }
-  if(rho <= 0 | length(rho) > 1){
-    stop("Error: rho must be a single positive value")
+  if(any(rho <= 0)){
+    stop("Error: rho must be positive")
+  }
+  if(length(rho) < 1){
+    stop("Error: rho must have positive length")
+  }
+  else if(length(rho) == 1){
+    rho = rep(rho, length(constraint_types))
+  }
+  else if((length(rho) > 1) & (length(rho) != length(constraint_types))){
+    stop("Error: rho has wrong length")
   }
 
   # define constraints
@@ -40,7 +49,7 @@ buildConstraints = function(constraint_types, constraint_vars, num_features, rho
 
   must_link = function(sel, num_feats){
     if(length(sel) > 1){
-      pairs = expand.grid(sel, sel) 					# all pairs
+      pairs = as.matrix(expand.grid(sel, sel)) 					# all pairs
       pairs = pairs[									# delete main diagonal (pair of two identical features)
         -which(pairs[,1] == pairs[,2]),
       ]
@@ -62,6 +71,7 @@ buildConstraints = function(constraint_types, constraint_vars, num_features, rho
   # initialize variables
   A = NULL
   b = c()
+  rho_vec = c()
 
   # iterate over provided constraints
   for (t in 1:length(constraint_types)) {				# for each constraint provided
@@ -79,12 +89,12 @@ buildConstraints = function(constraint_types, constraint_vars, num_features, rho
     }
     A = rbind(A, l$A)									# add new constraint to A
     b = c(b, l$b)										# add new constraint to b
+    rho_vec = c(rho_vec, rep(rho[t], length(l$b)))
   }
 
   const <- list(A = A,
                 b = b,
-                rho = rep(rho, length(b)))
-  class(const) <- "UBayconstraint"
+                rho = rho_vec)
 
   return(
     const

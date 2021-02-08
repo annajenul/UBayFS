@@ -11,10 +11,8 @@ build.UBaymodel(
   tt_split = 0.75,
   nr_features = 10,
   method = "mRMR",
-  A = NULL,
-  b = NULL,
-  rho = NULL,
-  weights = NULL,
+  constraints = NULL,
+  weights = 1,
   popsize = 50,
   maxiter = 100,
   shiny = FALSE
@@ -33,11 +31,7 @@ build.UBaymodel(
 
 \item{method}{a vector denoting the method(s) used as elementary models; options: "mRMR", "Laplacian score"}
 
-\item{A}{the matrix defining the constraint system Ax<=b}
-
-\item{b}{the vector defining the constraint system Ax<=b}
-
-\item{rho}{the vector of relaxation parameters for the constraint system Ax<=b}
+\item{constraints}{a list containing a relaxed system Ax<=b of user constraints, given as matrix A, vector b and vector or scalar rho (relaxation parameters); see buildConstraints function}
 
 \item{weights}{the vector of user-defined prior weights for each feature}
 
@@ -64,9 +58,7 @@ w <- rep(1, ncol(d$data)) # weights
 model <- build.UBaymodel(
                      data = d$data,
                      target = d$labels,
-                     A = c$A,
-                     b = c$b,
-                     rho = c$rho,
+                     constraints = c,
                      weights = w
 )
 }

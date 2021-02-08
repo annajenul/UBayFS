@@ -3,21 +3,20 @@ title: "A quick tour through UBayFS"
 author: "Anna Jenul, Stefan Schrunner, Oliver Tomic,  Jürgen Pilz"
 date: "Feb 2021"
 output: 
-  rmarkdown::html_vignette:
-    toc: true
-
-
+  prettydoc::html_pretty:
+    theme: architect
+    toc: TRUE
+    hightlight: github
 vignette: >
   %\VignetteIndexEntry{UBayFS}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-
 <style>
-body {
-text-align: justify;
-padding: 1em}
+  body {
+  text-align: justify;
+  padding: 1em}
 </style>
 
 
@@ -144,16 +143,15 @@ constraints = buildConstraints(constraint_types = c("max_size", "must_link", rep
                                                       c(20,23,24) #cannot_link
                                                       ),
                                num_features = ncol(model$data),
-#                                rho = c(Inf, # max_size
-#                                        0.1, # must_link
-#                                        1, # cannot_link
-#                                        1) # cannot_link
-rho=1
+                                rho = c(Inf, # max_size
+                                        0.1, # must_link
+                                        1, # cannot_link
+                                        1) # cannot_link
 )
 # )
 print(constraints)
 
-model = setConstraints(model = model, A = constraints$A, b = constraints$b, rho = constraints$rho)
+model = setConstraints(model = model, constraints = constraints)
 ```
 
 ## Optimization and evaluation

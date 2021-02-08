@@ -24,7 +24,7 @@ shinyServer(function(input, output, session) {
             newrho <- c(model()$user.params$constraints$rho, params$rho)
         }
 
-        model(setConstraints(model(), A = newA, b = newb, rho = as.numeric(newrho)))
+        model(UBayFS::setConstraints(model(), list(A = newA, b = newb, rho = as.numeric(newrho))))
 
         proxy = dataTableProxy('features')
         selectRows(proxy, c())
@@ -183,9 +183,7 @@ shinyServer(function(input, output, session) {
                                      model()$target,
                                      M = input$M,
                                      tt_split = input$tt_split,
-                                     A = model()$user.params$constraints$A,
-                                     b = model()$user.params$constraints$b,
-                                     rho = model()$user.params$constraints$rho,
+                                     constraints = model()$user.params$constraints,
                                      method = input$method,
                                      nr_features = input$n_feats,
                                      shiny = TRUE))},
@@ -197,14 +195,14 @@ shinyServer(function(input, output, session) {
 
     # === PRIOR INPUT HANDLING ===
     observeEvent(input$add_maxsize, {
-        addConstraint(buildConstraints("max_size", list(input$maxsize), num_features = n_feats(), rho = input$rho))
+        addConstraint(UBayFS::buildConstraints("max_size", list(input$maxsize), num_features = n_feats(), rho = input$rho))
     })
 
     observeEvent(input$add_must, {
         sel <- input$features_rows_selected
 
         if(length(sel) > 1){
-          addConstraint(buildConstraints("must_link", list(sel), num_features = n_feats(), rho = input$rho))
+          addConstraint(UBayFS::buildConstraints("must_link", list(sel), num_features = n_feats(), rho = input$rho))
         }
     })
 
@@ -212,7 +210,7 @@ shinyServer(function(input, output, session) {
         sel <- input$features_rows_selected
 
         if(length(sel) > 1){
-          addConstraint(buildConstraints("cannot_link", list(sel), num_features = n_feats(), rho = input$rho))
+          addConstraint(UBayFS::buildConstraints("cannot_link", list(sel), num_features = n_feats(), rho = input$rho))
         }
     })
 

@@ -4,16 +4,12 @@
 \alias{setConstraints}
 \title{set constraints in UBaymodel object}
 \usage{
-setConstraints(model, A, b, rho)
+setConstraints(model, constraints)
 }
 \arguments{
 \item{model}{a UBaymodel object created using build.UBaymodel}
 
-\item{A}{the matrix defining the constraint system Ax<=b}
-
-\item{b}{the vector defining the constraint system Ax<=b}
-
-\item{rho}{the vector of relaxation parameters for the constraint system Ax<=b}
+\item{constraints}{a list containing a relaxed system Ax<=b of user constraints, given as matrix A, vector b and vector or scalar rho (relaxation parameters); see buildConstraints function}
 }
 \value{
 a UBaymodel object with updated constraint parameters

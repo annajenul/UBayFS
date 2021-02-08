@@ -1,26 +1,28 @@
 #' set constraints in UBaymodel object
 #' @description sets the constraints in a UBaymodel object
 #' @param model a UBaymodel object created using build.UBaymodel
-#' @param A the matrix defining the constraint system Ax<=b
-#' @param b the vector defining the constraint system Ax<=b
-#' @param rho the vector of relaxation parameters for the constraint system Ax<=b
+#' @param constraints a list containing a relaxed system Ax<=b of user constraints, given as matrix A, vector b and vector or scalar rho (relaxation parameters); see buildConstraints function
 #' @return a UBaymodel object with updated constraint parameters
 #' @seealso build.UBaymodel
 #' @export
 
-setConstraints = function(model, A, b, rho){
+setConstraints = function(model, constraints){
 
   if(class(model) != "UBaymodel"){
-    stop("Wrong class of model")
+    stop("Error: wrong class of model")
   }
 
-  if(ncol(A) != ncol(model$data) | nrow(A) != length(b) | length(b) != length(rho)){
-    stop("Error: dimensions of constraints do not match")
+  if(!checkConstraints(constraints)){
+    stop("Error: inconsistent constraints provided")
   }
 
-  model$user.params$constraints = list(A = A,
-                                       b = b,
-                                       rho = rho)
+  if(!is.null(constraints)){
+    if(ncol(model$data) != ncol(constraints$A)){
+      stop("Error: inconsistent constraints provided")
+    }
+  }
+
+  model$user.params$constraints = constraints
 
   return(model)
 }

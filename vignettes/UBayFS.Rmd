@@ -1,6 +1,12 @@
 ---
-title: "UBayFS"
-output: rmarkdown::html_vignette
+title: "A quick tour through UBayFS"
+author: "Anna Jenul, Stefan Schrunner, Oliver Tomic,  Jürgen Pilz"
+date: "Feb 2021"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+
+
 vignette: >
   %\VignetteIndexEntry{UBayFS}
   %\VignetteEngine{knitr::rmarkdown}
@@ -38,7 +44,7 @@ demo = loadWisconsin()
 
 UBayFS - S3 classes etc? - wesentliche Funktionen
 
-```{r, out.width="100%", echo = FALSE}
+```{r, out.width="50%", out.height="50%", fig.align="center", echo = FALSE}
 include_graphics("UBay_UML.png")
 ``` 
 
@@ -179,5 +185,10 @@ include_graphics("UBay_Shiny_Screenshot.png")
 ``` 
 
 ## Conclusion
-runtime, extension with other models,...
+runtime increases linearly with the number of models;
+we also can add further feature selection approaches to the ensemble
+future topics
+
+## References
+
 

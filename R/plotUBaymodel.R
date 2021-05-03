@@ -41,7 +41,6 @@ plot.UBaymodel <- function(x,...){
     theme(axis.text.x = element_text(angle = 90))
 
   # constraint plot
-
   if(!is.null(x$user.params$constraints$A)){
     A = x$user.params$constraints$A
     b = x$user.params$constraints$b
@@ -76,4 +75,5 @@ plot.UBaymodel <- function(x,...){
   else{
     p
   }
+
 }

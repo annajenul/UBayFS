@@ -8,6 +8,7 @@
 #' @param nr_features number of features to select in each elementary model
 #' @param method a vector denoting the method(s) used as elementary models; options: "mRMR", "Laplacian score"
 #' @param constraints a list containing a relaxed system Ax<=b of user constraints, given as matrix A, vector b and vector or scalar rho (relaxation parameters); see buildConstraints function
+#' @param block_constraints a list containing a relaxed system Ax<=b of user constraints on feature blocks, given as matrix A, vector b and vector or scalar rho (relaxation parameters); see buildConstraints function
 #' @param weights the vector of user-defined prior weights for each feature
 #' @param popsize size of the initial population of the genetic algorithm for model optimization
 #' @param maxiter maximum number of iterations of the genetic algorithm for model optimization
@@ -36,6 +37,7 @@ build.UBaymodel = function(data, target, 															# data + labels
                        nr_features = 10,														# number of features to select by elementary FS
                        method = "mRMR",
                        constraints = NULL,
+                       block_constraints = NULL,
                        weights = 1, 														# user weights
                        popsize = 50,
                        maxiter = 100,
@@ -139,6 +141,7 @@ build.UBaymodel = function(data, target, 															# data + labels
   class(obj) = "UBaymodel"
 
   obj = setConstraints(obj, constraints)
+  obj = setBlockConstraints(obj, block_constraints)
   obj = setWeights(obj, weights)
   obj = setOptim(obj,
             maxiter = maxiter,

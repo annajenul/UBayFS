@@ -4,7 +4,13 @@
 \alias{buildConstraints}
 \title{Build constraint system}
 \usage{
-buildConstraints(constraint_types, constraint_vars, num_features, rho = 1)
+buildConstraints(
+  constraint_types,
+  constraint_vars,
+  num_features,
+  rho = 1,
+  block_matrix = NULL
+)
 }
 \arguments{
 \item{constraint_types}{a vector of strings denoting the type of constraint to be added; options: "max_size", "must_link", "cannot_link"}
@@ -14,6 +20,8 @@ buildConstraints(constraint_types, constraint_vars, num_features, rho = 1)
 \item{num_features}{the total number of features in the dataset}
 
 \item{rho}{a positive parameter denoting the level of relaxation; Inf denotes no relaxation}
+
+\item{block_matrix}{the matrix containing affiliations of features to each block; only required, if block constraints are built}
 }
 \value{
 a list constaining a matrix A and a vector b representing the inequality system Ax<=b, and a vector rho

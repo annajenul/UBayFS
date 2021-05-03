@@ -30,8 +30,27 @@ summary.UBaymodel <- function(object,...){
                           }),
                         collapse = " \n"
                       ),
-                      "\n\n")
-                    }else{""},
+                      "\n")
+                    }else{"\n"},
+                    if(!is.null(object$user.params$block_constraints$A)){
+                      paste0(
+                             paste0(
+                               sapply(1:nrow(object$user.params$block_constraints$A), function(i){
+                                 paste0(
+                                   " block constraint ",
+                                   i,
+                                   ": ( ",
+                                   paste0(object$user.params$block_constraints$A[i,], collapse = ","),
+                                   " ) x <= ",
+                                   object$user.params$block_constraints$b[i],
+                                   "; rho = ",
+                                   object$user.params$block_constraints$rho[i]
+                                 )
+                               }),
+                               collapse = " \n"
+                             ),
+                             "\n\n")
+                    }else{"\n"},
                     " === prior weights === \n",
                     " weights: (", paste0(object$user.params$weights, collapse = ","),") \n\n",
                     " === likelihood === \n",

@@ -5,6 +5,7 @@
 #' @param constraint_vars a list of parameters defining the constraints; in case of max-size constraints, the list element must contain an integer denoting the maximum size of the feature set, in case of max-link or cannot link, the list element must be a vector of feature indices to be linked
 #' @param num_features the total number of features in the dataset
 #' @param rho a positive parameter denoting the level of relaxation; Inf denotes no relaxation
+#' @param block_matrix the matrix containing affiliations of features to each block; only required, if block constraints are built
 #' @return a list constaining a matrix A and a vector b representing the inequality system Ax<=b, and a vector rho
 #' @examples
 #' # given a dataset with 10 features, we create a max-size constraint limiting
@@ -15,7 +16,7 @@
 #' rho = 1)
 #' @export
 
-buildConstraints = function(constraint_types, constraint_vars, num_features, rho = 1){
+buildConstraints = function(constraint_types, constraint_vars, num_features, rho = 1, block_matrix = NULL){
 
   # check input
   if(!all(constraint_types %in% c("max_size", "must_link", "cannot_link"))){
@@ -94,7 +95,8 @@ buildConstraints = function(constraint_types, constraint_vars, num_features, rho
 
   const <- list(A = A,
                 b = b,
-                rho = rho_vec)
+                rho = rho_vec,
+                block_matrix = block_matrix)
 
   return(
     const

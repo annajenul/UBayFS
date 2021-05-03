@@ -12,6 +12,7 @@ build.UBaymodel(
   nr_features = 10,
   method = "mRMR",
   constraints = NULL,
+  block_constraints = NULL,
   weights = 1,
   popsize = 50,
   maxiter = 100,
@@ -32,6 +33,8 @@ build.UBaymodel(
 \item{method}{a vector denoting the method(s) used as elementary models; options: "mRMR", "Laplacian score"}
 
 \item{constraints}{a list containing a relaxed system Ax<=b of user constraints, given as matrix A, vector b and vector or scalar rho (relaxation parameters); see buildConstraints function}
+
+\item{block_constraints}{a list containing a relaxed system Ax<=b of user constraints on feature blocks, given as matrix A, vector b and vector or scalar rho (relaxation parameters); see buildConstraints function}
 
 \item{weights}{the vector of user-defined prior weights for each feature}
 

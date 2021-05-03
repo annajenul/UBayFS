@@ -28,6 +28,11 @@ train.UBaymodel = function(x){
   b = x$user.params$constraints$b
   rho = x$user.params$constraints$rho
 
+  # define block constraints
+  A_block = x$user.params$block_constraints$A
+  b_block = x$user.params$block_constraints$b
+  rho_block = x$user.params$block_constraints$rho
+
   # define prior weights
   alpha = as.numeric(x$user.params$weights)
 
@@ -45,7 +50,8 @@ train.UBaymodel = function(x){
   for(i in 1:n){
     x_new = x_start
     x_new[initial_importance[i]] = 1						# try to add feature
-    if(admissibility(x_new, A, b, rep(Inf, length(b)), log = FALSE) == 1){# verify if constraints are still satified
+    if((admissibility(x_new, A, b, rep(Inf, length(b)), log = FALSE) == 1) &&
+       (block_admissibility(x_new, A_block, b_block, rep(Inf, length(b)), block_matrix, log = FALSE) == 1)){# verify if constraints are still satified
       x_start = x_new										# if yes, accept feature
     }
     i = i+1
@@ -54,12 +60,19 @@ train.UBaymodel = function(x){
   # optimization using GA
   target_fct = function(state){								# target function for optimization procedure
     return(
-      admissibility(state, 									# log-admissibility function
+       admissibility(state, 									# log-admissibility function
                     A,
                     b,
                     rho,
                     weights_sum,
                     log = TRUE) +
+        block_admissibility(state, 									# log-admissibility function
+                      A_block,
+                      b_block,
+                      rho_block,
+                      block_matrix,
+                      weights_sum / nrow(block_matrix),
+                      log = TRUE) +
         ddirichlet(t(state + 0.01), 							# log-dirichlet-density (with small epsilon to avoid errors from 0 probs)
                    alpha = post_param,
                    log = TRUE)

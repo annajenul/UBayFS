@@ -1,15 +1,5 @@
----
-title: "A quick tour through UBayFS"
-author: "Anna Jenul, Stefan Schrunner, Oliver Tomic,  Jürgen Pilz"
-date: "Feb 2021"
-output: 
-  prettydoc::html_pretty:
-    theme: architect
-    toc: TRUE
-    hightlight: github
-bibliography: UBayFS/vignettes/references.bib
-
----
+A quick tour through UBayFS
+===========================
 
 ## Introduction
 The UBayFS package implements the framework proposed in [@jenul:UBayFS], together with an interactive Shiny dashbord, which makes UBayFS applicable to R-users as well as non R-users. UBayFS is an ensemble feature selection technique, embedded in a Bayesian statistical framework. The method combines data and user knowledge, where the first is extracted from data driven ensemble feature selection techniques. The user can control the feature selection by assigning prior weights to features and penalizing specific feature combinations. Further, the user can define a maximal number of selected features and must-link constraints (features must be selected together) or cannot-link constraints (features must not be selected together). Using relaxed constraints, a parameter $\rho$ regulates the penalty shape. Hence, violation of constraints can be valid but leads to a lower probability of the feature set that is derived from the violated constraints.
@@ -132,3 +122,4 @@ include_graphics("UBay_Shiny_Screenshot.png")
 Although the current version of UBayFS is limited to ``mRMR`` and ``Laplacian score``, it will be extended with additional feature selectors that provide a scoring of the features. In addition, an expansion of the package with UBay Regression and UBay for unsupervised problems is planned. The exactness of the likelihood can be considered as a trade off between the number of models and the runtime, which linearly increases with the number of models. Especially the Shiny dashboard delivers insight into the single UBayFS steps. Nevertheless, the dashboard is slow for high dimensional datasets, what makes it necessary to use the console version in such settings. 
 
 ## References
+Anna Jenul, Stefan Schrunner, Jürgen Pilz and Oliver Tomic. "A User-Guided Bayesian Framework for Ensemble Feature Selection in Life Science Applications (UBayFS)." <em>arXiv preprint arXiv:2104.14787</em> (2021).

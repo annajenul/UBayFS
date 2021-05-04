@@ -7,7 +7,8 @@ output:
     theme: architect
     toc: TRUE
     hightlight: github
-bibliography: /vignettes/references.bib
+bibliography: UBayFS/vignettes/references.bib
+
 ---
 
 ## Introduction

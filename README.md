@@ -14,6 +14,20 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+<style>
+  body {
+  text-align: justify;
+  padding: 1em}
+</style>
+
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(knitr)
+```
 
 ## Introduction
 The UBayFS package implements the framework proposed in [@jenul:UBayFS], together with an interactive Shiny dashbord, which makes UBayFS applicable to R-users as well as non R-users. UBayFS is an ensemble feature selection technique, embedded in a Bayesian statistical framework. The method combines data and user knowledge, where the first is extracted from data driven ensemble feature selection techniques. The user can control the feature selection by assigning prior weights to features and penalizing specific feature combinations. Further, the user can define a maximal number of selected features and must-link constraints (features must be selected together) or cannot-link constraints (features must not be selected together). Using relaxed constraints, a parameter $\rho$ regulates the penalty shape. Hence, violation of constraints can be valid but leads to a lower probability of the feature set that is derived from the violated constraints.

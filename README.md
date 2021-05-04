@@ -7,11 +7,7 @@ output:
     theme: architect
     toc: TRUE
     hightlight: github
-bibliography: vignettes/references.bib
-vignette: >
-  %\VignetteIndexEntry{UBayFS}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+bibliography: /vignettes/references.bib
 ---
 
 ## Introduction

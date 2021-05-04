@@ -63,69 +63,6 @@ library(UBayFS)
 demo = loadWisconsin()
 ```
 
-## Background
-This section summarizes the core parts of UBayFS, where a central part is the Bayes Theorem for two random variables $\theta$ and $\Delta$:
-$$p(\theta|\Delta)\propto p(\Delta|\theta)\cdot p(\theta).$$
-
-### Ensemble feature selection as likelihood
-The first step in UBayFS is to build \$M\$ ensembles of elementary feature selectors  --- each elementary feature selector $1,\dots,M$ selects $S_m \subset \{1\dots N\}$ features from a randomly drawn subset of the sample-space of the train dataset,  where $N$ is assigned the total number of features in the train dataset and thus, delivers a proposal for an optimal feature set. For $S_m$,  $\delta^{S_m}$ denotes the binary membership vector, where 1 indicates that feature $i\in\{1,\dots,N\}$ is selected, and 0 if not. Statistically, we interpret the result from each elementary feature selector as realization from a multinomial distribution with parameters $\theta$ and $l$, where $\theta$ defines the success probabilities of sampling each feature in an individual feature selection and $l$ corresponds to the number of feature selected in $S_m$. Therefore, the joint probability density of the observed data --- the likelihood function --- is of the form 
-$$ p(\Delta|\theta) = \prod\limits_{m=1}^{M} f_{\text{mult}}(\delta^{S_m};\theta,l).$$
-
-### Expert knowledge as prior
-UBayFS includes to types of expert knowlegde: prior feature weighting and prior feature constraints. 
-
-#### Prior feature weights
-
-To introduce expert knowledge about feature importance, the user may define a vector $\alpha = (\alpha_1,\dots,\alpha_N)$, assigning a weight to each feature. High weights indicate that a feature is important. If all features are equally important or no prior weighting is used, $\alpha$ is the 1-vector of length $N$. With the weighting in place, we assume the a priori feature importances parameter $\theta$ follow a Dirichlet distribution [@R:DirichletReg]
-$$p(\theta) = f_{\text{Dir}}(\theta;\alpha).$$
-The Dirichlet  density function is given as 
-$$f_{\text{Dir}}(\theta;\alpha) = \text{Be}(\alpha)^{-1} \prod\limits_{n=1}^N \theta_n^{\alpha_n-1},$$
-where $\text{Be}(.)$ denotes the multivariate Beta function. Since the Dirichlet distribution is the conjugate prior of the multinomial distribution, it possible to explicitly state the parameter vector $\alpha^{\circ}$ of the posterior distribution, given the data as
-$$p(\theta|\Delta) \propto f_{\text{Dir}}(\theta;\alpha^\circ),$$
-with 
-$$\alpha^\circ = \left( \alpha_1 + \sum\limits_{m=1}^M \delta_1^{S_m}, \dots, \alpha_N + \sum\limits_{m=1}^M \delta_N^{S_m}  \right).$$
-
-
-#### Prior feature constraints
-In addition to the prior weighting of features, the UBayFS user can also add different types of constraints to the feature selection:
-
-- *max-size constraint*: maximal number of features that shall be selected.
-- *must-link constraint*: used if a set of features must be selected together. (defined as binary constraints for each feature pair)
-- *cannot-link constraint*: used if a set of features must not be selected together.
-
-Constraints are represented as a linear optimization problem $A\cdot \delta_\theta-b\leq 0$, where $A\in\mathbb{R}^{K\times N}$ and $b\in\mathbb{R}^K$. $K$ is defined as the total number of constraints. In general, a feature importance vector $\theta$ would be  admissible only if $\langle a^{(k)},\delta_\theta \rangle - b^{(k)} \leq 0$, due to the admissibility function
-$$ ad_k(\theta) = \left\{\begin{array}{ll}
-    1 & \text{if}~\langle a^{(k)}, \delta_\theta \rangle - b^{(k)} \leq 0 \\
-    0 & \text{else},\end{array}\right.$$
-
-$ad_k(\theta)$ is substituted by a relaxed admissibility function $ad_{k,\rho}(\theta)$, given as
-
-\begin{align}
-ad_{k,\rho}(\theta) = \left\{
-    \begin{array}{c c}
-    \frac{\xi_{k,\rho}}{1 + \xi_{k,\rho}} & \rho \in\mathbb{R}^{+}\\
-    ad_{k}(\theta) & \rho = \infty.
-    \end{array}
-    \right.
-\end{align}
-    
-where $\rho\in\mathbb{R}^+ \cup {\infty}$ denotes a relaxation parameter and
-$\xi_{k,\rho} = \exp\left(-\rho (\langle a^{(k)}, \delta_\theta \rangle - b^{(k)} - 0.5)\right)$ defines the exponential term of a logistic function. To handle $K$ different constraints for one feature selection problem, the joint admissibility function is given as
-
-$$ \kappa(\theta) = \prod\limits_{k=1}^K ad_{\kappa,\rho}(\theta).$$
-With this definition, a function $f_\kappa(\theta)\propto (1-\kappa(\theta))$, which is proportinal to a probability density function, is introduced. To combine prior weighting and prior constraints, the composite prior density is given as $$p(\theta) \propto f_\kappa(\theta)\cdot f_{\text{Dir}}(\theta;\alpha).$$
-
-
-The posterior density of $\theta$ can now be defined as
-
-\begin{align}
-    p(\theta|\Delta)
-    &\propto \left(\prod\limits_{m = 1}^{M} f_{\text{mult}}(\delta^{S_m};\theta,l) \right)\cdot \left(f_{\kappa}(\theta) \cdot f_{\text{Dir}}(\theta;\alpha)\right) \nonumber\\
-    &\propto f_{\kappa}(\theta) \cdot f_{\text{Dir}}(\theta;\alpha^{\circ}).
-\end{align}
-    
-From a statistical perspective, the maximum a posteriori value of $p(\theta|\Delta)$ is of interest. An exact optimization is impossible --- therefore, we use a heuristic genetic algorithm to find an appropriate feature set. In detail, the genetic algorithm starts with one random or predefined feature combination, iterates through the feature set and updates if another combination is more appropriate with regard to a fitness function.
-
 ## Ensemble Training
 The function ``build.UBaymodel()`` initializes the UBayFS and performs ensemble feature selection. The training dataset and target are initialized with the arguments ``data`` and ``target``. Although the UBayFS concept permits unsupervised, multiclass or regression setups, the current implementation supports binary target variables only. The input variable ``M`` defines the number ensembles of each feature selector in ``method`` shall be performed. Each ensemble model is computed on ``tt_split`` percent randomly selected samples of the whole sample space. Currently, the ``method`` parameter can be set to ``mRMR`` (minimum redundancy maximum relevance), see [@ding:mrmr], and ``lscore`` (Laplacian score), see [@he:laplacian]. Furthermore, the number of features selected in each ensemble can be controled with the parameter ``nr_features``.
 

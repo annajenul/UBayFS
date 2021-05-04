@@ -13,7 +13,12 @@
 
 block_admissibility = function(state, A, b, rho, block_matrix, weights_sum = NULL, log = TRUE){
 
-  state_block = (block_matrix %*% state) >= 0
+  if(!is.null(block_matrix)){
+    state_block = (block_matrix %*% state) > 0
+  }
+  else{
+    state_block = state
+  }
   return(admissibility(state_block, A, b, rho, weights_sum, log))
 
 }

@@ -12,6 +12,7 @@ plot.UBaymodel <- function(x,...){
     stop("Wrong class of x")
   }
 
+  # prepare data structure
   names_feats <- colnames(x$data)
 
   df <- data.frame(
@@ -21,6 +22,7 @@ plot.UBaymodel <- function(x,...){
     weights = factor(rep(c("ensemble", "prior"), each = length(names_feats)), levels = c("ensemble", "prior"))
   )
 
+  # red borders of selected features
   if(!is.null(x$output)){
     df$selected <- factor(rep(x$output$map, 2) == 1, levels = c(TRUE, FALSE))
     p <- ggplot2::ggplot(data = df,
@@ -34,6 +36,7 @@ plot.UBaymodel <- function(x,...){
                         y = .data$counts))
   }
 
+  # barplot
   p <- p +
     geom_bar(aes(fill = .data$weights), stat = "identity", size = 1.5, width = 0.8) +
     scale_fill_manual(values = RColorBrewer::brewer.pal(3,"Blues")[c(2,3)])+
@@ -43,9 +46,14 @@ plot.UBaymodel <- function(x,...){
   # constraint plot
   if(!is.null(x$user.params$constraints$A)){
     A = x$user.params$constraints$A
-    b = x$user.params$constraints$b
     rho = x$user.params$constraints$rho
-    df1 <- data.frame(feature = c(), constraint = c(), type = c())
+    num_feat_const = nrow(A)
+
+    if(!is.null(x$user.params$block_constraints)){
+      A = rbind(A, x$user.params$block_constraints$A %*% x$user.params$block_constraints$block_matrix)
+      rho = c(rho, x$user.params$block_constraints$rho)
+    }
+    df1 <- data.frame(feature = c(), constraint = c(), type = c(), level = c())
 
     for(i in 1:nrow(A)){
       df1 <- rbind(df1, data.frame(feature = factor(names_feats[which(A[i,] != 0)], levels = names_feats),
@@ -53,18 +61,20 @@ plot.UBaymodel <- function(x,...){
                                    type = ifelse(all(A[i,] == 1), "max-size",
                                                  ifelse(any(A[i,] < 0), "ML",
                                                         ifelse(all(A[i,] %in% c(0,1)), "CL", "other"))),
-                                   rho = rho[i]
+                                   rho = rho[i],
+                                   level = ifelse(i <= num_feat_const, "feature", "block")
       ))
     }
     df1$rho = factor(df1$rho, levels = sort(unique(rho)))
 
     q <- ggplot(data = df1, aes(x = .data$feature, y = .data$constraint, group = .data$constraint, color = .data$rho))+
-      geom_line(linetype = 1, size = 1)+
+      geom_line(aes(linetype = .data$level), size = 1)+
       geom_point(aes(shape = .data$type), size = 4)+
       theme_classic()+
       scale_y_discrete()+
       scale_color_manual(values = RColorBrewer::brewer.pal(max(length(levels(df1$rho))+1,3), "Greens")[-1])+
       scale_shape_manual(values = c("CL" = 15, "ML" = 16, "max-size" = 18, "other" = 17))+
+      scale_linetype_manual(values = c("feature" = 1, "block" = 2))+
       theme(axis.title.x=element_blank(),
             axis.text.x=element_blank(),
             axis.ticks.x=element_blank(),

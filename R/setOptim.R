@@ -7,7 +7,7 @@
 #' @seealso build.UBaymodel
 #' @export
 
-setOptim = function(model, popsize, maxiter){
+setOptim = function(model, popGreedy, popsize, maxiter, constraint_dropout_rate){
 
   if(class(model) != "UBaymodel"){
     stop("Wrong class of model")
@@ -17,7 +17,18 @@ setOptim = function(model, popsize, maxiter){
     stop("Error: popsize or maxiter < 10 does not make sense")
   }
 
-  model$optim.params <- list(popsize = popsize, maxiter = maxiter)
+  if(popGreedy > popsize){
+    stop("Error: popGreedy must be smaller than popsize")
+  }
+
+  if(constraint_dropout_rate > 1 | constraint_dropout_rate < 0){
+    stop("Error: constraint_dropout_rate must be in [0,1]")
+  }
+
+  model$optim.params <- list(popGreedy = popGreedy,
+                             popsize = popsize,
+                             maxiter = maxiter,
+                             constraint_dropout_rate = constraint_dropout_rate)
 
   return(model)
 }

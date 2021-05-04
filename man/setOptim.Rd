@@ -4,7 +4,7 @@
 \alias{setOptim}
 \title{set optimization parameters in UBaymodel object}
 \usage{
-setOptim(model, popsize, maxiter)
+setOptim(model, popGreedy, popsize, maxiter, constraint_dropout_rate)
 }
 \arguments{
 \item{model}{a UBaymodel object created using build.UBaymodel}

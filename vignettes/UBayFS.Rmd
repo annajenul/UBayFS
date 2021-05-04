@@ -183,6 +183,7 @@ constraints = buildConstraints(constraint_types = c("max_size", "must_link", rep
 print(constraints)
 
 model = setConstraints(model = model, constraints = constraints)
+model = setBlockConstraints(model = model, constraints = NULL)
 ```
 
 ## Optimization and evaluation
@@ -191,7 +192,11 @@ A genetic algorithm, described by [@givens:compstat] and implemented in [@R:GA],
   - print/summary/plot
 
 ```{r, include=TRUE}
-model = setOptim(model = model, popsize = 100, maxiter = 200)
+model = setOptim(model = model, 
+                 constraint_dropout_rate = 0.15,
+                 popGreedy = 50, 
+                 popsize = 100, 
+                 maxiter = 200)
 
 ```
 

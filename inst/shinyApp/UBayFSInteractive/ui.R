@@ -190,6 +190,42 @@ shinyUI(fluidPage(
                         )
                     ),
                     verticalTabPanel(
+                        id = "block_constraints_tab",
+                        box_height = "60px",
+                        title = NULL,
+                        icon = uiOutput("lab_block_constraints_tab"),
+                        fluidRow(
+                            column(12,
+                                   align = "center"
+                            ),
+                            conditionalPanel(
+                                condition = "input.showInput == true",
+                                column(3,
+                                       tabsetPanel(type = "pills",
+                                                   tabPanel("size constraint",
+                                                            sliderInput("block_maxsize", "$$s_{max}$$", min = 0, max = 10, value = 10, step = 1),
+                                                            bsTooltip("block_maxsize", "Select the maximum number of blocks to be selected (max-size constraint)"),
+                                                            disabled(actionButton("add_block_maxsize", "add size constraint")),
+                                                   ),
+                                                   tabPanel("link constraint",
+                                                            DT::dataTableOutput("blocks"),
+                                                            bsTooltip("blocks", "Select the blocks to be linked by must-link / cannot link constraint"),
+                                                            disabled(actionButton("add_block_must", "add must-link")),
+                                                            disabled(actionButton("add_block_cannot", "add cannot-link")),
+                                                   )
+                                       ),
+                                       hr(),
+                                       sliderTextInput("rho_block", "$$\\rho$$", choices = c(0.01,0.1,1,10,100,Inf), selected = 1),
+                                       bsTooltip("rho_block", "Select the relaxation parameter $$\\rho$, specifying the level of penalization if the constraint is violated"),
+                                       plotOutput("rho_block_plot", height = "200px"),
+                                       style='border: 1px solid black; border-radius: 30px; padding: 10px; margin: 10px',
+                                       align = 'center'
+                                )
+                            ),
+                            uiOutput("output_block_constraints")
+                        )
+                    ),
+                    verticalTabPanel(
                             box_height = "60px",
                              title = NULL,
                              icon = uiOutput("lab_results_tab"),

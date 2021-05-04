@@ -10,24 +10,46 @@ shinyServer(function(input, output, session) {
     options(shiny.maxRequestSize=20*1024^2) # maximum upload size
 
     # help functions
-    addConstraint <- function(params){
-        if(is.null(model()$user.params$constraints$A)){
-            newA <- params$A
-            newb <- params$b
-            newrho <- params$rho
+    addConstraint <- function(params, block_constraint = FALSE){
+      print(params)
 
-            colnames(newA) <- names_feats()
+      if(block_constraint){
+        if(is.null(model()$user.params$block_constraints$A)){
+          newA <- params$A
+          newb <- params$b
+          newrho <- params$rho
         }
         else{
-            newA <- rbind(model()$user.params$constraints$A, params$A)
-            newb <- c(model()$user.params$constraints$b, params$b)
-            newrho <- c(model()$user.params$constraints$rho, params$rho)
+          newA <- rbind(model()$user.params$block_constraints$A, params$A)
+          newb <- c(model()$user.params$block_constraints$b, params$b)
+          newrho <- c(model()$user.params$block_constraints$rho, params$rho)
+        }
+        model(UBayFS::setBlockConstraints(model(), list(A = newA, b = newb, rho = as.numeric(newrho), block_matrix = block_matrix())))
+
+        proxy = dataTableProxy('blocks')
+        selectRows(proxy, c())
+      }
+      else{
+        if(is.null(model()$user.params$constraints$A)){
+          newA <- params$A
+          newb <- params$b
+          newrho <- params$rho
+
+          colnames(newA) <- names_feats()
+        }
+        else{
+          newA <- rbind(model()$user.params$constraints$A, params$A)
+          newb <- c(model()$user.params$constraints$b, params$b)
+          newrho <- c(model()$user.params$constraints$rho, params$rho)
         }
 
         model(UBayFS::setConstraints(model(), list(A = newA, b = newb, rho = as.numeric(newrho))))
 
         proxy = dataTableProxy('features')
         selectRows(proxy, c())
+      }
+
+
     }
 
     addWeights <- function(weights){
@@ -67,6 +89,10 @@ shinyServer(function(input, output, session) {
     model <- reactiveVal(NULL)
 
     blocks <- reactiveVal(NULL)
+
+    block_matrix <- reactive({
+      t(sapply(unique(blocks()), function(x){return(1 * (x == blocks()))}))
+    })
 
     output_width <- reactive({
       ifelse(input$showInput, 8, 12)
@@ -195,14 +221,14 @@ shinyServer(function(input, output, session) {
 
     # === PRIOR INPUT HANDLING ===
     observeEvent(input$add_maxsize, {
-        addConstraint(UBayFS::buildConstraints("max_size", list(input$maxsize), num_features = n_feats(), rho = input$rho))
+        addConstraint(UBayFS::buildConstraints("max_size", list(input$maxsize), num_elements = n_feats(), rho = input$rho))
     })
 
     observeEvent(input$add_must, {
         sel <- input$features_rows_selected
 
         if(length(sel) > 1){
-          addConstraint(UBayFS::buildConstraints("must_link", list(sel), num_features = n_feats(), rho = input$rho))
+          addConstraint(UBayFS::buildConstraints("must_link", list(sel), num_elements = n_feats(), rho = input$rho))
         }
     })
 
@@ -210,8 +236,28 @@ shinyServer(function(input, output, session) {
         sel <- input$features_rows_selected
 
         if(length(sel) > 1){
-          addConstraint(UBayFS::buildConstraints("cannot_link", list(sel), num_features = n_feats(), rho = input$rho))
+          addConstraint(UBayFS::buildConstraints("cannot_link", list(sel), num_elements = n_feats(), rho = input$rho))
         }
+    })
+
+    observeEvent(input$add_block_maxsize, {
+      addConstraint(UBayFS::buildConstraints("max_size", list(input$block_maxsize), num_elements = length(unique(blocks())), rho = input$rho_block), block_constraint = TRUE)
+    })
+
+    observeEvent(input$add_block_must, {
+      sel <- input$blocks_rows_selected
+
+      if(length(sel) > 1){
+        addConstraint(UBayFS::buildConstraints("must_link", list(sel), num_elements = length(unique(blocks())), rho = input$rho_block), block_constraint = TRUE)
+      }
+    })
+
+    observeEvent(input$add_block_cannot, {
+      sel <- input$blocks_rows_selected
+
+      if(length(sel) > 1){
+        addConstraint(UBayFS::buildConstraints("cannot_link", list(sel), num_elements = length(unique(blocks())), rho = input$rho_block), block_constraint = TRUE)
+      }
     })
 
     observe({
@@ -226,10 +272,14 @@ shinyServer(function(input, output, session) {
     })
 
     # === FEATURE SELECTION ====
-    observeEvent(input$popsize | input$maxiter, {
+    observeEvent(input$popsize | input$maxiter | input$popGreedy | input$constraint_dropout_rate, {
       if(!is.null(model())){
         if(class(model()) == "UBaymodel"){
-          model(setOptim(model(), popsize = input$popsize, maxiter = input$maxiter))
+          model(setOptim(model(),
+                         popGreedy = input$popGreedy,
+                         popsize = input$popsize,
+                         constraint_dropout_rate = input$constraint_dropout_rate,
+                         maxiter = input$maxiter))
         }
       }
     })
@@ -259,7 +309,7 @@ shinyServer(function(input, output, session) {
     })
 
     prior_complete <- reactive({
-      ifelse(!data_complete() | is.null(model()$user.params$constraints), FALSE, TRUE)
+      ifelse(!data_complete() | (is.null(model()$user.params$constraints) & is.null(model()$user.params$block_constraints)), FALSE, TRUE)
     })
 
     parameters_complete <- reactive({
@@ -274,6 +324,7 @@ shinyServer(function(input, output, session) {
       if(data_complete()){
         updatePrettyToggle(session, "status_data", value = TRUE)
         updateSliderInput(session, "maxsize", min = 0, max = n_feats(), value = min(10, n_feats()))
+        updateSliderInput(session, "block_maxsize", min = 0, max = length(unique(blocks())), value = min(10, length(unique(blocks()))))
       }
     })
 
@@ -314,11 +365,19 @@ shinyServer(function(input, output, session) {
         enable("add_maxsize")
         enable("add_must")
         enable("add_cannot")
+        if(length(unique(blocks())) < length(blocks())){
+          enable("add_block_maxsize")
+          enable("add_block_must")
+          enable("add_block_cannot")
+        }
       }
       else{
         disable("add_maxsize")
         disable("add_must")
         disable("add_cannot")
+        disable("add_block_maxsize")
+        disable("add_block_must")
+        disable("add_block_cannot")
       }
     })
 
@@ -330,7 +389,8 @@ shinyServer(function(input, output, session) {
 
     observeEvent(prior_complete(), {
       if(prior_complete()){
-        updatePrettyToggle(session, "status_prior", value = TRUE)
+        updatePrettyToggle(session, "status_prior_features", value = TRUE)
+        updatePrettyToggle(session, "status_prior_blocks", value = TRUE)
       }
     })
 
@@ -367,6 +427,15 @@ shinyServer(function(input, output, session) {
       datatable(
         data.frame(
             feature = names_feats()
+        ),
+        options = list(paging = FALSE, scrollX = TRUE, scrollY = "200px")
+      )
+    )
+
+    output$blocks <- DT::renderDataTable(
+      datatable(
+        data.frame(
+          block = unique(blocks())
         ),
         options = list(paging = FALSE, scrollX = TRUE, scrollY = "200px")
       )
@@ -420,7 +489,27 @@ shinyServer(function(input, output, session) {
       }
     })
 
+    output$block_constraints <- renderUI({
+      if(!is.null(model()$user.params$block_constraints$A)){
+        matA <- paste0(apply(model()$user.params$block_constraints$A, 1, function(x){paste0(x, collapse = " & ")}), collapse = "\\\\")
+        matb <- paste0(model()$user.params$block_constraints$b, collapse = "\\\\")
+        matrho <- paste0(ifelse(model()$user.params$block_constraints$rho == Inf, "\\infty", model()$user.params$block_constraints$rho), collapse = "\\\\")
 
+        withMathJax(
+          paste0("$$\\begin{pmatrix}",
+                 matA,
+                 "\\end{pmatrix} x
+          \\leq
+          \\begin{pmatrix}",
+                 matb,
+                 "\\end{pmatrix},~ \\\\",
+                 "\\rho = ",
+                 "\\begin{pmatrix}",
+                 matrho,
+                 "\\end{pmatrix}$$")
+        )
+      }
+    })
 
     output$blocktable <- renderUI({
       blockweights <- model()$user.params$weights
@@ -450,6 +539,14 @@ shinyServer(function(input, output, session) {
         ylab(label = "prior prob.")
     })
 
+    output$rho_block_plot <- renderPlot({
+      x <- seq(-10,10,by = 0.01)
+      ggplot2::ggplot(data = data.frame(x = x, y = sapply(x, admissibility, A = matrix(1, nrow = 1, ncol = 1), b = 0, rho = input$rho_block, log = FALSE)),
+                      aes(x = x, y = y, group = 1)) +
+        geom_line() +
+        xlab(label = "ax-b") +
+        ylab(label = "prior prob.")
+    })
 
     output$output_data <- renderUI({
       column(output_width(),
@@ -515,23 +612,45 @@ shinyServer(function(input, output, session) {
       )
     })
 
+    output$output_block_constraints <- renderUI({
+      column(output_width(),
+             uiOutput("block_constraints"),
+             align = 'center'
+      )
+    })
+
 
     output$fs_sliders <- renderUI({
 
       sel_popsize <- ifelse(is.null(model()$optim.params$popsize), 1000, model()$optim.params$popsize)
+      sel_popGreedy <- ifelse(is.null(model()$optim.params$popGreedy), min(100, sel_popsize), model()$optim.params$popGreedy)
+      sel_constraint_dropout_rate <- ifelse(is.null(model()$optim.params$constraint_dropout_rate), 0.1, model()$optim.params$constraint_dropout_rate)
       sel_maxiter <- ifelse(is.null(model()$optim.params$maxiter), 100, model()$optim.params$maxiter)
 
+      popsize_choices <- c(10, 20, 50, 100, 500, 1000, 5000)
+      maxiter_choices <- c(10, 20, 30, 40, 50,
+                           60, 70, 80, 90, 100,
+                           150, 200, 250, 300, 350, 400, 450, 500,
+                           600, 700, 800, 900, 1000)
+
       column(12,
-        sliderTextInput("popsize", withMathJax('$$q$$'), choices = c(10, 20, 50, 100, 500, 1000, 5000),
-                      selected = sel_popsize),
-        bsTooltip("popsize", "Select the size of the initial population in the genetic algorithm"),
-        sliderTextInput("maxiter", withMathJax('$$T$$'), choices = c(10, 20, 30, 40, 50,
-                                                                     60, 70, 80, 90, 100,
-                                                                     150, 200, 250, 300, 350, 400, 450, 500,
-                                                                     600, 700, 800, 900, 1000),
-                      selected = sel_maxiter),
+        sliderTextInput("popGreedy", withMathJax('$$q_G$$'), choices = popsize_choices[popsize_choices <= sel_popsize],
+                        selected = sel_popGreedy),
+        bsTooltip("popGreedy", "Select the size of the initial population, which is determined via Greedy algorithm"),
+        sliderTextInput("popsize", withMathJax('$$q$$'), choices = popsize_choices,
+                        selected = sel_popsize),
+        bsTooltip("popsize", "Select the full size of the initial population in the genetic algorithm"),
+        sliderTextInput("constraint_dropout_rate", withMathJax('$$c$$'), choices = seq(0, 1, by = 0.1),
+                        selected = sel_constraint_dropout_rate),
+        bsTooltip("constraint_dropout_rate", "Select the rate of dropping constraints during Greedy initialization"),
+        sliderTextInput("maxiter", withMathJax('$$T$$'), choices = maxiter_choices,
+                        selected = sel_maxiter),
         bsTooltip("maxiter", "Select the maximum number of iterations used in the genetic algorithm")
       )
+    })
+
+    output$popsizeSlider <- renderUI({
+
     })
 
     output$output_fs <- renderUI({
@@ -634,7 +753,7 @@ shinyServer(function(input, output, session) {
      div(align = "left",
      disabled(
         prettyToggle(
-          inputId = "status_prior",
+          inputId = "status_prior_features",
           label_on = strong("constraints"),#"constraints set",
           icon_on = icon("thumbs-up"),
           status_on = "default",
@@ -647,6 +766,26 @@ shinyServer(function(input, output, session) {
           plain = TRUE
         )
       )
+      )
+    })
+
+    output$lab_block_constraints_tab <- renderUI({
+      div(align = "left",
+          disabled(
+            prettyToggle(
+              inputId = "status_prior_blocks",
+              label_on = strong("block constraints"),#"constraints set",
+              icon_on = icon("thumbs-up"),
+              status_on = "default",
+              status_off = "default",
+              label_off = strong("block constraints"),#"no constraints set",
+              icon_off = icon("hand-point-right"),
+              animation = "smooth",
+              bigger = TRUE,
+              fill = FALSE,
+              plain = TRUE
+            )
+          )
       )
     })
 
@@ -669,6 +808,4 @@ shinyServer(function(input, output, session) {
       )
       )
     })
-
-
 })

@@ -173,7 +173,7 @@ constraints = buildConstraints(constraint_types = c("max_size", "must_link", rep
                                                       c(1,10), # cannot_link
                                                       c(20,23,24) #cannot_link
                                                       ),
-                               num_features = ncol(model$data),
+                               num_elements = ncol(model$data),
                                 rho = c(Inf, # max_size
                                         0.1, # must_link
                                         1, # cannot_link

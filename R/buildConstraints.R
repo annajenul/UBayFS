@@ -3,19 +3,21 @@
 #' @details The function transforms user information about relations between features (must-link or cannot-link constraints) and maximum feature set size (max-size) into a linear inequation system. In addition, the relaxation paramter rho can be specified to achieve soft constraints.
 #' @param constraint_types a vector of strings denoting the type of constraint to be added; options: "max_size", "must_link", "cannot_link"
 #' @param constraint_vars a list of parameters defining the constraints; in case of max-size constraints, the list element must contain an integer denoting the maximum size of the feature set, in case of max-link or cannot link, the list element must be a vector of feature indices to be linked
-#' @param num_features the total number of features in the dataset
+#' @param num_elements the total number of features (feature-wise constraints) or blocks (block-wise constraints) in the dataset
 #' @param rho a positive parameter denoting the level of relaxation; Inf denotes no relaxation
+#' @param block_list the list of feature indices for each block; only required, if block-wise constraints are built and block_matrix is NULL
+#' @param block_matrix the matrix containing affiliations of features to each block; only required, if block-wise constraints are built and block_list is NULL
 #' @return a list constaining a matrix A and a vector b representing the inequality system Ax<=b, and a vector rho
 #' @examples
 #' # given a dataset with 10 features, we create a max-size constraint limiting
 #' # the set to 5 features and a cannot-link constraint between features 1 and 2
 #' buildConstraints(constraint_types = c("max_size","cannot_link"),
-#' constraint_vars = list(5, c(1,2)),
-#' num_features = 10,
-#' rho = 1)
+#'                  constraint_vars = list(5, c(1,2)),
+#'                  num_elements = 10,
+#'                  rho = 1)
 #' @export
 
-buildConstraints = function(constraint_types, constraint_vars, num_features, rho = 1){
+buildConstraints = function(constraint_types, constraint_vars, num_elements, rho = 1, block_list = NULL, block_matrix = NULL){
 
   # check input
   if(!all(constraint_types %in% c("max_size", "must_link", "cannot_link"))){
@@ -24,8 +26,8 @@ buildConstraints = function(constraint_types, constraint_vars, num_features, rho
   if(length(constraint_types) != length(constraint_vars)){
     stop("Error: constraint_vars must have same length as constraint_types")
   }
-  if(num_features <= 0 | num_features %%1 != 0){
-    stop("Error: num_features must be a positive integer")
+  if(num_elements <= 0 | num_elements %%1 != 0){
+    stop("Error: num_elements must be a positive integer")
   }
   if(any(rho <= 0)){
     stop("Error: rho must be positive")
@@ -77,24 +79,43 @@ buildConstraints = function(constraint_types, constraint_vars, num_features, rho
   for (t in 1:length(constraint_types)) {				# for each constraint provided
     if (constraint_types[t] == "max_size") {			# if max-size
       l = max_size(constraint_vars[[t]],
-                   num_features)
+                   num_elements)
     }
     else if (constraint_types[t] == "must_link"){		# if must-link
       l = must_link(constraint_vars[[t]],
-                    num_features)
+                    num_elements)
     }
     else if (constraint_types[t] == "cannot_link"){		# if cannot-link
       l = cannot_link(constraint_vars[[t]],
-                      num_features)
+                      num_elements)
     }
     A = rbind(A, l$A)									# add new constraint to A
     b = c(b, l$b)										# add new constraint to b
     rho_vec = c(rho_vec, rep(rho[t], length(l$b)))
   }
 
+  # build block_matrix, if block_list is provided
+  if(is.null(block_matrix) & !is.null(block_list)){
+    block_matrix = matrix(0, nrow = length(block_list), ncol = max(unlist(block_list)))
+    for(i in 1:length(block_list)){
+      block_matrix[i,block_list[[i]]] <- 1
+    }
+  }
+
+  # check consistency of block matrix
+  if(!is.null(block_matrix)){
+    if(nrow(block_matrix) != num_elements){
+      stop("Error: number of elements must match number of blocks, if block constraints are provided")
+    }
+    if(any(colSums(block_matrix > 0) > 1)){
+      stop("Error: more than one block assigned to a single feature")
+    }
+  }
+
   const <- list(A = A,
                 b = b,
-                rho = rho_vec)
+                rho = rho_vec,
+                block_matrix = block_matrix)
 
   return(
     const

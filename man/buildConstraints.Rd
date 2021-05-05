@@ -4,16 +4,27 @@
 \alias{buildConstraints}
 \title{Build constraint system}
 \usage{
-buildConstraints(constraint_types, constraint_vars, num_features, rho = 1)
+buildConstraints(
+  constraint_types,
+  constraint_vars,
+  num_elements,
+  rho = 1,
+  block_list = NULL,
+  block_matrix = NULL
+)
 }
 \arguments{
 \item{constraint_types}{a vector of strings denoting the type of constraint to be added; options: "max_size", "must_link", "cannot_link"}
 
 \item{constraint_vars}{a list of parameters defining the constraints; in case of max-size constraints, the list element must contain an integer denoting the maximum size of the feature set, in case of max-link or cannot link, the list element must be a vector of feature indices to be linked}
 
-\item{num_features}{the total number of features in the dataset}
+\item{num_elements}{the total number of features (feature-wise constraints) or blocks (block-wise constraints) in the dataset}
 
 \item{rho}{a positive parameter denoting the level of relaxation; Inf denotes no relaxation}
+
+\item{block_list}{the list of feature indices for each block; only required, if block-wise constraints are built and block_matrix is NULL}
+
+\item{block_matrix}{the matrix containing affiliations of features to each block; only required, if block-wise constraints are built and block_list is NULL}
 }
 \value{
 a list constaining a matrix A and a vector b representing the inequality system Ax<=b, and a vector rho
@@ -28,7 +39,7 @@ The function transforms user information about relations between features (must-
 # given a dataset with 10 features, we create a max-size constraint limiting
 # the set to 5 features and a cannot-link constraint between features 1 and 2
 buildConstraints(constraint_types = c("max_size","cannot_link"),
-constraint_vars = list(5, c(1,2)),
-num_features = 10,
-rho = 1)
+                 constraint_vars = list(5, c(1,2)),
+                 num_elements = 10,
+                 rho = 1)
 }

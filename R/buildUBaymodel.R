@@ -8,20 +8,40 @@
 #' @param nr_features number of features to select in each elementary model
 #' @param method a vector denoting the method(s) used as elementary models; options: "mRMR", "Laplacian score"
 #' @param constraints a list containing a relaxed system Ax<=b of user constraints, given as matrix A, vector b and vector or scalar rho (relaxation parameters); see buildConstraints function
+#' @param block_constraints a list containing a relaxed system Ax<=b of user constraints on feature blocks, given as matrix A, vector b and vector or scalar rho (relaxation parameters); see buildConstraints function
 #' @param weights the vector of user-defined prior weights for each feature
+#' @param constraint_dropout_rate rate of dropping constraints in Greedy algorithm
+#' @param popGreedy size of the initial population obtained from Greedy algorithm. Must be smaller or equal to popsize.
 #' @param popsize size of the initial population of the genetic algorithm for model optimization
 #' @param maxiter maximum number of iterations of the genetic algorithm for model optimization
 #' @param shiny TRUE indicates that the function is called from Shiny dashboard
 #' @return a UBaymodel object containing the following list elements: data, target, user.params (parameters representing user knowledge), ensemble.params (parameters representing the likelihood) and optim.params (parameters for genetic algorithm)
 #' @examples
 #' # build a UBayFS model using Wisconsin breast cancer dataset
-#' d <- loadWisconsin() # dataset
-#' c <- buildConstraints("max_size", list(10), ncol(d$data), rho = 1) # prior constraints
-#' w <- rep(1, ncol(d$data)) # weights
+#' data(wbc) # dataset
+#' c <- buildConstraints(constraint_types = "max_size",
+#'                       constraint_vars = list(10),
+#'                       num_elements = ncol(wbc$data),
+#'                       rho = 1) # prior constraints
+#' w <- rep(1, ncol(wbc$data)) # weights
 #' model <- build.UBaymodel(
-#'                      data = d$data,
-#'                      target = d$labels,
+#'                      data = wbc$data,
+#'                      target = wbc$labels,
 #'                      constraints = c,
+#'                      weights = w
+#' )
+#'
+#' # include block-constraints
+#' c_block <- buildConstraints(constraint_types = "max_size",
+#'                             constraint_vars = list(2),
+#'                             num_elements = length(wbc$blocks),
+#'                             rho = 10,
+#'                             block_list = wbc$blocks)
+#' model <- build.UBaymodel(
+#'                      data = wbc$data,
+#'                      target = wbc$labels,
+#'                      constraints = c,
+#'                      block_constraints = c_block,
 #'                      weights = w
 #' )
 #' @import Rdimtools
@@ -36,8 +56,11 @@ build.UBaymodel = function(data, target, 															# data + labels
                        nr_features = 10,														# number of features to select by elementary FS
                        method = "mRMR",
                        constraints = NULL,
+                       block_constraints = NULL,
                        weights = 1, 														# user weights
-                       popsize = 50,
+                       constraint_dropout_rate = 0.1,
+                       popGreedy = 20, 														# number of initial candidates from Greedy algorithm
+                       popsize = 50, 														# number of initial candidates (total)
                        maxiter = 100,
                        shiny = FALSE){														# elementary FS to use
 
@@ -139,10 +162,13 @@ build.UBaymodel = function(data, target, 															# data + labels
   class(obj) = "UBaymodel"
 
   obj = setConstraints(obj, constraints)
+  obj = setBlockConstraints(obj, block_constraints)
   obj = setWeights(obj, weights)
   obj = setOptim(obj,
+            popGreedy = popGreedy,
+            popsize = popsize,
             maxiter = maxiter,
-            popsize = popsize
+            constraint_dropout_rate = constraint_dropout_rate
         )
 
   return(obj)

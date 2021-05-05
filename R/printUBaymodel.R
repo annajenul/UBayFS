@@ -2,6 +2,7 @@
 #' @description print details of an UBayFS model
 #' @param x a UBaymodel object created using build.UBaymodel
 #' @param ... unused
+#' @import utils
 #' @export
 
 print.UBaymodel <- function(x,...){

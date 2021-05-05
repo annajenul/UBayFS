@@ -75,7 +75,7 @@ Like other R packages, UBayFS is loaded using the ``library(UBayFS)`` command. V
 
 ```{r, include = TRUE, cache = TRUE}
 library(UBayFS)
-demo = loadWisconsin()
+data(wbc)
 ```
 
 ## Background
@@ -146,8 +146,8 @@ The function ``build.UBaymodel()`` initializes the UBayFS and performs ensemble 
 
 For the standard UBayFS initialization, all prior feature weights are set to 1 and no prior feature constraints are included, yet. The ``summary()`` function provides an overview  of the dataset, the prior weights and the likelihood --- ensemble counts indicate how often a feature was selected over the ensemble feature selections. 
 ```{r, include = TRUE}
-model = build.UBaymodel(data = demo$data,
-                        target = demo$labels,
+model = build.UBaymodel(data = wbc$data,
+                        target = wbc$labels,
                         M = 100, 
                         tt_split = 0.75,
                         nr_features = 10,
@@ -173,7 +173,7 @@ constraints = buildConstraints(constraint_types = c("max_size", "must_link", rep
                                                       c(1,10), # cannot_link
                                                       c(20,23,24) #cannot_link
                                                       ),
-                               num_features = ncol(model$data),
+                               num_elements = ncol(model$data),
                                 rho = c(Inf, # max_size
                                         0.1, # must_link
                                         1, # cannot_link
@@ -183,6 +183,7 @@ constraints = buildConstraints(constraint_types = c("max_size", "must_link", rep
 print(constraints)
 
 model = setConstraints(model = model, constraints = constraints)
+model = setBlockConstraints(model = model, constraints = NULL)
 ```
 
 ## Optimization and evaluation
@@ -191,7 +192,11 @@ A genetic algorithm, described by [@givens:compstat] and implemented in [@R:GA],
   - print/summary/plot
 
 ```{r, include=TRUE}
-model = setOptim(model = model, popsize = 100, maxiter = 200)
+model = setOptim(model = model, 
+                 constraint_dropout_rate = 0.15,
+                 popGreedy = 50, 
+                 popsize = 100, 
+                 maxiter = 200)
 
 ```
 

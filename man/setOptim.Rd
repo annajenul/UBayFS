@@ -9,9 +9,13 @@ setOptim(model, popGreedy, popsize, maxiter, constraint_dropout_rate)
 \arguments{
 \item{model}{a UBaymodel object created using build.UBaymodel}
 
+\item{popGreedy}{size of the initial population obtained from Greedy algorithm. Must be smaller or equal to popsize.}
+
 \item{popsize}{size of the initial population of the genetic algorithm for model optimization}
 
 \item{maxiter}{maximum number of iterations of the genetic algorithm for model optimization}
+
+\item{constraint_dropout_rate}{rate of dropping constraints in Greedy algorithm}
 }
 \value{
 a UBaymodel object with updated optimization parameters

@@ -13,44 +13,40 @@ summary.UBaymodel <- function(object,...){
   cat(" UBayFS model summary \n",
                     " data: ", paste0(dim(object$data), collapse = "x"), '\n',
                     " labels: ", paste0(levels(object$target), ": ", tabulate(object$target), collapse = " "), "\n\n",
+                    " === prior constraints === \n",
                     if(!is.null(object$user.params$constraints$A)){
-                      paste0(" === prior information === \n",
                       paste0(
                         sapply(1:nrow(object$user.params$constraints$A), function(i){
                             paste0(
                               " constraint ",
                               i,
-                              ": ( ",
+                              ": (",
                               paste0(object$user.params$constraints$A[i,], collapse = ","),
-                              " ) x <= ",
+                              ") x <= ",
                               object$user.params$constraints$b[i],
                               "; rho = ",
                               object$user.params$constraints$rho[i]
                             )
                           }),
-                        collapse = " \n"
-                      ),
                       "\n")
-                    }else{"\n"},
+                    },
                     if(!is.null(object$user.params$block_constraints$A)){
-                      paste0(
+                       paste0(
+                         sapply(1:nrow(object$user.params$block_constraints$A), function(i){
                              paste0(
-                               sapply(1:nrow(object$user.params$block_constraints$A), function(i){
-                                 paste0(
-                                   " block constraint ",
-                                   i,
-                                   ": ( ",
-                                   paste0(object$user.params$block_constraints$A[i,], collapse = ","),
-                                   " ) x <= ",
-                                   object$user.params$block_constraints$b[i],
-                                   "; rho = ",
-                                   object$user.params$block_constraints$rho[i]
-                                 )
-                               }),
-                               collapse = " \n"
-                             ),
-                             "\n\n")
-                    }else{"\n"},
+                               " block constraint ",
+                               i,
+                               ": (",
+                               paste0(object$user.params$block_constraints$A[i,], collapse = ","),
+                               ") x <= ",
+                               object$user.params$block_constraints$b[i],
+                               "; rho = ",
+                               object$user.params$block_constraints$rho[i]
+                             )
+                           }),
+                        "\n")
+                    },
+                    " \n",
                     " === prior weights === \n",
                     " weights: (", paste0(object$user.params$weights, collapse = ","),") \n\n",
                     " === likelihood === \n",

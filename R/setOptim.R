@@ -1,8 +1,11 @@
 #' set optimization parameters in UBaymodel object
 #' @description sets the optimization parameters in a UBaymodel object
 #' @param model a UBaymodel object created using build.UBaymodel
+#' @param popGreedy size of the initial population obtained from Greedy algorithm. Must be smaller or equal to popsize.
 #' @param popsize size of the initial population of the genetic algorithm for model optimization
 #' @param maxiter maximum number of iterations of the genetic algorithm for model optimization
+#' @param constraint_dropout_rate rate of dropping constraints in Greedy algorithm
+
 #' @return a UBaymodel object with updated optimization parameters
 #' @seealso build.UBaymodel
 #' @export

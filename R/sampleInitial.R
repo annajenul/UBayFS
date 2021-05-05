@@ -3,6 +3,7 @@
 #' @param post_scores a vector of posterior scores (prior scores + likelihood) for each feature
 #' @param constraints a list containing feature-wise constraints
 #' @param block_constraints a list containing block-wise constraints
+#' @param constraint_dropout_rate rate of dropping constraints in Greedy algorithm
 #' @param size initial number of samples to be created. The output sample size can be lower, since duplicates are removed.
 #' @return a matrix containing initial feature sets as rows.
 

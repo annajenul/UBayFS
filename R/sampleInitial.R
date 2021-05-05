@@ -5,7 +5,6 @@
 #' @param block_constraints a list containing block-wise constraints
 #' @param size initial number of samples to be created. The output sample size can be lower, since duplicates are removed.
 #' @return a matrix containing initial feature sets as rows.
-#' @export
 
 sampleInitial <- function(post_scores, constraints, block_constraints, constraint_dropout_rate, size){
 

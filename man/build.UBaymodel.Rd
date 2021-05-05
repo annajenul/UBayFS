@@ -61,13 +61,30 @@ The function aggregates input parameters for UBayFS - including data, parameters
 }
 \examples{
 # build a UBayFS model using Wisconsin breast cancer dataset
-d <- loadWisconsin() # dataset
-c <- buildConstraints("max_size", list(10), ncol(d$data), rho = 1) # prior constraints
-w <- rep(1, ncol(d$data)) # weights
+data(wbc) # dataset
+c <- buildConstraints(constraint_types = "max_size",
+                      constraint_vars = list(10),
+                      num_elements = ncol(wbc$data),
+                      rho = 1) # prior constraints
+w <- rep(1, ncol(wbc$data)) # weights
 model <- build.UBaymodel(
-                     data = d$data,
-                     target = d$labels,
+                     data = wbc$data,
+                     target = wbc$labels,
                      constraints = c,
+                     weights = w
+)
+
+# include block-constraints
+c_block <- buildConstraints(constraint_types = "max_size",
+                            constraint_vars = list(2),
+                            num_elements = length(wbc$blocks),
+                            rho = 10,
+                            block_list = wbc$blocks)
+model <- build.UBaymodel(
+                     data = wbc$data,
+                     target = wbc$labels,
+                     constraints = c,
+                     block_constraints = c_block,
                      weights = w
 )
 }

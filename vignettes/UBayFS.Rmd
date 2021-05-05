@@ -75,7 +75,7 @@ Like other R packages, UBayFS is loaded using the ``library(UBayFS)`` command. V
 
 ```{r, include = TRUE, cache = TRUE}
 library(UBayFS)
-demo = loadWisconsin()
+data(wbc)
 ```
 
 ## Background
@@ -146,8 +146,8 @@ The function ``build.UBaymodel()`` initializes the UBayFS and performs ensemble 
 
 For the standard UBayFS initialization, all prior feature weights are set to 1 and no prior feature constraints are included, yet. The ``summary()`` function provides an overview  of the dataset, the prior weights and the likelihood --- ensemble counts indicate how often a feature was selected over the ensemble feature selections. 
 ```{r, include = TRUE}
-model = build.UBaymodel(data = demo$data,
-                        target = demo$labels,
+model = build.UBaymodel(data = wbc$data,
+                        target = wbc$labels,
                         M = 100, 
                         tt_split = 0.75,
                         nr_features = 10,

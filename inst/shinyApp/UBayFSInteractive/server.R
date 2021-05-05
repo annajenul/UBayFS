@@ -162,7 +162,8 @@ shinyServer(function(input, output, session) {
     })
 
     observeEvent(input$demo_data,{
-      dat <- loadWisconsin()
+      data(wbc)
+      dat <- wbc
 
       colnames(dat$data) <- paste0("F", 1:ncol(dat$data))
 

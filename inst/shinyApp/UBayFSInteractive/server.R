@@ -649,10 +649,6 @@ shinyServer(function(input, output, session) {
       )
     })
 
-    output$popsizeSlider <- renderUI({
-
-    })
-
     output$output_fs <- renderUI({
       column(output_width(),
              column(8,

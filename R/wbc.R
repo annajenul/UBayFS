@@ -8,7 +8,7 @@
 #'  \item{\url{https://doi.org/10.1117/12.148698}}
 #'  \item{\url{https://www.jstor.org/stable/171686}}
 #' }
-#' Feature blocks were added to the original dataset according to the dataset description (block 'A' represents means, block 'B' represents standard deviations and block 'C' represents extreme values).
+#' Feature blocks were added to the original dataset according to the dataset description (10 blocks corresponding to different image characteristics).
 #'
 #' @format A list containing:
 #'        \itemize{

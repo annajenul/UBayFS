@@ -45,7 +45,7 @@ Like other R packages, UBayFS is loaded using the ``library(UBayFS)`` command. V
 
 ```{r, include = TRUE, cache = TRUE}
 library(UBayFS)
-demo = loadWisconsin()
+data(wbc)
 ```
 
 ## Ensemble Training
@@ -53,8 +53,8 @@ The function ``build.UBaymodel()`` initializes the UBayFS and performs ensemble 
 
 For the standard UBayFS initialization, all prior feature weights are set to 1 and no prior feature constraints are included, yet. The ``summary()`` function provides an overview  of the dataset, the prior weights and the likelihood --- ensemble counts indicate how often a feature was selected over the ensemble feature selections. 
 ```{r, include = TRUE}
-model = build.UBaymodel(data = demo$data,
-                        target = demo$labels,
+model = build.UBaymodel(data = wbc$data,
+                        target = wbc$labels,
                         M = 100, 
                         tt_split = 0.75,
                         nr_features = 10,
@@ -64,9 +64,9 @@ summary(model)
 ## User knowledge
 With the function ``setWeights()`` the user can change the feature weights from the standard initialization to desired values. In our example dataset we assign features representing common image characteristics the same weight.  
 ```{r, include=TRUE}
-weights = rep(c(10,15,20,16,15,10,12,17,21,14), 3)
+weights = c(10,15,20,16,15,10,12,17,21,14)
 print(weights)
-model = setWeights(model = model, weights = weights)
+model = setWeights(model = model, weights = weights, block_list = wbc$blocks)
 ```
 
 Prior feature constraints can defined with the function ``buildConstraints()``. The input ``constraint_types`` consists of a vector, where all onstraint types are defined. Then, with ``constraint_vars``, the user specifies details about the constraint: for max-size, the number of features to select is provided, while for must-link and cannot-link, the set of feature indices to be linked must be provided. Each list entry corresponds to one constraint in ``constraint_types``. In addition, ``num_features`` denotes the total number of features in the dataset and ``rho`` corresponds to the relaxation parameter of the admissibility function.  
@@ -79,7 +79,7 @@ constraints = buildConstraints(constraint_types = c("max_size", "must_link", rep
                                                       c(1,10), # cannot_link
                                                       c(20,23,24) #cannot_link
                                                       ),
-                               num_features = ncol(model$data),
+                               num_elements = ncol(model$data),
                                 rho = c(Inf, # max_size
                                         0.1, # must_link
                                         1, # cannot_link
@@ -96,7 +96,7 @@ A genetic algorithm, described by [@givens:compstat] and implemented in [@R:GA],
   - print/summary/plot
 
 ```{r, include=TRUE}
-model = setOptim(model = model, popsize = 100, maxiter = 200)
+model = setOptim(model = model, popGreedy = 80, popsize = 100, maxiter = 200, constraint_dropout_rate = 0.05)
 ```
 
 At this point, we are have initialized prior weights, prior constraints and the optimization procedure --- we can now train the UBayFS model with the generic function ``train``. The summary function provides an overview on all components, UBay exists of. The ``plot()`` function shows the prior feature information as bar charts, with the selected features marked with red borders. In addition, the constraints and the regularization parameter $\rho$ are presented. 

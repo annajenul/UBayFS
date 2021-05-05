@@ -167,7 +167,11 @@ shinyServer(function(input, output, session) {
       model(append(model(), list(data = dat$data)))
       model(append(model(), list(target = dat$labels)))
 
-      blocks(rep(names(dat$blocks), sapply(dat$blocks, length)))
+      block_vec <- rep(0, ncol(dat$data))
+      for(i in 1:length(dat$blocks)){
+        block_vec[dat$blocks[[i]]] <- names(dat$blocks)[i]
+      }
+      blocks(block_vec)
       }
     )
 
@@ -511,9 +515,10 @@ shinyServer(function(input, output, session) {
 
     output$blocktable <- renderUI({
       blockweights <- model()$user.params$weights
+      print(blocks())
       lapply(unique(blocks()), function(block_name){
-        #block_name <- unique(blocks())[block_no]
         block_no <- which(blocks() == block_name)[1]
+        print(block_no)
         fluidRow(
           column(4,
                 textInput(inputId = paste0("blockweight_", block_name),

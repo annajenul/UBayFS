@@ -11,8 +11,6 @@ shinyServer(function(input, output, session) {
 
     # help functions
     addConstraint <- function(params, block_constraint = FALSE){
-      print(params)
-
       if(block_constraint){
         if(is.null(model()$user.params$block_constraints$A)){
           newA <- params$A
@@ -53,7 +51,8 @@ shinyServer(function(input, output, session) {
     }
 
     addWeights <- function(weights){
-      model(setWeights(model(), weights))
+      block_list = lapply(unique(blocks()), function(x){return(which(blocks() == x))})
+      model(setWeights(model(), weights, block_list = block_list))
     }
 
     # error messages
@@ -165,12 +164,10 @@ shinyServer(function(input, output, session) {
       data(wbc)
       dat <- wbc
 
-      colnames(dat$data) <- paste0("F", 1:ncol(dat$data))
-
       model(append(model(), list(data = dat$data)))
       model(append(model(), list(target = dat$labels)))
 
-      blocks(1:ncol(model()$data))
+      blocks(rep(names(dat$blocks), sapply(dat$blocks, length)))
       }
     )
 
@@ -242,14 +239,14 @@ shinyServer(function(input, output, session) {
     })
 
     observeEvent(input$add_block_maxsize, {
-      addConstraint(UBayFS::buildConstraints("max_size", list(input$block_maxsize), num_elements = length(unique(blocks())), rho = input$rho_block), block_constraint = TRUE)
+      addConstraint(UBayFS::buildConstraints("max_size", list(input$block_maxsize), num_elements = nrow(block_matrix()), rho = input$rho_block), block_constraint = TRUE)
     })
 
     observeEvent(input$add_block_must, {
       sel <- input$blocks_rows_selected
 
       if(length(sel) > 1){
-        addConstraint(UBayFS::buildConstraints("must_link", list(sel), num_elements = length(unique(blocks())), rho = input$rho_block), block_constraint = TRUE)
+        addConstraint(UBayFS::buildConstraints("must_link", list(sel), num_elements = nrow(block_matrix()), rho = input$rho_block), block_constraint = TRUE)
       }
     })
 
@@ -257,7 +254,7 @@ shinyServer(function(input, output, session) {
       sel <- input$blocks_rows_selected
 
       if(length(sel) > 1){
-        addConstraint(UBayFS::buildConstraints("cannot_link", list(sel), num_elements = length(unique(blocks())), rho = input$rho_block), block_constraint = TRUE)
+        addConstraint(UBayFS::buildConstraints("cannot_link", list(sel), num_elements = nrow(block_matrix()), rho = input$rho_block), block_constraint = TRUE)
       }
     })
 
@@ -266,7 +263,7 @@ shinyServer(function(input, output, session) {
         if(class(model()) == "UBaymodel"){
           if(any(sapply(names(input), grepl, pattern = "blockweight"))){
           blockweights <- sapply(paste0("blockweight_", unique(blocks())), function(x){return(input[[x]])})
-          addWeights(as.numeric(blockweights)[blocks()])
+          addWeights(as.numeric(blockweights))
           }
         }
       }
@@ -325,7 +322,7 @@ shinyServer(function(input, output, session) {
       if(data_complete()){
         updatePrettyToggle(session, "status_data", value = TRUE)
         updateSliderInput(session, "maxsize", min = 0, max = n_feats(), value = min(10, n_feats()))
-        updateSliderInput(session, "block_maxsize", min = 0, max = length(unique(blocks())), value = min(10, length(unique(blocks()))))
+        updateSliderInput(session, "block_maxsize", min = 0, max = nrow(block_matrix()), value = min(10, nrow(block_matrix())))
       }
     })
 
@@ -366,7 +363,7 @@ shinyServer(function(input, output, session) {
         enable("add_maxsize")
         enable("add_must")
         enable("add_cannot")
-        if(length(unique(blocks())) < length(blocks())){
+        if(nrow(block_matrix()) < ncol(block_matrix())){
           enable("add_block_maxsize")
           enable("add_block_must")
           enable("add_block_cannot")
@@ -514,8 +511,9 @@ shinyServer(function(input, output, session) {
 
     output$blocktable <- renderUI({
       blockweights <- model()$user.params$weights
-      lapply(unique(blocks()), function(block_no){
-        block_name <- unique(blocks())[block_no]
+      lapply(unique(blocks()), function(block_name){
+        #block_name <- unique(blocks())[block_no]
+        block_no <- which(blocks() == block_name)[1]
         fluidRow(
           column(4,
                 textInput(inputId = paste0("blockweight_", block_name),

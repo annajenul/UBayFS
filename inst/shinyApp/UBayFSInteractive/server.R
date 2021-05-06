@@ -274,13 +274,18 @@ shinyServer(function(input, output, session) {
     })
 
     # === FEATURE SELECTION ====
-    observeEvent(input$popsize | input$maxiter | input$popGreedy | input$constraint_dropout_rate, {
+    observeEvent(input$popsize | input$maxiter, {
       if(!is.null(model())){
+        if(grepl(input$optim_method, pattern = "(MH)")){
+          optim_method = "MH"
+        }
+        else{
+          optim_method = "GA"
+        }
         if(class(model()) == "UBaymodel"){
           model(setOptim(model(),
-                         popGreedy = input$popGreedy,
+                         method = optim_method,
                          popsize = input$popsize,
-                         constraint_dropout_rate = input$constraint_dropout_rate,
                          maxiter = input$maxiter))
         }
       }
@@ -534,7 +539,7 @@ shinyServer(function(input, output, session) {
 
     output$rho_plot <- renderPlot({
       x <- seq(-10,10,by = 0.01)
-      ggplot2::ggplot(data = data.frame(x = x, y = sapply(x, admissibility, A = matrix(1, nrow = 1, ncol = 1), b = 0, rho = input$rho, log = FALSE)),
+      ggplot2::ggplot(data = data.frame(x = x, y = sapply(x, admissibility, constraints = list( A = matrix(1, nrow = 1, ncol = 1), b = 0, rho = input$rho), log = FALSE)),
                       aes(x = x, y = y, group = 1)) +
         geom_line() +
         xlab(label = "ax-b") +
@@ -543,7 +548,7 @@ shinyServer(function(input, output, session) {
 
     output$rho_block_plot <- renderPlot({
       x <- seq(-10,10,by = 0.01)
-      ggplot2::ggplot(data = data.frame(x = x, y = sapply(x, admissibility, A = matrix(1, nrow = 1, ncol = 1), b = 0, rho = input$rho_block, log = FALSE)),
+      ggplot2::ggplot(data = data.frame(x = x, y = sapply(x, admissibility, constraints = list( A = matrix(1, nrow = 1, ncol = 1), b = 0, rho = input$rho_block), log = FALSE)),
                       aes(x = x, y = y, group = 1)) +
         geom_line() +
         xlab(label = "ax-b") +
@@ -624,27 +629,32 @@ shinyServer(function(input, output, session) {
 
     output$fs_sliders <- renderUI({
 
-      sel_popsize <- ifelse(is.null(model()$optim.params$popsize), 1000, model()$optim.params$popsize)
-      sel_popGreedy <- ifelse(is.null(model()$optim.params$popGreedy), min(100, sel_popsize), model()$optim.params$popGreedy)
-      sel_constraint_dropout_rate <- ifelse(is.null(model()$optim.params$constraint_dropout_rate), 0.1, model()$optim.params$constraint_dropout_rate)
-      sel_maxiter <- ifelse(is.null(model()$optim.params$maxiter), 100, model()$optim.params$maxiter)
-
+      optim_method_choices <- c("Genetic Algorithm (GA)",
+                                "Metropolis-Hastings Algorithm (MH)")
+      optim_method_choices_short <- c("GA", "MH")
       popsize_choices <- c(10, 20, 50, 100, 500, 1000, 5000)
       maxiter_choices <- c(10, 20, 30, 40, 50,
                            60, 70, 80, 90, 100,
                            150, 200, 250, 300, 350, 400, 450, 500,
                            600, 700, 800, 900, 1000)
 
+
+      sel_popsize <- ifelse(is.null(model()$optim.params$popsize), 1000, model()$optim.params$popsize)
+      sel_maxiter <- ifelse(is.null(model()$optim.params$maxiter), 100, model()$optim.params$maxiter)
+      sel_optim_method <- ifelse(is.null(model()$optim.params$method), optim_method_choices[1], model()$optim.params$method)
+      if(sel_optim_method %in% optim_method_choices_short){
+        sel_optim_method = optim_method_choices[which(optim_method_choices_short == sel_optim_method)]
+      }
+
       column(12,
-        sliderTextInput("popGreedy", withMathJax('$$q_G$$'), choices = popsize_choices[popsize_choices <= sel_popsize],
-                        selected = sel_popGreedy),
-        bsTooltip("popGreedy", "Select the size of the initial population, which is determined via Greedy algorithm"),
+        pickerInput("optim_method", "select optimization method",
+                         choices = optim_method_choices,
+                         selected = sel_optim_method,
+                         multiple = FALSE),
+        bsTooltip("method", "Select the method to be used for optimizing the feature set"),
         sliderTextInput("popsize", withMathJax('$$q$$'), choices = popsize_choices,
                         selected = sel_popsize),
         bsTooltip("popsize", "Select the full size of the initial population in the genetic algorithm"),
-        sliderTextInput("constraint_dropout_rate", withMathJax('$$c$$'), choices = seq(0, 1, by = 0.1),
-                        selected = sel_constraint_dropout_rate),
-        bsTooltip("constraint_dropout_rate", "Select the rate of dropping constraints during Greedy initialization"),
         sliderTextInput("maxiter", withMathJax('$$T$$'), choices = maxiter_choices,
                         selected = sel_maxiter),
         bsTooltip("maxiter", "Select the maximum number of iterations used in the genetic algorithm")

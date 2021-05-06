@@ -96,7 +96,7 @@ A genetic algorithm, described by [@givens:compstat] and implemented in [@R:GA],
   - print/summary/plot
 
 ```{r, include=TRUE}
-model = setOptim(model = model, popGreedy = 80, popsize = 100, maxiter = 200, constraint_dropout_rate = 0.05)
+model = setOptim(model = model, popsize = 100, maxiter = 200)
 ```
 
 At this point, we are have initialized prior weights, prior constraints and the optimization procedure --- we can now train the UBayFS model with the generic function ``train``. The summary function provides an overview on all components, UBay exists of. The ``plot()`` function shows the prior feature information as bar charts, with the selected features marked with red borders. In addition, the constraints and the regularization parameter $\rho$ are presented. 

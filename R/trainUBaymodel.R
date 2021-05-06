@@ -1,5 +1,5 @@
 #' UBayFS feature selection
-#' @description genetic algorithm to train UBayFS feature selection model using genetic algorithm
+#' @description genetic algorithm to train UBayFS feature selection model
 #' @param x a UBaymodel created by build.UBaymodel
 #' @return a UBaymodel with an additional list element output containing the maximum a-posteriori estimate (map)
 #' @import dplyr

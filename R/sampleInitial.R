@@ -7,12 +7,19 @@
 #' @param size initial number of samples to be created. The output sample size can be lower, since duplicates are removed.
 #' @return a matrix containing initial feature sets as rows.
 
-sampleInitial <- function(post_scores, constraints, block_constraints, constraint_dropout_rate, size){
+sampleInitial <- function(post_scores, constraints, block_constraints, size, constraint_dropout_rate = NULL){
 
   n = length(post_scores) # number of features
   num_feat_constraints = ifelse(is.null(constraints$A), 0, nrow(constraints$A))
   num_constraints = num_feat_constraints +
                     ifelse(is.null(block_constraints$A), 0, nrow(block_constraints$A))
+  rho = c(constraints$rho, block_constraints$rho)
+  rho = 1 / (1 + rho)
+
+  if(!is.null(constraint_dropout_rate)){
+    rho = constraint_dropout_rate * rho
+  }
+
 
   full_admissibility <- function(state, constraints, block_constraints, constraint_dropout, log = TRUE){
     active_constraints <- which(constraint_dropout == 1)
@@ -54,10 +61,13 @@ sampleInitial <- function(post_scores, constraints, block_constraints, constrain
 
 
   x_start = t(apply(feature_orders, 1, function(order){
-    constraint_dropout <- sample(x = c(0,1),
-                                 size = num_constraints,
-                                 replace = TRUE,
-                                 prob = c(constraint_dropout_rate, 1-constraint_dropout_rate)
+    constraint_dropout <- apply(cbind(rho, 1-rho),
+                                1,
+                                sample,
+                                x = c(0,1),
+                                size = 1,
+                                replace = TRUE
+                               # prob = c(constraint_dropout_rate, 1-constraint_dropout_rate)
     )
     i = 1														# iterate over features in descending order
     x = rep(0, n)

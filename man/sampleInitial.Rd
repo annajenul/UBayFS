@@ -8,8 +8,8 @@ sampleInitial(
   post_scores,
   constraints,
   block_constraints,
-  constraint_dropout_rate,
-  size
+  size,
+  constraint_dropout_rate = NULL
 )
 }
 \arguments{
@@ -19,9 +19,9 @@ sampleInitial(
 
 \item{block_constraints}{a list containing block-wise constraints}
 
-\item{constraint_dropout_rate}{rate of dropping constraints in Greedy algorithm}
-
 \item{size}{initial number of samples to be created. The output sample size can be lower, since duplicates are removed.}
+
+\item{constraint_dropout_rate}{rate of dropping constraints in Greedy algorithm}
 }
 \value{
 a matrix containing initial feature sets as rows.

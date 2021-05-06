@@ -1,16 +1,19 @@
 #' admissibility function (kappa)
 #' @description evaluates the value of the admissibility function kappa
 #' @param state a binary membership vector describing a feature set
-#' @param A the matrix defining the constraint system Ax<=b
-#' @param b the vector defining the constraint system Ax<=b
-#' @param rho the vector of relaxation parameters for the constraint system Ax<=b
+#' @param constraints a list constaining a matrix A and a vector b representing the inequality system Ax<=b and a vector rho
 #' @param weights_sum a scalar denoting the sum of all feature weights to scale rho; if NULL, no weighting is performed
 #' @param log whether the admissibility should be returned on log scale
 #' @return an admissibility value
 #' @importFrom matrixStats logSumExp
 #' @export
 
-admissibility = function(state, A, b, rho, weights_sum = NULL, log = TRUE){
+admissibility = function(state, constraints, weights_sum = NULL, log = TRUE){
+
+  # parse input
+  A = constraints$A
+  b = constraints$b
+  rho = constraints$rho
 
   # check input
   if(!is.null(A)){

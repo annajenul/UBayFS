@@ -4,26 +4,12 @@
 \alias{block_admissibility}
 \title{block admissibility function (kappa)}
 \usage{
-block_admissibility(
-  state,
-  A,
-  b,
-  rho,
-  block_matrix,
-  weights_sum = NULL,
-  log = TRUE
-)
+block_admissibility(state, constraints, weights_sum = NULL, log = TRUE)
 }
 \arguments{
 \item{state}{a binary membership vector describing a feature set}
 
-\item{A}{the matrix defining the constraint system Ax<=b between blocks}
-
-\item{b}{the vector defining the constraint system Ax<=b between blocks}
-
-\item{rho}{the vector of relaxation parameters for the constraint system Ax<=b between blocks}
-
-\item{block_matrix}{the matrix containing affiliations of features to each block}
+\item{constraints}{a list constaining a matrix A and a vector b representing the inequality system Ax<=b, a vector rho, and a block matrix}
 
 \item{weights_sum}{a scalar denoting the sum of all block weights to scale rho; if NULL, no weighting is performed}
 

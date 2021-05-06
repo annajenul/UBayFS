@@ -7,6 +7,10 @@
 #' @export
 
 plot.UBaymodel <- function(x,...){
+  plot_UBaymodel(x,...)
+}
+
+plot_UBaymodel <- function(x,...){
 
   if(class(x) != "UBaymodel"){
     stop("Wrong class of x")
@@ -24,7 +28,11 @@ plot.UBaymodel <- function(x,...){
 
   # red borders of selected features
   if(!is.null(x$output)){
-    df$selected <- factor(rep(x$output$map, 2) == 1, levels = c(TRUE, FALSE))
+    if(nrow(x$output$map) > 1){
+      print("Warning: multiple optimal feature sets, plotting first feature set.")
+    }
+    map <- x$output$map[1,]
+    df$selected <- factor(rep(map, 2) == 1, levels = c(TRUE, FALSE))
     p <- ggplot2::ggplot(data = df,
                          aes(x = .data$feature,
                              y = .data$counts)) +

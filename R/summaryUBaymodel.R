@@ -28,8 +28,9 @@ summary.UBaymodel <- function(object,...){
                               object$user.params$constraints$rho[i]
                             )
                           }),
-                      "\n")
+                      collapse = "\n")
                     },
+                    "\n",
                     if(!is.null(object$user.params$block_constraints$A)){
                        paste0(
                          sapply(1:nrow(object$user.params$block_constraints$A), function(i){
@@ -44,16 +45,21 @@ summary.UBaymodel <- function(object,...){
                                object$user.params$block_constraints$rho[i]
                              )
                            }),
-                        "\n")
-                    },
+                        collapse = "\n")
+                    }else{"\n"},
                     " \n",
                     " === prior weights === \n",
                     " weights: (", paste0(object$user.params$weights, collapse = ","),") \n\n",
                     " === likelihood === \n",
                     " ensemble counts: (", paste0(object$ensemble.params$output$counts, collapse = ","),") \n\n",
-                    " === feature selection results === \n",
-                    " MAP: ",
-                    ifelse(is.null(object$output$map), "no output produced yet", paste0("( ", paste0(object$output$map, collapse = ",")," )")),
+                    " === feature selection results (MAP) === \n",
+                    ifelse(is.null(object$output$map), "no output produced yet",
+                           paste0(
+                              apply(object$output$map, 1, function(x){
+                                  paste0(" ( ", paste0(which(x == 1), collapse = ",")," )")
+                               }),
+                               collapse = "\n")
+                          ),
                     " \n"
   )
 

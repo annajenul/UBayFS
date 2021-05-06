@@ -10,8 +10,7 @@
 #' @param constraints a list containing a relaxed system Ax<=b of user constraints, given as matrix A, vector b and vector or scalar rho (relaxation parameters); see buildConstraints function
 #' @param block_constraints a list containing a relaxed system Ax<=b of user constraints on feature blocks, given as matrix A, vector b and vector or scalar rho (relaxation parameters); see buildConstraints function
 #' @param weights the vector of user-defined prior weights for each feature
-#' @param constraint_dropout_rate rate of dropping constraints in Greedy algorithm
-#' @param popGreedy size of the initial population obtained from Greedy algorithm. Must be smaller or equal to popsize.
+#' @param optim_method the method to evaluate the posterior distribution. Options "GA" (genetic algorithm) and "MH" (Metropolis-Hastrings MCMC) are supported.
 #' @param popsize size of the initial population of the genetic algorithm for model optimization
 #' @param maxiter maximum number of iterations of the genetic algorithm for model optimization
 #' @param shiny TRUE indicates that the function is called from Shiny dashboard
@@ -58,8 +57,9 @@ build.UBaymodel = function(data, target, 															# data + labels
                        constraints = NULL,
                        block_constraints = NULL,
                        weights = 1, 														# user weights
-                       constraint_dropout_rate = 0.1,
-                       popGreedy = 20, 														# number of initial candidates from Greedy algorithm
+                       optim_method = "GA",
+                       #constraint_dropout_rate = 0.1,
+                       #popGreedy = 20, 														# number of initial candidates from Greedy algorithm
                        popsize = 50, 														# number of initial candidates (total)
                        maxiter = 100,
                        shiny = FALSE){														# elementary FS to use
@@ -71,7 +71,7 @@ build.UBaymodel = function(data, target, 															# data + labels
   if(nrow(data) != length(target)){
     stop("Error: number of labels must match number of data rows")
   }
-  if(M%%1 != 0 | M <= 0){
+  if(M %% 1 != 0 | M <= 0){
     stop("Error: M must be a positive integer")
   }
   if(tt_split < 0 | tt_split > 1){
@@ -83,9 +83,6 @@ build.UBaymodel = function(data, target, 															# data + labels
   if(!all(method %in% c("mRMR", "mrmr", "Laplacian score", "laplace"))){
     stop("Error: unknown method")
   }
-
-  # theoretical maximum count that can be obtained by a single feature in ensemble (= number of elementary FS)
-  max_counts = length(method) * M
 
   # initialize matrix
   ensemble_matrix = c()
@@ -155,8 +152,7 @@ build.UBaymodel = function(data, target, 															# data + labels
                     M = M,
                     method = method,
                     nr_features = nr_features),
-      output = list(counts = counts,
-                    max_counts = max_counts)
+      output = list(counts = counts)
     )
   )
   class(obj) = "UBaymodel"
@@ -165,10 +161,9 @@ build.UBaymodel = function(data, target, 															# data + labels
   obj = setBlockConstraints(obj, block_constraints)
   obj = setWeights(obj, weights)
   obj = setOptim(obj,
-            popGreedy = popGreedy,
+            method = optim_method,
             popsize = popsize,
-            maxiter = maxiter,
-            constraint_dropout_rate = constraint_dropout_rate
+            maxiter = maxiter
         )
 
   return(obj)

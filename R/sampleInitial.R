@@ -3,11 +3,11 @@
 #' @param post_scores a vector of posterior scores (prior scores + likelihood) for each feature
 #' @param constraints a list containing feature-wise constraints
 #' @param block_constraints a list containing block-wise constraints
-#' @param constraint_dropout_rate rate of dropping constraints in Greedy algorithm
+# @param constraint_dropout_rate rate of dropping constraints in Greedy algorithm
 #' @param size initial number of samples to be created. The output sample size can be lower, since duplicates are removed.
 #' @return a matrix containing initial feature sets as rows.
 
-sampleInitial <- function(post_scores, constraints, block_constraints, size, constraint_dropout_rate = NULL){
+sampleInitial <- function(post_scores, constraints, block_constraints, size){
 
   n = length(post_scores) # number of features
   num_feat_constraints = ifelse(is.null(constraints$A), 0, nrow(constraints$A))
@@ -16,9 +16,9 @@ sampleInitial <- function(post_scores, constraints, block_constraints, size, con
   rho = c(constraints$rho, block_constraints$rho)
   rho = 1 / (1 + rho)
 
-  if(!is.null(constraint_dropout_rate)){
-    rho = constraint_dropout_rate * rho
-  }
+  #if(!is.null(constraint_dropout_rate)){
+  #  rho = constraint_dropout_rate * rho
+  #}
 
 
   full_admissibility <- function(state, constraints, block_constraints, constraint_dropout, log = TRUE){
@@ -30,18 +30,18 @@ sampleInitial <- function(post_scores, constraints, block_constraints, size, con
     if(!is.null(constraints) & (length(active_feat_constraints) > 0)){
 
       a = admissibility(state,
-                        constraints$A[active_feat_constraints,, drop = FALSE],
-                        constraints$b[active_feat_constraints],
-                        rep(Inf, length(active_feat_constraints)),
+                        list( A = constraints$A[active_feat_constraints,, drop = FALSE],
+                              b = constraints$b[active_feat_constraints],
+                              rho = rep(Inf, length(active_feat_constraints))),
                         log = log)
       res = ifelse(log, res + a, res * a)
     }
     if(!is.null(block_constraints) & length(active_block_constraints) > 0){
       a = block_admissibility(state,
-                              block_constraints$A[active_block_constraints,, drop = FALSE],
-                              block_constraints$b[active_block_constraints],
-                              rep(Inf, length(active_block_constraints)),
-                              block_constraints$block_matrix,
+                              list( A = block_constraints$A[active_block_constraints,, drop = FALSE],
+                                    b = block_constraints$b[active_block_constraints],
+                                    rho = rep(Inf, length(active_block_constraints)),
+                                    block_matrix = block_constraints$block_matrix),
                               log = log)
       res = ifelse(log, res + a, res * a)
     }
@@ -86,5 +86,6 @@ sampleInitial <- function(post_scores, constraints, block_constraints, size, con
     return(x)
   }))
 
-  return(unique(x_start)) # unique removes duplicated rows (feature sets) before returning
+  #return(unique(x_start)) # unique removes duplicated rows (feature sets) before returning
+  return(x_start)
 }

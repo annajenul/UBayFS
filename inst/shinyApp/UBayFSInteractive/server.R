@@ -515,10 +515,8 @@ shinyServer(function(input, output, session) {
 
     output$blocktable <- renderUI({
       blockweights <- model()$user.params$weights
-      print(blocks())
       lapply(unique(blocks()), function(block_name){
         block_no <- which(blocks() == block_name)[1]
-        print(block_no)
         fluidRow(
           column(4,
                 textInput(inputId = paste0("blockweight_", block_name),

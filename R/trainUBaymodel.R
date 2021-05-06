@@ -2,7 +2,6 @@
 #' @description genetic algorithm to train UBayFS feature selection model
 #' @param x a UBaymodel created by build.UBaymodel
 #' @return a UBaymodel with an additional list element output containing the maximum a-posteriori estimate (map)
-#' @import dplyr
 #' @importFrom GA ga
 #' @importFrom DirichletReg ddirichlet
 #' @export train
@@ -20,20 +19,6 @@ train.UBaymodel = function(x){
     stop("Wrong class of model")
   }
 
-  #define parameters
-  n = length(x$ensemble.params$output$counts)			# number of features
-
-  # define constraints
-  A = x$user.params$constraints$A
-  b = x$user.params$constraints$b
-  rho = x$user.params$constraints$rho
-
-  # define block constraints
-  A_block = x$user.params$block_constraints$A
-  b_block = x$user.params$block_constraints$b
-  rho_block = x$user.params$block_constraints$rho
-  block_matrix = x$user.params$block_constraints$block_matrix
-
   # define prior weights
   alpha = as.numeric(x$user.params$weights)
 
@@ -42,49 +27,134 @@ train.UBaymodel = function(x){
 
   # calculate posterior parameter
   post_param = alpha + delta
-  weights_sum = sum(post_param)								# sum of all posterior weights
 
-  # Greedy algorithm to select starting vectors
-  x_start = sampleInitial(post_scores = post_param,
-                          constraints = x$user.params$constraints,
-                          block_constraints = x$user.params$block_constraints,
-                          constraint_dropout_rate = x$optim.params$constraint_dropout_rate,
-                          size = x$optim.params$popGreedy)
+  if(x$optim.params$method == "GA"){
+    print("Running Genetic Algorithm")
+    x$output <- train_GA(post_param,
+                         x$user.params$constraints,
+                         x$user.params$block_constraints,
+                         x$optim.params,
+                         colnames(x$data))
+  }
+  else if(x$optim.params$method == "MH"){
+    print("Running Metropolis-Hastings Algorithm")
+    x$output <- train_MH(post_param,
+                         x$user.params$constraints,
+                         x$user.params$block_constraints,
+                         x$optim.params,
+                         colnames(x$data))
+  }
+  else{
+    stop("Error: method not supported.")
+  }
+
+  return(x)
+}
+
+train_GA <- function(post_param, constraints, block_constraints, optim_params, feat_names){
 
   # optimization using GA
   target_fct = function(state){								# target function for optimization procedure
     return(
-        admissibility(state, 									# log-admissibility function
-                    A,
-                    b,
-                    rho,
-                    weights_sum,
+      admissibility(state, 									# log-admissibility function
+                    constraints,
+                    sum(post_param),
                     log = TRUE) +
         block_admissibility(state, 									# log-admissibility function
-                      A_block,
-                      b_block,
-                      rho_block,
-                      block_matrix,
-                      weights_sum / nrow(block_matrix),
-                      log = TRUE) +
+                            constraints = block_constraints,
+                            sum(post_param) / nrow(block_constraints$block_matrix),
+                            log = TRUE) +
         ddirichlet(t(state + 0.01), 							# log-dirichlet-density (with small epsilon to avoid errors from 0 probs)
                    alpha = post_param,
                    log = TRUE)
     )
   }
+
+  # Greedy algorithm to select starting vectors
+  x_start = sampleInitial(post_scores = post_param,
+                          constraints = constraints,
+                          block_constraints = block_constraints,
+                          size = optim_params$popsize)
+
+
   optim = ga(type = "binary",								# use GA for optimization
              fitness = target_fct,
              lower = 0,
              upper = 1,
-             nBits = n,
-             maxiter = x$optim.params$maxiter,
-             popSize = x$optim.params$popsize,
+             nBits = length(post_param),
+             maxiter = optim_params$maxiter,
+             popSize = optim_params$popsize,
              suggestions = x_start
   )
   x_optim = optim@solution									# extract solution
+  if(is.vector(x_optim)){
+    x_optim <- as.data.frame(t(x_optim))
+  }
+  else{
+    x_optim <- as.data.frame(x_optim)
+  }
+  colnames(x_optim) <- feat_names
 
-  # return result
-  x$output = list(map = x_optim[1,])					# return solution as vector
+  return(list(map = x_optim))
+}
 
-  return(x)
+#' @importFrom plyr count
+
+train_MH = function(post_param, constraints, block_constraints, optim_params, feat_names){
+
+  # posterior density
+  target_fct = function(state){								# target function for optimization procedure
+    return(
+      admissibility(state, 									# log-admissibility function
+                    constraints,
+                    sum(post_param),
+                    log = TRUE) +
+        block_admissibility(state, 									# log-admissibility function
+                            block_constraints,
+                            sum(post_param) / nrow(block_constraints$block_matrix),
+                            log = TRUE) +
+        ddirichlet(t(state + 0.01), 							# log-dirichlet-density (with small epsilon to avoid errors from 0 probs)
+                   alpha = post_param,
+                   log = TRUE)
+    )
+  }
+
+  # sample from proposal density
+  X <- matrix(, nrow = 0, ncol = length(post_param))        # MCMC history
+  x_t = sampleInitial(post_scores = post_param,
+                      constraints = constraints,
+                      block_constraints = block_constraints,
+                      size = optim_params$popsize)
+  f_x_t = apply(x_t, 1, target_fct)
+
+  # calculate MH-ratio
+  for(t in 1:optim_params$maxiter){
+    print(t)
+    # new sample from proposal density
+    x_new = sampleInitial(post_scores = post_param,
+                          constraints = constraints,
+                          block_constraints = block_constraints,
+                          size = optim_params$popsize)
+    # calculate MH-ratio
+    f_x_new = apply(x_new, 1, target_fct)
+    mh_ratio = apply(cbind(f_x_new - f_x_t, 0), 1, min)
+    mh_ratio = exp(mh_ratio)
+    acceptance = apply(cbind(mh_ratio, 1-mh_ratio), 1, sample, x = c(1,0), size = 1, replace = FALSE) == 1
+    print(sum(acceptance))
+    x_t[acceptance,] <- x_new[acceptance,]
+    X <- rbind(X, x_t)
+    f_x_t[acceptance] <- f_x_new[acceptance]
+  }
+
+  # prepare output
+  colnames(X) <- feat_names
+  unique_X <- as.data.frame(X)
+  unique_X <- plyr::count(unique_X)
+  max_freq <- max(unique_X$freq)
+  unique_X <- unique_X[unique_X$freq == max_freq, -ncol(unique_X)]
+  colnames(unique_X) <- c(feat_names)
+
+  return(list(post.sample = X,
+              map = unique_X))
+
 }

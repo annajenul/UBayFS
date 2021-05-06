@@ -14,8 +14,7 @@ build.UBaymodel(
   constraints = NULL,
   block_constraints = NULL,
   weights = 1,
-  constraint_dropout_rate = 0.1,
-  popGreedy = 20,
+  optim_method = "GA",
   popsize = 50,
   maxiter = 100,
   shiny = FALSE
@@ -40,9 +39,7 @@ build.UBaymodel(
 
 \item{weights}{the vector of user-defined prior weights for each feature}
 
-\item{constraint_dropout_rate}{rate of dropping constraints in Greedy algorithm}
-
-\item{popGreedy}{size of the initial population obtained from Greedy algorithm. Must be smaller or equal to popsize.}
+\item{optim_method}{the method to evaluate the posterior distribution. Options "GA" (genetic algorithm) and "MH" (Metropolis-Hastrings MCMC) are supported.}
 
 \item{popsize}{size of the initial population of the genetic algorithm for model optimization}
 

@@ -274,7 +274,13 @@ shinyServer(function(input, output, session) {
     })
 
     # === FEATURE SELECTION ====
-    observeEvent(input$popsize | input$maxiter, {
+    optim_expressions <- reactive(
+      list(input$optim_method,
+           input$popsize,
+           input$maxiter)
+    )
+
+    observeEvent(optim_expressions(), {
       if(!is.null(model())){
         if(grepl(input$optim_method, pattern = "(MH)")){
           optim_method = "MH"
@@ -647,17 +653,17 @@ shinyServer(function(input, output, session) {
       }
 
       column(12,
-        pickerInput("optim_method", "select optimization method",
+        pickerInput("optim_method", "select optimization/sampling method",
                          choices = optim_method_choices,
                          selected = sel_optim_method,
                          multiple = FALSE),
-        bsTooltip("method", "Select the method to be used for optimizing the feature set"),
+        bsTooltip("optim_method", "Select the method to be used for optimizing the feature set"),
         sliderTextInput("popsize", withMathJax('$$q$$'), choices = popsize_choices,
                         selected = sel_popsize),
-        bsTooltip("popsize", "Select the full size of the initial population in the genetic algorithm"),
+        bsTooltip("popsize", "Select the full size of the initial population in the optimization/sampling algorithm"),
         sliderTextInput("maxiter", withMathJax('$$T$$'), choices = maxiter_choices,
                         selected = sel_maxiter),
-        bsTooltip("maxiter", "Select the maximum number of iterations used in the genetic algorithm")
+        bsTooltip("maxiter", "Select the maximum number of iterations used in the optimization/sampling algorithm")
       )
     })
 

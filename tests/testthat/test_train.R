@@ -10,7 +10,16 @@ test_that("correct results in train.UBaymodel",{
     data = wbc$data,
     target = wbc$labels,
     constraints = c,
-    weights = w
+    block_constraint = NULL,
+    weights = w,
+    M = 100,
+    tt_split = 0.75,
+    nr_features = 10,
+    method = "mRMR",
+    optim_method = "GA",
+    popsize = 50,
+    maxiter = 100,
+    shiny = FALSE
   )
 
   # run with wrong input
@@ -28,7 +37,7 @@ test_that("correct results in train.UBaymodel",{
   # train model (with distinct weights)
   model <- setWeights(model, rep(c(1,100,10,20,100,20,50,30,40,90), 3))
   model <- train(model)
-  expect_equal(unname(which(model$output$map == 1)), c(2,5,7,8,14,22,24,25,27,28))
+  expect_equal(unname(which(model$output$map == 1)), c(2,7,8,14,22,23,24,25,27,28))
 
   # train model (with distinct constraints)
   const_new <- buildConstraints("cannot_link", constraint_vars = list(c(7,8,14)), 30, Inf)
@@ -37,12 +46,12 @@ test_that("correct results in train.UBaymodel",{
             rho = c(c$rho, const_new$rho))
   model <- setConstraints(model, c)
   model <- train(model)
-  expect_equal(unname(which(model$output$map == 1)), c(2,8,10,12,22,23,24,25,27,28))
+  expect_equal(unname(which(model$output$map == 1)), c(2,5,7,21,22,23,24,25,27,28))
 
 
   # train model (with distinct optim.params)
-  model <- setOptim(model, popGreedy = 10, popsize = 25, maxiter = 11, constraint_dropout_rate = 0.05)
+  model <- setOptim(model, method = "MH", popsize = 10, maxiter = 1000)
   model <- train(model)
-  expect_equal(unname(which(model$output$map == 1)), c(5,12,14,15,17,20,22,24,25,27))
+  expect_equal(unname(which(model$output$map == 1)), c(2,7,12,20,22,23,24,27,28,30))
 
 })

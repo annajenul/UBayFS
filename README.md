@@ -33,11 +33,7 @@ In addition, some functionality of the package (in particular, the interactive S
 - knitr
 - rmarkdown
 
-UBayFS is implemented via a core S3-class 'UBaymodel', along with help functions. An overview of the 'UBaymodel' class and its main generic functions, is shown in the following UML diagram:
-
-```{r, out.width="45%", out.height="45%", fig.align="center", echo = FALSE}
-include_graphics("UBay_UML.png")
-``` 
+UBayFS is implemented via a core S3-class 'UBaymodel', along with help functions.
 
 The help function ``buildConstraints(...)`` provides an easy way to define side constraints for the model. Further, ``runInteractive()`` enters the Shiny dashboard, given that the required depedencies are available (see above).
 
@@ -66,28 +62,30 @@ With the function ``setWeights()`` the user can change the feature weights from 
 ```{r, include=TRUE}
 weights = c(10,15,20,16,15,10,12,17,21,14)
 print(weights)
-model = setWeights(model = model, weights = weights, block_list = wbc$blocks)
+model = setWeights(model = model, 
+                   weights = weights, 
+                   block_list = wbc$blocks)
 ```
 
 Prior feature constraints can defined with the function ``buildConstraints()``. The input ``constraint_types`` consists of a vector, where all onstraint types are defined. Then, with ``constraint_vars``, the user specifies details about the constraint: for max-size, the number of features to select is provided, while for must-link and cannot-link, the set of feature indices to be linked must be provided. Each list entry corresponds to one constraint in ``constraint_types``. In addition, ``num_features`` denotes the total number of features in the dataset and ``rho`` corresponds to the relaxation parameter of the admissibility function.  
 
 As ``print(constraints)`` shows, the matrix ``A`` has 10 rows for 4 constraints. While *max-size* and *cannot-link* can be expressed in one equation each, *must-link* is a pairwise constraint. In specific, the *must-link* constraint between $n$ features is split into $\frac{n!}{(n-2)!}$ elementary constraints. Hence, 6 equations represent the *must-link* constraint. The function ``setConstraints()`` integrates the constraints into the UBay model. 
 ```{r, include=TRUE}
-constraints = buildConstraints(constraint_types = c("max_size", "must_link", rep("cannot_link", 2)),
+constraints = buildConstraints(constraint_types = c("max_size", 
+                                                    "must_link",
+                                                    rep("cannot_link", 2)),
                                constraint_vars = list(10, # max_size
                                                       c(1,11,21), # must_link
                                                       c(1,10), # cannot_link
-                                                      c(20,23,24) #cannot_link
-                                                      ),
+                                                      c(20,23,24)), #cannot_link
                                num_elements = ncol(model$data),
-                                rho = c(Inf, # max_size
-                                        0.1, # must_link
-                                        1, # cannot_link
-                                        1) # cannot_link
-)
-# )
+                               rho = c(Inf, # max_size
+                                       0.1, # must_link
+                                       1, # cannot_link
+                                       1)) # cannot_link
 print(constraints)
-model = setConstraints(model = model, constraints = constraints)
+model = setConstraints(model = model, 
+                       constraints = constraints)
 ```
 
 ## Optimization and evaluation
@@ -96,7 +94,9 @@ A genetic algorithm, described by [@givens:compstat] and implemented in [@R:GA],
   - print/summary/plot
 
 ```{r, include=TRUE}
-model = setOptim(model = model, popsize = 100, maxiter = 200)
+model = setOptim(model = model, 
+                 popsize = 100, 
+                 maxiter = 200)
 ```
 
 At this point, we are have initialized prior weights, prior constraints and the optimization procedure --- we can now train the UBayFS model with the generic function ``train``. The summary function provides an overview on all components, UBay exists of. The ``plot()`` function shows the prior feature information as bar charts, with the selected features marked with red borders. In addition, the constraints and the regularization parameter $\rho$ are presented. 
@@ -112,10 +112,6 @@ plot(model)
 ```{r,eval=FALSE}
 runInteractive()
 ```
-
-```{r, out.width="100%", echo = FALSE}
-include_graphics("UBay_Shiny_Screenshot.png")
-``` 
 
 ## Conclusion
 Although the current version of UBayFS is limited to ``mRMR`` and ``Laplacian score``, it will be extended with additional feature selectors that provide a scoring of the features. In addition, an expansion of the package with UBay Regression and UBay for unsupervised problems is planned. The exactness of the likelihood can be considered as a trade off between the number of models and the runtime, which linearly increases with the number of models. Especially the Shiny dashboard delivers insight into the single UBayFS steps. Nevertheless, the dashboard is slow for high dimensional datasets, what makes it necessary to use the console version in such settings. 

@@ -10,19 +10,22 @@
 #' @importFrom DirichletReg ddirichlet
 
 posterior = function(state, constraints, block_constraints, post_param, log = TRUE){								# target function for optimization procedure
-  return(
+  post <-
     admissibility(state, 									# log-admissibility function
                   constraints,
                   sum(post_param),
-                  log = log) +
+                  log = TRUE) +
     block_admissibility(state, 									# log-admissibility function
                         block_constraints,
                         sum(post_param) / nrow(block_constraints$block_matrix),
-                        log = log) +
+                        log = TRUE) +
     ddirichlet(t(state + 0.01), 							# log-dirichlet-density (with small epsilon to avoid errors from 0 probs)
                  alpha = post_param,
-                 log = log)
-  )
+                 log = TRUE)
+  if(!log){
+    post <- exp(post)
+  }
+  return(post)
 }
 
 #' @export

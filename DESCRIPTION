@@ -22,7 +22,8 @@ Imports: GA,
          glmnet,
          ggplot2,
          ggpubr,
-         utils
+         utils,
+         knitr
 Suggests: 
     shinyWidgets,
     DT,

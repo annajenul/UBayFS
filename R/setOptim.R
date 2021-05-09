@@ -4,7 +4,6 @@
 #' @param method the method to evaluate the posterior distribution. Options "GA" (genetic algorithm) and "MH" (Metropolis-Hastrings MCMC) are supported.
 #' @param popsize size of the initial population of the genetic algorithm for model optimization
 #' @param maxiter maximum number of iterations of the genetic algorithm for model optimization
-
 #' @return a UBaymodel object with updated optimization parameters
 #' @seealso build.UBaymodel
 #' @export

@@ -19,6 +19,8 @@ In this vignette we use the Wisconsin breast cancer dataset [@wolberg:wisconsin]
 - utils
 - ggplot2
 - ggpubr
+- utils
+- knitr
 
 In addition, some functionality of the package (in particular, the interactive Shiny interface) requires the following depedencies:
 
@@ -30,7 +32,6 @@ In addition, some functionality of the package (in particular, the interactive S
 - shinythemes
 - shinyBS
 - testthat (>= 3.0.0)
-- knitr
 - rmarkdown
 
 UBayFS is implemented via a core S3-class 'UBaymodel', along with help functions.

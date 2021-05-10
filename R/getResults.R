@@ -41,12 +41,34 @@ getResults <- function(model){
                                    alpha=post_param,
                                    log=TRUE), 2)
 
-  df = cbind(NO, feature_sets,
-             feature_size,
-             log_posterior,
-             log_admissibility,
-             log_block_admissibility,
-             log_dirichlet)
+  if (model$optim.params$method == "MH") {
+    unique_rows = as.data.frame(model$output$post.sample)
+    unique_rows = plyr::count(unique_rows)
+
+    unique_rows = unique_rows[which(apply(unique_rows[,1:(ncol(unique_rows)-1)], 1, function(x){
+                  return(
+                    apply(map, 1, function(y){
+                      return(all(x == y))
+                    })
+                  )
+                })), "freq"]
+
+    df = cbind(NO, feature_sets,
+               feature_size,
+               log_posterior,
+               log_admissibility,
+               log_block_admissibility,
+               log_dirichlet,
+               MH_frequency = unique_rows)
+  }
+  else{
+    df = cbind(NO, feature_sets,
+               feature_size,
+               log_posterior,
+               log_admissibility,
+               log_block_admissibility,
+               log_dirichlet)
+  }
   print("MAP feature sets")
   print(kable(df))
 

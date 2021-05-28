@@ -17,7 +17,7 @@ posterior = function(state, constraints, block_constraints, post_param, log = TR
                   log = log) +
     block_admissibility(state, 									# log-admissibility function
                         block_constraints,
-                        sum(post_param) / nrow(block_constraints$block_matrix),
+                        sum(post_param), # / nrow(block_constraints$block_matrix),
                         log = log) +
     ddirichlet(t(state + 0.01), 							# log-dirichlet-density (with small epsilon to avoid errors from 0 probs)
                  alpha = post_param,

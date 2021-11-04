@@ -39,7 +39,7 @@ admissibility = function(state, constraints, weights_sum = NULL, log = TRUE){
 
   # case 1: rho < Inf
   if(any(!ind_inf)){
-    z = (b[!ind_inf] + 0.5 - A[!ind_inf,] %*% state) * rho[!ind_inf]			# compute exponential term (nom) for each constraint (in log-scale)
+    z = (-b[!ind_inf] - 0.5 + A[!ind_inf,] %*% state) * rho[!ind_inf]			# compute exponential term (nom) for each constraint (in log-scale)
     lprob1 = z - apply(cbind(z,0), 1, logSumExp) # log(nom) - log(1 + nom)
     lprob1 = sum(lprob1)							# product over all constraints
   }
@@ -49,7 +49,7 @@ admissibility = function(state, constraints, weights_sum = NULL, log = TRUE){
 
   # case 2: rho = Inf
   if(any(ind_inf)){
-    z = (b[ind_inf] - A[ind_inf,] %*% state) >= 0
+    z = (b[ind_inf] - A[ind_inf,] %*% state) < 0
     lprob2 = log(prod(z))						# 1, if all constraints are fulfilled, 0 else
   }
   else{lprob2 = 0}

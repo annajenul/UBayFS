@@ -23,7 +23,7 @@ print.UBaymodel <- function(x,...){
   print("optim.params")
   print(x$optim.params)
   if(!is.null(x$output)){
-    getResults(x)
+    printResults(x)
   }
 
 }

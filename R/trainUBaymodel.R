@@ -21,7 +21,7 @@ train.UBaymodel = function(x){
   }
 
   # define posterior expected parameter
-  theta = posterior_expectation(model)
+  theta = posteriorExpectation(model)
 
   if(x$optim.params$method == "GA"){
     print("Running Genetic Algorithm")
@@ -33,27 +33,7 @@ train.UBaymodel = function(x){
                          colnames(x$data))
 
     # calculate output metrics
-    feature_size = apply(feature_set, 1, sum)
-    log_posterior = round(apply(feature_set,
-                                1,
-                                getPosterior,
-                                model = model,
-                                log = TRUE), 2)
-    log_admissibility = round(apply(feature_set,
-                                    1,
-                                    admissibility,
-                                    constraints = model$constraint.params$constraints,
-                                    log=TRUE), 2)
-
-    log_block_admissibility = round(apply(feature_set,
-                                          1,
-                                          block_admissibility,
-                                          constraints = model$constraint.params$block_constraints,
-                                          log=TRUE), 2)
-    metrics <- data.frame(number_of_features = feature_size,
-                                   log_posterior = log_posterior,
-                                   log_admissibility = log_admissibility,
-                                   log_block_admissibility = log_block_admissibility)
+    metrics <- apply(feature_set, 1, evaluateFS, model = x)
 
     if(nrow(feature_set) > 1){
       NO = nrow(feature_set)

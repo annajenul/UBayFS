@@ -1,4 +1,4 @@
-posterior_expectation <- function(model){
+posteriorExpectation <- function(model){
 
   if(class(model) != "UBaymodel"){
     stop("Wrong class of model")

@@ -4,16 +4,16 @@
 #' @importFrom knitr kable
 #' @export
 
-getResults <- function(model){
+printResults <- function(model){
 
   feature_sets = apply(model$output$feature_set, 1, function(x){
     paste0(which(x == 1), collapse = ",")
   })
 
   cat("=== MAP feature sets ===\n")
-  print(kable(cbind(feature_sets, model$output$metrics)))
+  print(kable(cbind(feature_sets, t(model$output$metrics))))
 
 
-  cat("=== MAP feature set similarities===\n")
+  cat("=== MAP feature set similarities ===\n")
   print(model$output$mutual_similarity)
 }

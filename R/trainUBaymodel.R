@@ -63,17 +63,28 @@ train.UBaymodel = function(x){
   return(x)
 }
 
+loss <- function(state, theta, lambda, constraints, block_constraints){
+  return( - logSumExp(c(theta[state == 0],
+          log(lambda) + admissibility(state = state,
+                                      constraints = constraints,
+                                      log = TRUE),
+          log(lambda) + block_admissibility(state = state,
+                                      constraints = block_constraints,
+                                      log = TRUE))))}
+getLoss <- function(state, model){
+  return(loss(
+          state = state,
+          theta = posteriorExpectation(model),
+          lambda = model$lambda,
+          constraints = model$constraint.params$constraints,
+          block_constraints = model$constraint.params$block_constraints))
+}
+
+
 train_GA <- function(theta, lambda, constraints, block_constraints, optim_params, feat_names){
 
-  target_fct <- function(state){return( - logSumExp(c(theta[state == 0],
-                                                 log(lambda) + admissibility(state = state,
-                                                                            constraints = constraints,
-                                                                            weights_sum = NULL,
-                                                                            log = TRUE),
-                                                 log(lambda) + block_admissibility(state = state,
-                                                                     constraints = block_constraints,
-                                                                     weights_sum = NULL,
-                                                                     log = TRUE))))}
+
+  target_fct <- function(state){return(loss(state, theta, lambda, constraints, block_constraints))}
 
   # Greedy algorithm to select starting vectors
   x_start = sampleInitial(post_scores = exp(theta),

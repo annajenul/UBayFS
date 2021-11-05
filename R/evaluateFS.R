@@ -16,10 +16,12 @@ evaluateFS <- function(state, model, method = "spearman", log = TRUE){
   }
   post_scores <- posteriorExpectation(model)
   log_post <- logSumExp(post_scores[state == 1])
+  loss <- getLoss(state, model)
 
   # calculate output metrics
   return(c(
     size = sum(state),
+    loss = ifelse(log, round(loss, 2), round(exp(loss), 2)),
     posterior = ifelse(log, round(log_post, 2), round(exp(log_post, 2))),
     admissibility = round(admissibility(state,
                                             constraints = model$constraint.params$constraints,

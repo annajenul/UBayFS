@@ -29,6 +29,11 @@ setConstraints = function(model, constraints, append = FALSE){
                        b = c(const$b, constraints$b),
                        rho = c(const$rho, constraints$rho),
                        block_matrix = rbind(const$block_matrix, constraints$block_matrix))
+    const <- model$user.params$constraints
+    constraints$A <- rbind(const$A, constraints$A)
+    constraints$b <- c(const$b, constraints$b)
+    constraints$rho <- c(const$rho, constraints$rho)
+    constraints$block_matrix <- rbind(const$block_matrix, constraints$block_matrix)
   }
   model$user.params$constraints = constraints
 

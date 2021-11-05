@@ -80,7 +80,7 @@ build.UBaymodel = function(data, target, 															# data + labels
   else if(tt_split < 0.5 | tt_split > 0.99){
     warning("Warning: tt_split should not be outside [0.5,0.99]")
   }
-  if(!all(method %in% c("mRMR", "mrmr", "Laplacian score", "laplace"))){
+  if(!all(method %in% c("mRMR", "mrmr", "Laplacian score", "laplace", "lasso", "LASSO", "fisher", "Fisher", "RFE", "rfe"))){
     stop("Error: unknown method")
   }
 
@@ -108,6 +108,9 @@ build.UBaymodel = function(data, target, 															# data + labels
       if(f %in% c("laplace", "Laplacian score")){												# type: Laplacian score
         ranks = do.lscore(train_data,ndim = nr_features)$featidx									# use do.lscore function (package Rdimtools)
       }
+      else if(f %in% c("fisher", "Fisher")){
+        ranks = do.fscore(X = train_data, label = train_labels, ndim = nr_features)$featidx
+      }
       else if(f %in% c("mrmr", "mRMR")){														# type: mRMR
         dat = data.frame(train_data, "class" = train_labels)									# change data format to data.frame
         dat$class = factor(dat$class, 															# change label format to ordered factor
@@ -115,10 +118,26 @@ build.UBaymodel = function(data, target, 															# data + labels
         rs = mRMR.classic(data = mRMR.data(dat), 												# use mRMR.classic function (package mRMRe)
                           target_indices = ncol(dat),
                           feature_count = nr_features)
+        #cat("rs filters", unlist(rs@filters), "\n")
         ranks = unlist(rs@filters)[																# extract selected features
           order(unlist(rs@scores),
                 decreasing = TRUE)]
+        #cat("mrmr ranks", ranks, "\n")
       }
+
+      else if(f %in% c("lasso", "LASSO")){
+        cv.lasso <- cv.glmnet(train_data, train_labels, intercept = FALSE, alpha = 1, family = "binomial")
+        model <- glmnet(train_data, train_labels, intercept = FALSE, alpha = 1, family = "binomial",
+                        lambda = cv.lasso$lambda.min)
+        ranks = which(as.vector(model$beta) != 0)
+      }
+
+      else if(f %in% c("RFE", "rfe")){
+        control <- rfeControl(functions=rfFuncs, method="cv", number=5)
+        results <- rfe(train_data, train_labels, sizes = nr_features, rfeControl=control)
+        ranks = which(colnames(train_data) %in% results$optVariables)
+      }
+
       else{
         stop(paste0("Error: unknown method", f))												# catch unknown methods
       }

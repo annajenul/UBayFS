@@ -10,6 +10,8 @@ setConstraints(model, constraints, append = FALSE)
 \item{model}{a UBaymodel object created using build.UBaymodel}
 
 \item{constraints}{a list containing a relaxed system Ax<=b of user constraints, given as matrix A, vector b and vector or scalar rho (relaxation parameters); see buildConstraints function}
+
+\item{append}{if TRUE, constraints are appended to the existing constraint system}
 }
 \value{
 a UBaymodel object with updated constraint parameters

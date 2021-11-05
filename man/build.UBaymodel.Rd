@@ -11,9 +11,10 @@ build.UBaymodel(
   tt_split = 0.75,
   nr_features = 10,
   method = "mRMR",
+  weights = 1,
   constraints = NULL,
   block_constraints = NULL,
-  weights = 1,
+  lambda = 1,
   optim_method = "GA",
   popsize = 50,
   maxiter = 100,
@@ -33,11 +34,13 @@ build.UBaymodel(
 
 \item{method}{a vector denoting the method(s) used as elementary models; options: "mRMR", "Laplacian score"}
 
+\item{weights}{the vector of user-defined prior weights for each feature}
+
 \item{constraints}{a list containing a relaxed system Ax<=b of user constraints, given as matrix A, vector b and vector or scalar rho (relaxation parameters); see buildConstraints function}
 
 \item{block_constraints}{a list containing a relaxed system Ax<=b of user constraints on feature blocks, given as matrix A, vector b and vector or scalar rho (relaxation parameters); see buildConstraints function}
 
-\item{weights}{the vector of user-defined prior weights for each feature}
+\item{lambda}{a positive scalar denoting the overall strength of the constraints}
 
 \item{optim_method}{the method to evaluate the posterior distribution. Options "GA" (genetic algorithm) and "MH" (Metropolis-Hastrings MCMC) are supported.}
 

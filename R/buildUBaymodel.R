@@ -7,9 +7,10 @@
 #' @param tt_split the ratio of samples drawn for building an elementary model (train-test-split)
 #' @param nr_features number of features to select in each elementary model
 #' @param method a vector denoting the method(s) used as elementary models; options: "mRMR", "Laplacian score"
+#' @param weights the vector of user-defined prior weights for each feature
+#' @param lambda a positive scalar denoting the overall strength of the constraints
 #' @param constraints a list containing a relaxed system Ax<=b of user constraints, given as matrix A, vector b and vector or scalar rho (relaxation parameters); see buildConstraints function
 #' @param block_constraints a list containing a relaxed system Ax<=b of user constraints on feature blocks, given as matrix A, vector b and vector or scalar rho (relaxation parameters); see buildConstraints function
-#' @param weights the vector of user-defined prior weights for each feature
 #' @param optim_method the method to evaluate the posterior distribution. Options "GA" (genetic algorithm) and "MH" (Metropolis-Hastrings MCMC) are supported.
 #' @param popsize size of the initial population of the genetic algorithm for model optimization
 #' @param maxiter maximum number of iterations of the genetic algorithm for model optimization
@@ -54,12 +55,11 @@ build.UBaymodel = function(data, target, 															# data + labels
                        M = 100, tt_split = 0.75, 												# number of train-test-splits, split ratio
                        nr_features = 10,														# number of features to select by elementary FS
                        method = "mRMR",
+                       weights = 1, 														# user weights
                        constraints = NULL,
                        block_constraints = NULL,
-                       weights = 1, 														# user weights
+                       lambda = 1, 														# constraint strength
                        optim_method = "GA",
-                       #constraint_dropout_rate = 0.1,
-                       #popGreedy = 20, 														# number of initial candidates from Greedy algorithm
                        popsize = 50, 														# number of initial candidates (total)
                        maxiter = 100,
                        shiny = FALSE){														# elementary FS to use
@@ -82,6 +82,9 @@ build.UBaymodel = function(data, target, 															# data + labels
   }
   if(!all(method %in% c("mRMR", "mrmr", "Laplacian score", "laplace", "lasso", "LASSO", "fisher", "Fisher", "RFE", "rfe"))){
     stop("Error: unknown method")
+  }
+  if(!is.numeric(lambda) | lambda <=0){
+    stop("Error: lambda must be a scalar greater than 0")
   }
 
   # initialize matrix
@@ -166,6 +169,7 @@ build.UBaymodel = function(data, target, 															# data + labels
   obj = list(
     data = data,
     target = target,
+    lambda = lambda,
     ensemble.params = list(
       input = list( tt_split = tt_split,
                     M = M,

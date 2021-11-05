@@ -12,5 +12,5 @@
 \item{...}{unused}
 }
 \description{
-a barplot of an UBayFS model containing prior weights, ensemble counts and the selected features and map estimate
+a barplot of an UBayFS model containing prior weights, ensemble counts and the selected features
 }

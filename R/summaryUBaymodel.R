@@ -14,35 +14,35 @@ summary.UBaymodel <- function(object,...){
                     " data: ", paste0(dim(object$data), collapse = "x"), '\n',
                     " labels: ", paste0(levels(object$target), ": ", tabulate(object$target), collapse = " "), "\n\n",
                     " === prior constraints === \n",
-                    if(!is.null(object$user.params$constraints$A)){
+                    if(!is.null(object$constraint.params$constraints$A)){
                       paste0(
-                        sapply(1:nrow(object$user.params$constraints$A), function(i){
+                        sapply(1:nrow(object$constraint.params$constraints$A), function(i){
                             paste0(
                               " constraint ",
                               i,
                               ": (",
-                              paste0(object$user.params$constraints$A[i,], collapse = ","),
+                              paste0(object$constraint.params$constraints$A[i,], collapse = ","),
                               ") x <= ",
-                              object$user.params$constraints$b[i],
+                              object$constraint.params$constraints$b[i],
                               "; rho = ",
-                              object$user.params$constraints$rho[i]
+                              object$constraint.params$constraints$rho[i]
                             )
                           }),
                       collapse = "\n")
                     },
                     "\n",
-                    if(!is.null(object$user.params$block_constraints$A)){
+                    if(!is.null(object$constraint.params$block_constraints$A)){
                        paste0(
-                         sapply(1:nrow(object$user.params$block_constraints$A), function(i){
+                         sapply(1:nrow(object$constraint.params$block_constraints$A), function(i){
                              paste0(
                                " block constraint ",
                                i,
                                ": (",
-                               paste0(object$user.params$block_constraints$A[i,], collapse = ","),
+                               paste0(object$constraint.params$block_constraints$A[i,], collapse = ","),
                                ") x <= ",
-                               object$user.params$block_constraints$b[i],
+                               object$constraint.params$block_constraints$b[i],
                                "; rho = ",
-                               object$user.params$block_constraints$rho[i]
+                               object$constraint.params$block_constraints$rho[i]
                              )
                            }),
                         collapse = "\n")
@@ -53,9 +53,9 @@ summary.UBaymodel <- function(object,...){
                     " === likelihood === \n",
                     " ensemble counts: (", paste0(object$ensemble.params$output$counts, collapse = ","),") \n\n",
                     " === feature selection results (MAP) === \n",
-                    ifelse(is.null(object$output$map), "no output produced yet",
+                    ifelse(is.null(object$output$feature_set), "no output produced yet",
                            paste0(
-                              apply(object$output$map, 1, function(x){
+                              apply(object$output$feature_set, 1, function(x){
                                   paste0(" ( ", paste0(which(x == 1), collapse = ",")," )")
                                }),
                                collapse = "\n")

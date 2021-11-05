@@ -25,7 +25,7 @@ setBlockConstraints = function(model, constraints){
     }
   }
 
-  model$user.params$block_constraints = constraints
+  model$constraint.params$block_constraints = constraints
 
   return(model)
 }

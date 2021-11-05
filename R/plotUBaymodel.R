@@ -1,5 +1,5 @@
 #' plot a UBayFS model
-#' @description a barplot of an UBayFS model containing prior weights, ensemble counts and the selected features and map estimate
+#' @description a barplot of an UBayFS model containing prior weights, ensemble counts and the selected features
 #' @param x a UBaymodel object created using build.UBaymodel
 #' @param ... unused
 #' @import ggplot2
@@ -28,11 +28,11 @@ plot_UBaymodel <- function(x,...){
 
   # red borders of selected features
   if(!is.null(x$output)){
-    if(nrow(x$output$map) > 1){
+    if(nrow(x$output$feature_set) > 1){
       print("Warning: multiple optimal feature sets, plotting first feature set.")
     }
-    map <- x$output$map[1,]
-    df$selected <- factor(rep(map, 2) == 1, levels = c(TRUE, FALSE))
+    feature_set <- x$output$feature_set[1,]
+    df$selected <- factor(rep(feature_set, 2) == 1, levels = c(TRUE, FALSE))
     p <- ggplot2::ggplot(data = df,
                          aes(x = .data$feature,
                              y = .data$counts)) +
@@ -52,14 +52,14 @@ plot_UBaymodel <- function(x,...){
     theme(axis.text.x = element_text(angle = 90))
 
   # constraint plot
-  if(!is.null(x$user.params$constraints$A)){
-    A = x$user.params$constraints$A
-    rho = x$user.params$constraints$rho
+  if(!is.null(x$constraint.params$constraints$A)){
+    A = x$constraint.params$constraints$A
+    rho = x$constraint.params$constraints$rho
     num_feat_const = nrow(A)
 
-    if(!is.null(x$user.params$block_constraints)){
-      A = rbind(A, x$user.params$block_constraints$A %*% x$user.params$block_constraints$block_matrix)
-      rho = c(rho, x$user.params$block_constraints$rho)
+    if(!is.null(x$constraint.params$block_constraints)){
+      A = rbind(A, x$constraint.params$block_constraints$A %*% x$constraint.params$block_constraints$block_matrix)
+      rho = c(rho, x$constraint.params$block_constraints$rho)
     }
     df1 <- data.frame(feature = c(), constraint = c(), type = c(), level = c())
 

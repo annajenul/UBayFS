@@ -16,13 +16,14 @@ print.UBaymodel <- function(x,...){
   print(str(x$target))
   print("user.params")
   print(x$user.params)
+  print("constraint.params")
+  print(x$constraint.params)
   print("ensemble.params")
   print(x$ensemble.params)
   print("optim.params")
   print(x$optim.params)
   if(!is.null(x$output)){
-    print("MAP")
-    print(x$output$map)
+    getResults(x)
   }
 
 }

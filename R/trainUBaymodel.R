@@ -25,19 +25,56 @@ train.UBaymodel = function(x){
 
   if(x$optim.params$method == "GA"){
     print("Running Genetic Algorithm")
-    x$output <- train_GA(theta,
-                         x$user.params$constraints,
-                         x$user.params$block_constraints,
+    feature_set <- train_GA(theta,
+                         x$lambda,
+                         x$constraint.params$constraints,
+                         x$constraint.params$block_constraints,
                          x$optim.params,
                          colnames(x$data))
-  }
-  else if(x$optim.params$method == "MH"){
-    print("Running Metropolis-Hastings Algorithm")
-    x$output <- train_MH(theta,
-                         x$user.params$constraints,
-                         x$user.params$block_constraints,
-                         x$optim.params,
-                         colnames(x$data))
+
+    # calculate output metrics
+    feature_size = apply(feature_set, 1, sum)
+    log_posterior = round(apply(feature_set,
+                                1,
+                                getPosterior,
+                                model = model,
+                                log = TRUE), 2)
+    log_admissibility = round(apply(feature_set,
+                                    1,
+                                    admissibility,
+                                    constraints = model$constraint.params$constraints,
+                                    log=TRUE), 2)
+
+    log_block_admissibility = round(apply(feature_set,
+                                          1,
+                                          block_admissibility,
+                                          constraints = model$constraint.params$block_constraints,
+                                          log=TRUE), 2)
+    metrics <- data.frame(number_of_features = feature_size,
+                                   log_posterior = log_posterior,
+                                   log_admissibility = log_admissibility,
+                                   log_block_admissibility = log_block_admissibility)
+
+    if(nrow(feature_set) > 1){
+      NO = nrow(feature_set)
+      mut_sim = matrix(1, nrow = length(NO), ncol = length(NO))
+      for (i in NO) {
+        for (j in NO[NO > i]) {
+          mut_sim[i,j] = length(intersect(which(feature_set[i,] == 1), which(feature_set[j,] == 1))) /
+            length(union(which(feature_set[i,] == 1), which(feature_set[j,] == 1)))
+          mut_sim[j,i] = mut_sim[i,j]
+        }
+      }
+      mut_sim = round(mut_sim, 2)
+      rownames(mut_sim) = NO
+      colnames(mut_sim) = NO
+    }
+    else{
+      mut_sim <- 1
+    }
+    x$output <- list(feature_set = feature_set,
+                     metrics = metrics,
+                     mutual_similarity = mut_sim)
   }
   else{
     stop("Error: method not supported.")
@@ -46,14 +83,14 @@ train.UBaymodel = function(x){
   return(x)
 }
 
-train_GA <- function(theta, constraints, block_constraints, optim_params, feat_names){
+train_GA <- function(theta, lambda, constraints, block_constraints, optim_params, feat_names){
 
   target_fct <- function(state){return( - logSumExp(c(theta[state == 0],
-                                                 admissibility(state = state,
+                                                 log(lambda) + admissibility(state = state,
                                                                             constraints = constraints,
                                                                             weights_sum = NULL,
                                                                             log = TRUE),
-                                                 block_admissibility(state = state,
+                                                 log(lambda) + block_admissibility(state = state,
                                                                      constraints = block_constraints,
                                                                      weights_sum = NULL,
                                                                      log = TRUE))))}
@@ -83,6 +120,6 @@ train_GA <- function(theta, constraints, block_constraints, optim_params, feat_n
   }
   colnames(x_optim) <- feat_names
 
-  return(list(map = x_optim))
+  return(x_optim)
 }
 

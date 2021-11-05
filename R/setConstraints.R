@@ -24,7 +24,7 @@ setConstraints = function(model, constraints, append = FALSE){
   }
 
   if(append){
-    const = model$user.params$constraints
+    const = model$constraint.params$constraints
     constraints = list(A = rbind(const$A, constraints$A),
                        b = c(const$b, constraints$b),
                        rho = c(const$rho, constraints$rho),
@@ -35,7 +35,7 @@ setConstraints = function(model, constraints, append = FALSE){
     constraints$rho <- c(const$rho, constraints$rho)
     constraints$block_matrix <- rbind(const$block_matrix, constraints$block_matrix)
   }
-  model$user.params$constraints = constraints
+  model$constraint.params$constraints = constraints
 
   return(model)
 }

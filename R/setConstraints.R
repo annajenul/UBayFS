@@ -6,7 +6,7 @@
 #' @seealso build.UBaymodel
 #' @export
 
-setConstraints = function(model, constraints){
+setConstraints = function(model, constraints, append = FALSE){
 
   if(class(model) != "UBaymodel"){
     stop("Error: wrong class of model")
@@ -22,6 +22,13 @@ setConstraints = function(model, constraints){
     }
   }
 
+  if(append){
+    const <- model$user.params$constraints
+    constraints$A <- rbind(const$A, constraints$A)
+    constraints$b <- c(const$b, constraints$b)
+    constraints$rho <- c(const$rho, constraints$rho)
+    constraints$block_matrix <- rbind(const$block_matrix, constraints$block_matrix)
+  }
   model$user.params$constraints = constraints
 
   return(model)

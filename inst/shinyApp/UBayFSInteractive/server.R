@@ -549,7 +549,8 @@ shinyServer(function(input, output, session) {
                       aes(x = x, y = y, group = 1)) +
         geom_line() +
         xlab(label = "ax-b") +
-        ylab(label = "prior prob.")
+        ylab(label = "prior prob.") +
+        ylim(0, 1)
     })
 
     output$rho_block_plot <- renderPlot({

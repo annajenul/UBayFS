@@ -12,37 +12,39 @@ shinyServer(function(input, output, session) {
     # help functions
     addConstraint <- function(params, block_constraint = FALSE){
       if(block_constraint){
-        if(is.null(model()$user.params$block_constraints$A)){
-          newA <- params$A
-          newb <- params$b
-          newrho <- params$rho
-        }
-        else{
-          newA <- rbind(model()$user.params$block_constraints$A, params$A)
-          newb <- c(model()$user.params$block_constraints$b, params$b)
-          newrho <- c(model()$user.params$block_constraints$rho, params$rho)
-        }
-        model(UBayFS::setBlockConstraints(model(), list(A = newA, b = newb, rho = as.numeric(newrho), block_matrix = block_matrix())))
+        #if(is.null(model()$user.params$block_constraints$A)){
+        newA <- params$A
+        newb <- params$b
+        newrho <- params$rho
+        #}
+        #else{
+        #  newA <- rbind(model()$user.params$block_constraints$A, params$A)
+        #  newb <- c(model()$user.params$block_constraints$b, params$b)
+        #  newrho <- c(model()$user.params$block_constraints$rho, params$rho)
+        #}
+        model(UBayFS::setBlockConstraints(model(),
+                                          list(A = newA, b = newb, rho = as.numeric(newrho), block_matrix = block_matrix()),
+                                          append = TRUE))
 
         proxy = dataTableProxy('blocks')
         selectRows(proxy, c())
       }
       else{
-        if(is.null(model()$user.params$constraints$A)){
-          newA <- params$A
-          newb <- params$b
-          newrho <- params$rho
+        #if(is.null(model()$user.params$constraints$A)){
+        newA <- params$A
+        newb <- params$b
+        newrho <- params$rho
+        colnames(newA) <- names_feats()
+        #}
+        #else{
+        #  newA <- rbind(model()$user.params$constraints$A, params$A)
+        #  newb <- c(model()$user.params$constraints$b, params$b)
+        #  newrho <- c(model()$user.params$constraints$rho, params$rho)
+        #}
 
-          colnames(newA) <- names_feats()
-        }
-        else{
-          newA <- rbind(model()$user.params$constraints$A, params$A)
-          newb <- c(model()$user.params$constraints$b, params$b)
-          newrho <- c(model()$user.params$constraints$rho, params$rho)
-        }
-
-        model(UBayFS::setConstraints(model(), list(A = newA, b = newb, rho = as.numeric(newrho))))
-
+        model(UBayFS::setConstraints(model(),
+                                     list(A = newA, b = newb, rho = as.numeric(newrho)),
+                                     append = TRUE))
         proxy = dataTableProxy('features')
         selectRows(proxy, c())
       }
@@ -322,7 +324,8 @@ shinyServer(function(input, output, session) {
     })
 
     prior_complete <- reactive({
-      ifelse(!data_complete() | (is.null(model()$user.params$constraints) & is.null(model()$user.params$block_constraints)), FALSE, TRUE)
+      ifelse(!data_complete() | (is.null(model()$constraint.params$constraints) &
+                                 is.null(model()$constraint.params$block_constraints)), FALSE, TRUE)
     })
 
     parameters_complete <- reactive({
@@ -481,10 +484,10 @@ shinyServer(function(input, output, session) {
     )
 
     output$constraints <- renderUI({
-      if(!is.null(model()$user.params$constraints$A)){
-        matA <- paste0(apply(model()$user.params$constraints$A, 1, function(x){paste0(x, collapse = " & ")}), collapse = "\\\\")
-        matb <- paste0(model()$user.params$constraints$b, collapse = "\\\\")
-        matrho <- paste0(ifelse(model()$user.params$constraints$rho == Inf, "\\infty", model()$user.params$constraints$rho), collapse = "\\\\")
+      if(!is.null(model()$constraint.params$constraints$A)){
+        matA <- paste0(apply(model()$constraint.params$constraints$A, 1, function(x){paste0(x, collapse = " & ")}), collapse = "\\\\")
+        matb <- paste0(model()$constraint.params$constraints$b, collapse = "\\\\")
+        matrho <- paste0(ifelse(model()$constraint.params$constraints$rho == Inf, "\\infty", model()$constraint.params$constraints$rho), collapse = "\\\\")
 
         withMathJax(
           paste0("$$\\begin{pmatrix}",
@@ -503,10 +506,10 @@ shinyServer(function(input, output, session) {
     })
 
     output$block_constraints <- renderUI({
-      if(!is.null(model()$user.params$block_constraints$A)){
-        matA <- paste0(apply(model()$user.params$block_constraints$A, 1, function(x){paste0(x, collapse = " & ")}), collapse = "\\\\")
-        matb <- paste0(model()$user.params$block_constraints$b, collapse = "\\\\")
-        matrho <- paste0(ifelse(model()$user.params$block_constraints$rho == Inf, "\\infty", model()$user.params$block_constraints$rho), collapse = "\\\\")
+      if(!is.null(model()$constraint.params$block_constraints$A)){
+        matA <- paste0(apply(model()$constraint.params$block_constraints$A, 1, function(x){paste0(x, collapse = " & ")}), collapse = "\\\\")
+        matb <- paste0(model()$constraint.params$block_constraints$b, collapse = "\\\\")
+        matrho <- paste0(ifelse(model()$constraint.params$block_constraints$rho == Inf, "\\infty", model()$constraint.params$block_constraints$rho), collapse = "\\\\")
 
         withMathJax(
           paste0("$$\\begin{pmatrix}",
@@ -549,7 +552,7 @@ shinyServer(function(input, output, session) {
                       aes(x = x, y = y, group = 1)) +
         geom_line() +
         xlab(label = "ax-b") +
-        ylab(label = "prior prob.") +
+        ylab(label = "penality") +
         ylim(0, 1)
     })
 
@@ -559,7 +562,8 @@ shinyServer(function(input, output, session) {
                       aes(x = x, y = y, group = 1)) +
         geom_line() +
         xlab(label = "ax-b") +
-        ylab(label = "prior prob.")
+        ylab(label = "penalty") +
+        ylim(0, 1)
     })
 
     output$output_data <- renderUI({

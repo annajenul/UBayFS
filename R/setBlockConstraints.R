@@ -6,7 +6,7 @@
 #' @seealso build.UBaymodel
 #' @export
 
-setBlockConstraints = function(model, constraints){
+setBlockConstraints = function(model, constraints, append = FALSE){
 
   if(class(model) != "UBaymodel"){
     stop("Error: wrong class of model")
@@ -25,6 +25,17 @@ setBlockConstraints = function(model, constraints){
     }
   }
 
+  if(!is.null(model$constraint.params$block_constraints$block_matrix) && model$constraint.params$block_constraints$block_matrix != constraint$block_matrix){
+    stop("Error: block matrix must match previously defined blocks")
+  }
+
+  if(append){
+    const = model$constraint.params$block_constraints
+    constraints = list(A = rbind(const$A, constraints$A),
+                       b = c(const$b, constraints$b),
+                       rho = c(const$rho, constraints$rho),
+                       block_matrix = const$block_matrix)
+  }
   model$constraint.params$block_constraints = constraints
 
   return(model)

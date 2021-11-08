@@ -4,7 +4,7 @@
 \alias{setBlockConstraints}
 \title{set block constraints in UBaymodel object}
 \usage{
-setBlockConstraints(model, constraints)
+setBlockConstraints(model, constraints, append = FALSE)
 }
 \arguments{
 \item{model}{a UBaymodel object created using build.UBaymodel}

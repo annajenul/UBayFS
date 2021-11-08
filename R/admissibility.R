@@ -32,7 +32,7 @@ admissibility = function(state, constraints, log = TRUE){
   # case 1: rho < Inf (term lprob1)
   if(any(!ind_inf)){
     const_fulfilled <- b[!ind_inf] - A[!ind_inf,] %*% state >= 0
-    z = (b[!ind_inf] + 0.5 - A[!ind_inf,] %*% state) * rho[!ind_inf]			# compute exponential term (nom) for each constraint (in log-scale)
+    z = (b[!ind_inf] - A[!ind_inf,] %*% state) * rho[!ind_inf]			# compute exponential term (nom) for each constraint (in log-scale)
     lprob1 = z - apply(cbind(z,0), 1, logSumExp) # log(nom) - log(1 + nom)
     #lprob1 = sum(lprob1)							# product over all constraints
     lprob1 = sum(lprob1[!const_fulfilled])

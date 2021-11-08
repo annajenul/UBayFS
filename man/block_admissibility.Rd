@@ -4,14 +4,12 @@
 \alias{block_admissibility}
 \title{block admissibility function (kappa)}
 \usage{
-block_admissibility(state, constraints, weights_sum = NULL, log = TRUE)
+block_admissibility(state, constraints, log = TRUE)
 }
 \arguments{
 \item{state}{a binary membership vector describing a feature set}
 
 \item{constraints}{a list constaining a matrix A and a vector b representing the inequality system Ax<=b, a vector rho, and a block matrix}
-
-\item{weights_sum}{a scalar denoting the sum of all block weights to scale rho; if NULL, no weighting is performed}
 
 \item{log}{whether the admissibility should be returned on log scale}
 }

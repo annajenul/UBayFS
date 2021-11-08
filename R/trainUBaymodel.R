@@ -34,24 +34,22 @@ train.UBaymodel = function(x){
 
     # calculate output metrics
     metrics <- apply(feature_set, 1, evaluateFS, model = x)
+    NO = nrow(feature_set)
+    mut_sim = matrix(1, nrow = NO, ncol = NO)
 
-    if(nrow(feature_set) > 1){
-      NO = nrow(feature_set)
-      mut_sim = matrix(1, nrow = length(NO), ncol = length(NO))
-      for (i in NO) {
-        for (j in NO[NO > i]) {
+    if(NO > 1){
+      for (i in 1 : (NO - 1)) {
+        for (j in (i+1) : NO) {
           mut_sim[i,j] = length(intersect(which(feature_set[i,] == 1), which(feature_set[j,] == 1))) /
             length(union(which(feature_set[i,] == 1), which(feature_set[j,] == 1)))
           mut_sim[j,i] = mut_sim[i,j]
         }
       }
-      mut_sim = round(mut_sim, 2)
-      rownames(mut_sim) = NO
-      colnames(mut_sim) = NO
     }
-    else{
-      mut_sim <- 1
-    }
+
+    mut_sim = round(mut_sim, 2)
+    rownames(mut_sim) = 1:NO
+    colnames(mut_sim) = 1:NO
     x$output <- list(feature_set = feature_set,
                      metrics = metrics,
                      mutual_similarity = mut_sim)
@@ -63,28 +61,34 @@ train.UBaymodel = function(x){
   return(x)
 }
 
-loss <- function(state, theta, lambda, constraints, block_constraints){
-  return( - logSumExp(c(theta[state == 0],
-          log(lambda) + admissibility(state = state,
+neg_loss <- function(state, theta, lambda, constraints, block_constraints){
+  return(logSumExp(c(
+          theta[state == 1],
+          log(lambda) + admissibility(state = state, # log( lambda * admissibility * block_admissibility )
                                       constraints = constraints,
-                                      log = TRUE),
-          log(lambda) + block_admissibility(state = state,
+                                      log = TRUE)
+                      + block_admissibility(state = state,
                                       constraints = block_constraints,
-                                      log = TRUE))))}
-getLoss <- function(state, model){
-  return(loss(
-          state = state,
-          theta = posteriorExpectation(model),
-          lambda = model$lambda,
-          constraints = model$constraint.params$constraints,
-          block_constraints = model$constraint.params$block_constraints))
+                                      log = TRUE)
+          )))}
+getNegLoss <- function(state, model, log = TRUE){
+  res <- neg_loss(
+    state = state,
+    theta = posteriorExpectation(model),
+    lambda = model$lambda,
+    constraints = model$constraint.params$constraints,
+    block_constraints = model$constraint.params$block_constraints)
+  if(!log){
+    res <- exp(res)
+  }
+  return(res)
 }
 
 
 train_GA <- function(theta, lambda, constraints, block_constraints, optim_params, feat_names){
 
 
-  target_fct <- function(state){return(loss(state, theta, lambda, constraints, block_constraints))}
+  target_fct <- function(state){return(neg_loss(state, theta, lambda, constraints, block_constraints))}
 
   # Greedy algorithm to select starting vectors
   x_start = sampleInitial(post_scores = exp(theta),

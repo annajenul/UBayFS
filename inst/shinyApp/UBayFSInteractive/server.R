@@ -300,6 +300,7 @@ shinyServer(function(input, output, session) {
     })
 
     observeEvent(input$run_UBay, {
+      print(model())
       withProgress(min = 0, max = 1, value = 0, message = "optimizing posterior function", {
         tryCatch({
           model(UBayFS::train(model()))
@@ -685,10 +686,10 @@ shinyServer(function(input, output, session) {
     })
 
     output$feature_results <- DT::renderDataTable(
-      if(!is.null(model()$output$map)){
+      if(!is.null(model()$output$feature_set)){
         df <- data.frame(
-          no = 1:sum(model()$output$map),
-          features = names_feats()[model()$output$map == 1])
+          no = 1:sum(model()$output$feature_set),
+          features = names_feats()[model()$output$feature_set == 1])
         colnames(df) <- c("no", "selected features")
         datatable(
           df,

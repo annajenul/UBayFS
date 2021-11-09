@@ -34,7 +34,7 @@ setBlockConstraints = function(model, constraints, append = FALSE){
     constraints = list(A = rbind(const$A, constraints$A),
                        b = c(const$b, constraints$b),
                        rho = c(const$rho, constraints$rho),
-                       block_matrix = const$block_matrix)
+                       block_matrix = constraints$block_matrix)
   }
   model$constraint.params$block_constraints = constraints
 

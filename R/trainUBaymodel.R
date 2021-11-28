@@ -21,16 +21,19 @@ train.UBaymodel = function(x){
   }
 
   # define posterior expected parameter
-  theta = posteriorExpectation(model)
+  theta = posteriorExpectation(x)
 
   if(x$optim.params$method == "GA"){
     print("Running Genetic Algorithm")
-    feature_set <- train_GA(theta,
+    tGA <- train_GA(theta,
                          x$lambda,
                          x$constraint.params$constraints,
                          x$constraint.params$block_constraints,
                          x$optim.params,
                          colnames(x$data))
+
+    feature_set = tGA[[1]]
+    x_start = tGA[[2]]
 
     # calculate output metrics
     metrics <- apply(feature_set, 1, evaluateFS, model = x)
@@ -58,7 +61,7 @@ train.UBaymodel = function(x){
     stop("Error: method not supported.")
   }
 
-  return(x)
+  return(list(x, x_start))
 }
 
 neg_loss <- function(state, theta, lambda, constraints, block_constraints){
@@ -115,6 +118,6 @@ train_GA <- function(theta, lambda, constraints, block_constraints, optim_params
   }
   colnames(x_optim) <- feat_names
 
-  return(x_optim)
+  return(list(x_optim, x_start))
 }
 

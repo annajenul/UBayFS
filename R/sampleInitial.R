@@ -55,7 +55,7 @@ sampleInitial <- function(post_scores, constraints, block_constraints, size){
                                   n = n,
                                   size = n,
                                   replace = FALSE,
-                                  prob = post_scores + 0.1/n) # add a small constant to account for unobserved elements
+                                  prob = post_scores) # add a small constant to account for unobserved elements
                         )
                      )
 

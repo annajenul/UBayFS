@@ -7,6 +7,7 @@
 #' @param tt_split the ratio of samples drawn for building an elementary model (train-test-split)
 #' @param nr_features number of features to select in each elementary model
 #' @param method a vector denoting the method(s) used as elementary models; options: "mRMR", "Laplacian score"
+#' @param family family is method is lasso
 #' @param weights the vector of user-defined prior weights for each feature
 #' @param lambda a positive scalar denoting the overall strength of the constraints
 #' @param constraints a list containing a relaxed system Ax<=b of user constraints, given as matrix A, vector b and vector or scalar rho (relaxation parameters); see buildConstraints function
@@ -55,6 +56,7 @@ build.UBaymodel = function(data, target, 															# data + labels
                        M = 100, tt_split = 0.75, 												# number of train-test-splits, split ratio
                        nr_features = 10,														# number of features to select by elementary FS
                        method = "mRMR",
+                       family = "binomial",
                        weights = 1, 														# user weights
                        constraints = NULL,
                        block_constraints = NULL,
@@ -80,7 +82,7 @@ build.UBaymodel = function(data, target, 															# data + labels
   else if(tt_split < 0.5 | tt_split > 0.99){
     warning("Warning: tt_split should not be outside [0.5,0.99]")
   }
-  if(!all(method %in% c("mRMR", "mrmr", "Laplacian score", "laplace", "lasso", "LASSO", "fisher", "Fisher", "RFE", "rfe"))){
+  if(!all(method %in% c("mRMR", "mrmr", "Laplacian score", "laplace", "lasso", "LASSO", "fisher", "Fisher", "RFE", "rfe", "hsic", "HSIC"))){
     stop("Error: unknown method")
   }
   if(!is.numeric(lambda) | lambda <=0){
@@ -89,6 +91,8 @@ build.UBaymodel = function(data, target, 															# data + labels
 
   # initialize matrix
   ensemble_matrix = c()
+
+  if(method %in% c("lasso", "LASSO")){cv.lasso <- cv.glmnet(as.matrix(data), target, intercept = FALSE, alpha = 1, family = family, nfolds=3)}
 
   for(i in 1:M){																				# perform M runs
 
@@ -113,6 +117,7 @@ build.UBaymodel = function(data, target, 															# data + labels
       }
       else if(f %in% c("fisher", "Fisher")){
         ranks = do.fscore(X = train_data, label = train_labels, ndim = nr_features)$featidx
+
       }
       else if(f %in% c("mrmr", "mRMR")){														# type: mRMR
         dat = data.frame(train_data, "class" = train_labels)									# change data format to data.frame
@@ -129,8 +134,7 @@ build.UBaymodel = function(data, target, 															# data + labels
       }
 
       else if(f %in% c("lasso", "LASSO")){
-        cv.lasso <- cv.glmnet(train_data, train_labels, intercept = FALSE, alpha = 1, family = "binomial")
-        model <- glmnet(train_data, train_labels, intercept = FALSE, alpha = 1, family = "binomial",
+        model <- glmnet(train_data, train_labels, intercept = FALSE, alpha = 1, family = family,
                         lambda = cv.lasso$lambda.min)
         ranks = which(as.vector(model$beta) != 0)
       }
@@ -139,6 +143,12 @@ build.UBaymodel = function(data, target, 															# data + labels
         control <- rfeControl(functions=rfFuncs, method="cv", number=5)
         results <- rfe(train_data, train_labels, sizes = nr_features, rfeControl=control)
         ranks = which(colnames(train_data) %in% results$optVariables)
+      }
+      else if(f %in% c("hsic", "HSIC")){
+
+        #results = feature.selection(train_data, as.numeric(as.character(train_labels)), nr_features)
+        results = feature.selection(train_data, as.numeric(as.integer(train_labels)-1), nr_features)
+        ranks = results$hsic_selected_feature_index
       }
 
       else{

@@ -11,7 +11,6 @@ build.UBaymodel(
   tt_split = 0.75,
   nr_features = 10,
   method = "mRMR",
-  family = "binomial",
   weights = 1,
   constraints = NULL,
   block_constraints = NULL,
@@ -34,8 +33,6 @@ build.UBaymodel(
 \item{nr_features}{number of features to select in each elementary model}
 
 \item{method}{a vector denoting the method(s) used as elementary models; options: "mRMR", "Laplacian score"}
-
-\item{family}{family is method is lasso}
 
 \item{weights}{the vector of user-defined prior weights for each feature}
 

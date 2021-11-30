@@ -7,7 +7,6 @@
 #' @param tt_split the ratio of samples drawn for building an elementary model (train-test-split)
 #' @param nr_features number of features to select in each elementary model
 #' @param method a vector denoting the method(s) used as elementary models; options: "mRMR", "Laplacian score"
-#' @param family family is method is lasso
 #' @param weights the vector of user-defined prior weights for each feature
 #' @param lambda a positive scalar denoting the overall strength of the constraints
 #' @param constraints a list containing a relaxed system Ax<=b of user constraints, given as matrix A, vector b and vector or scalar rho (relaxation parameters); see buildConstraints function
@@ -56,7 +55,6 @@ build.UBaymodel = function(data, target, 															# data + labels
                        M = 100, tt_split = 0.75, 												# number of train-test-splits, split ratio
                        nr_features = 10,														# number of features to select by elementary FS
                        method = "mRMR",
-                       family = "binomial",
                        weights = 1, 														# user weights
                        constraints = NULL,
                        block_constraints = NULL,
@@ -82,7 +80,8 @@ build.UBaymodel = function(data, target, 															# data + labels
   else if(tt_split < 0.5 | tt_split > 0.99){
     warning("Warning: tt_split should not be outside [0.5,0.99]")
   }
-  if(!all(method %in% c("mRMR", "mrmr", "Laplacian score", "laplace", "lasso", "LASSO", "fisher", "Fisher", "RFE", "rfe", "hsic", "HSIC"))){
+  if(!all(method %in% c("mRMR", "mrmr", "Laplacian score", "laplace", "lasso", "LASSO", "fisher", "Fisher", "RFE", "rfe", "hsic", "HSIC",
+                        "dtree", "DTREE"))){
     stop("Error: unknown method")
   }
   if(!is.numeric(lambda) | lambda <=0){
@@ -91,7 +90,7 @@ build.UBaymodel = function(data, target, 															# data + labels
 
   # initialize matrix
   ensemble_matrix = c()
-
+  family = ifelse(is.factor(target), "binomial", "gaussian")
   if(method %in% c("lasso", "LASSO")){cv.lasso <- cv.glmnet(as.matrix(data), target, intercept = FALSE, alpha = 1, family = family, nfolds=3)}
 
   for(i in 1:M){																				# perform M runs
@@ -107,7 +106,9 @@ build.UBaymodel = function(data, target, 															# data + labels
     nconst_cols = which(apply(data[train_index,], 2, 											# identify columns with constant features
                               function(x){return(length(unique(x)))}) > 1)
     train_data = scale(data[train_index,nconst_cols])											# scale data
-    train_labels = target[train_index]															# prepare labels
+    train_labels = factor(target[train_index])															# prepare labels
+
+    cat("is factor train labels: ",is.factor(train_labels), "\n")
 
     # generate elementary FS
     for(f in method){
@@ -116,21 +117,23 @@ build.UBaymodel = function(data, target, 															# data + labels
         ranks = do.lscore(train_data,ndim = nr_features)$featidx									# use do.lscore function (package Rdimtools)
       }
       else if(f %in% c("fisher", "Fisher")){
+        if(is.numeric(train_labels)){stop("Fisher score cannot be used for regression!")}
         ranks = do.fscore(X = train_data, label = train_labels, ndim = nr_features)$featidx
 
       }
       else if(f %in% c("mrmr", "mRMR")){														# type: mRMR
         dat = data.frame(train_data, "class" = train_labels)									# change data format to data.frame
+        if(is.factor(train_labels)){
         dat$class = factor(dat$class, 															# change label format to ordered factor
-                           ordered = TRUE)
+                           ordered = TRUE)}
         rs = mRMR.classic(data = mRMR.data(dat), 												# use mRMR.classic function (package mRMRe)
                           target_indices = ncol(dat),
                           feature_count = nr_features)
-        #cat("rs filters", unlist(rs@filters), "\n")
+
         ranks = unlist(rs@filters)[																# extract selected features
           order(unlist(rs@scores),
                 decreasing = TRUE)]
-        #cat("mrmr ranks", ranks, "\n")
+
       }
 
       else if(f %in% c("lasso", "LASSO")){
@@ -140,15 +143,20 @@ build.UBaymodel = function(data, target, 															# data + labels
       }
 
       else if(f %in% c("RFE", "rfe")){
-        control <- rfeControl(functions=rfFuncs, method="cv", number=5)
+        control <- rfeControl(functions=rfFuncs, method = "cv", number = 2)
         results <- rfe(train_data, train_labels, sizes = nr_features, rfeControl=control)
         ranks = which(colnames(train_data) %in% results$optVariables)
       }
       else if(f %in% c("hsic", "HSIC")){
-
-        #results = feature.selection(train_data, as.numeric(as.character(train_labels)), nr_features)
-        results = feature.selection(train_data, as.numeric(as.integer(train_labels)-1), nr_features)
+        ifelse(is.factor(train_labels), {tl = as.numeric(as.integer(train_labels)-1)}, {tl = train_labels})
+        results = feature.selection(train_data, tl, nr_features)
         ranks = results$hsic_selected_feature_index
+      }
+      else if(f %in% c("dtree", "DTREE")){
+        rf_data = as.data.frame(cbind(train_labels, train_data))
+        colnames(rf_data) <- make.names(colnames(rf_data))
+        tree = rpart::rpart(train_labels~., data = rf_data)
+        ranks = which(colnames(train_data) %in% names(rpart:::importance(tree))[1:nr_features])
       }
 
       else{

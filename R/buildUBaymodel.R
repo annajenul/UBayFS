@@ -108,8 +108,6 @@ build.UBaymodel = function(data, target, 															# data + labels
     train_data = scale(data[train_index,nconst_cols])											# scale data
     train_labels = factor(target[train_index])															# prepare labels
 
-    cat("is factor train labels: ",is.factor(train_labels), "\n")
-
     # generate elementary FS
     for(f in method){
 

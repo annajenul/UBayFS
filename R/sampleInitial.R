@@ -50,7 +50,7 @@ sampleInitial <- function(post_scores, constraints, block_constraints, size){
 
   # shuffle features n times (sampling without replacement), with probability proportional to post_scores
   feature_orders = t(
-                        replicate(size,
+                        replicate(size-1,
                                sample.int(
                                   n = n,
                                   size = n,
@@ -87,5 +87,17 @@ sampleInitial <- function(post_scores, constraints, block_constraints, size){
   }))
 
   #return(unique(x_start)) # unique removes duplicated rows (feature sets) before returning
+
+  #always add feature set with best scores
+  ms <- constraints$b[which(apply(constraints$A == 1, 1, all))]
+  if(is.numeric(ms)){
+    ms_sel <- order(post_scores, decreasing = TRUE)[1:ms]
+    x_start <- rbind(x_start, 1:n %in% ms_sel)
+  }
+  else{
+    stop("ERROR: no max-size constraint")
+  }
+
+
   return(x_start)
 }

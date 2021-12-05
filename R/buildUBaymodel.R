@@ -106,7 +106,7 @@ build.UBaymodel = function(data, target, 															# data + labels
     nconst_cols = which(apply(data[train_index,], 2, 											# identify columns with constant features
                               function(x){return(length(unique(x)))}) > 1)
     train_data = scale(data[train_index,nconst_cols])											# scale data
-    train_labels = factor(target[train_index])															# prepare labels
+    train_labels = target[train_index]															# prepare labels
 
     # generate elementary FS
     for(f in method){
@@ -141,7 +141,12 @@ build.UBaymodel = function(data, target, 															# data + labels
       }
 
       else if(f %in% c("RFE", "rfe")){
-        control <- rfeControl(functions=rfFuncs, method = "cv", number = 2)
+        if(is.factor(train_labels)){
+          control <- rfeControl(functions=rfFuncs, method = "cv", number = 2)
+        }
+        else{
+          control <- rfeControl(functions=lmFuncs, method = "cv", number = 2)
+        }
         results <- rfe(train_data, train_labels, sizes = nr_features, rfeControl=control)
         ranks = which(colnames(train_data) %in% results$optVariables)
       }

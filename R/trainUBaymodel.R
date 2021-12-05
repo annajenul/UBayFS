@@ -61,7 +61,7 @@ train.UBaymodel = function(x){
     stop("Error: method not supported.")
   }
 
-  return(list(x, x_start))
+  return(x)
 }
 
 neg_loss <- function(state, theta, lambda, constraints, block_constraints){

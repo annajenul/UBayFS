@@ -11,6 +11,7 @@ build.UBaymodel(
   tt_split = 0.75,
   nr_features = 10,
   method = "mRMR",
+  prior_model = "dirichlet",
   weights = 1,
   constraints = NULL,
   block_constraints = NULL,
@@ -33,6 +34,8 @@ build.UBaymodel(
 \item{nr_features}{number of features to select in each elementary model}
 
 \item{method}{a vector denoting the method(s) used as elementary models; options: "mRMR", "Laplacian score"}
+
+\item{prior_model}{a string denoting the prior model to use; options: "dirichlet", "wong", "hankin"}
 
 \item{weights}{the vector of user-defined prior weights for each feature}
 

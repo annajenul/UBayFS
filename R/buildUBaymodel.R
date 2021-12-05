@@ -7,6 +7,7 @@
 #' @param tt_split the ratio of samples drawn for building an elementary model (train-test-split)
 #' @param nr_features number of features to select in each elementary model
 #' @param method a vector denoting the method(s) used as elementary models; options: "mRMR", "Laplacian score"
+#' @param prior_model a string denoting the prior model to use; options: "dirichlet", "wong", "hankin"
 #' @param weights the vector of user-defined prior weights for each feature
 #' @param lambda a positive scalar denoting the overall strength of the constraints
 #' @param constraints a list containing a relaxed system Ax<=b of user constraints, given as matrix A, vector b and vector or scalar rho (relaxation parameters); see buildConstraints function
@@ -55,6 +56,7 @@ build.UBaymodel = function(data, target, 															# data + labels
                        M = 100, tt_split = 0.75, 												# number of train-test-splits, split ratio
                        nr_features = 10,														# number of features to select by elementary FS
                        method = "mRMR",
+                       prior_model = "dirichlet",
                        weights = 1, 														# user weights
                        constraints = NULL,
                        block_constraints = NULL,
@@ -86,6 +88,9 @@ build.UBaymodel = function(data, target, 															# data + labels
   }
   if(!is.numeric(lambda) | lambda <=0){
     stop("Error: lambda must be a scalar greater than 0")
+  }
+  if(!(prior_model %in% c("dirichlet", "wong", "hankin"))){
+    stop("Error: unknown prior_model")
   }
 
   # initialize matrix
@@ -191,6 +196,7 @@ build.UBaymodel = function(data, target, 															# data + labels
     data = data,
     target = target,
     lambda = lambda,
+    prior_model = prior_model,
     ensemble.params = list(
       input = list( tt_split = tt_split,
                     M = M,

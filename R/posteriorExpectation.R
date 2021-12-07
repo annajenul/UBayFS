@@ -1,3 +1,5 @@
+#' @import hyper2
+
 posteriorExpectation <- function(model){
 
   if(class(model) != "UBaymodel"){
@@ -26,15 +28,25 @@ posteriorExpectation <- function(model){
     for(i in 2:(N)){
       post_scores <- c(post_scores, ratio_1[i] * prod(ratio_2[1:i]))
     }
-    #post_scores <- c(post_scores, prod(ratio_2))
-    post_scores <- log(post_scores)
-    post_scores <- post_scores - logSumExp(post_scores)
-    post_scores <- apply(cbind(post_scores, -10), 1, logSumExp)
+    post_scores <- log(post_scores) # log-scale
+    post_scores <- post_scores - logSumExp(post_scores) # normalize to sum 1
+    post_scores <- apply(cbind(post_scores, -10), 1, logSumExp) # add small additive constant to avoid 0
     names(post_scores) <- names(counts)
   }
   else{
     # Hankin's hyperdirichlet expected value
-    stop("This prior model is not yet implemented")
+    fs <- apply(model$ensemble.params$output$ensemble_matrix == 1, 1, which) # add feature sets as index lists
+    d <- rep(1, length(fs))   # set count 1 for each feature set
+
+    fs <- append(fs, as.list(1:ncol(model$data))) # add each feature individually to define prior
+    d <- c(d, model$user.params$weights) # add feature weights as prior
+
+    h <- hyper2(L = fs, d = d)
+
+    samples <- hyper2::rp(500, h)
+    post_scores <- colMeans(samples)
+    post_scores <- log(post_scores)
+    names(post_scores) <- names(model$ensemble.params$output$counts)
   }
 
   return(post_scores)

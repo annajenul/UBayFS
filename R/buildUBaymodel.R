@@ -202,7 +202,8 @@ build.UBaymodel = function(data, target, 															# data + labels
                     M = M,
                     method = method,
                     nr_features = nr_features),
-      output = list(counts = counts)
+      output = list(counts = counts,
+                    ensemble_matrix = ensemble_matrix)
     )
   )
   class(obj) = "UBaymodel"

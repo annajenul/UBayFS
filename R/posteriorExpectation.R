@@ -19,16 +19,18 @@ posteriorExpectation <- function(model){
     n <- cumsum(counts[N:1])[N:1]
     alpha_n <- alpha + n
 
-    ratio_1 <- (alpha + counts) / alpha_n
-    ratio_2 <- n[-1] / alpha_n[-N] #  has length N-1
-
+    ratio_1 <- (alpha + counts) / alpha_n # length N
+    ratio_2 <- c(n[-1],0) / alpha_n #  length N
 
     post_scores <- ratio_1[1]
-    for(i in 2:(N-1)){
-      post_scores <- c(post_scores, ratio_1[i] * cumprod(ratio_2[1:i])[i])
+    for(i in 2:(N)){
+      post_scores <- c(post_scores, ratio_1[i] * prod(ratio_2[1:i]))
     }
-    post_scores <- c(post_scores, cumprod(ratio_2)[N-1])
+    #post_scores <- c(post_scores, prod(ratio_2))
     post_scores <- log(post_scores)
+    post_scores <- post_scores - logSumExp(post_scores)
+    post_scores <- apply(cbind(post_scores, -10), 1, logSumExp)
+    names(post_scores) <- names(counts)
   }
   else{
     # Hankin's hyperdirichlet expected value

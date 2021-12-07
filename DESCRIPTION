@@ -23,7 +23,8 @@ Imports: GA,
          ggplot2,
          ggpubr,
          utils,
-         knitr
+         knitr,
+         hyper2
 Suggests: 
     shinyWidgets,
     DT,

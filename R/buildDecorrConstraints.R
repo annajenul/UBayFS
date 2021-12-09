@@ -14,6 +14,9 @@ buildDecorrConstraints = function(data, level = 0.5, method = "kendall"){
   #restrict to positive rho
   pos_corr <- rho_corr > level
   A_corr <- A_corr[pos_corr,]
+
+  if(is.vector(A_corr)){A_corr = t(A_corr)}
+
   b_corr <- b_corr[pos_corr]
   rho_corr <- rho_corr[pos_corr]
   rho_corr <- log( rho_corr / (1-rho_corr)) # logit function # TODO: transform for level != 0.5!

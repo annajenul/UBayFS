@@ -19,7 +19,7 @@ buildDecorrConstraints = function(data, level = 0.5, method = "kendall"){
 
   b_corr <- b_corr[pos_corr]
   rho_corr <- rho_corr[pos_corr]
-  rho_corr <- log( rho_corr / (1-rho_corr)) # logit function # TODO: transform for level != 0.5!
+  rho_corr <- rho_corr / (1-rho_corr)# logit function # TODO: transform for level != 0.5!
 
   const <- list(A = A_corr,
                 b = b_corr,

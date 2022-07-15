@@ -2,15 +2,37 @@
 % Please edit documentation in R/printUBaymodel.R
 \name{print.UBaymodel}
 \alias{print.UBaymodel}
-\title{prints a UBayFS model}
+\alias{printResults}
+\alias{summary.UBaymodel}
+\alias{plot.UBaymodel}
+\title{Prints a UBayFS model}
 \usage{
 \method{print}{UBaymodel}(x, ...)
+
+printResults(model)
+
+\method{summary}{UBaymodel}(object, ...)
+
+\method{plot}{UBaymodel}(x, ...)
 }
 \arguments{
 \item{x}{a UBaymodel object created using build.UBaymodel}
 
-\item{...}{unused}
+\item{...}{additional print parameters}
+
+\item{model}{a UBaymodel object created using build.UBaymodel after training}
+
+\item{object}{a UBaymodel object created using build.UBaymodel}
 }
 \description{
 print details of an UBayFS model
 }
+\section{Functions}{
+\itemize{
+\item \code{printResults}: Displays and summarizes the results of UBayFS after feature selection.
+
+\item \code{summary.UBaymodel}: A summary of an UBayFS model.
+
+\item \code{plot.UBaymodel}: A barplot of an UBayFS model containing prior weights, ensemble counts and the selected features.
+}}
+

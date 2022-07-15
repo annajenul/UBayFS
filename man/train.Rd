@@ -13,5 +13,5 @@ train(x)
 a UBaymodel with an additional list element output containing the maximum a-posteriori estimate (map)
 }
 \description{
-genetic algorithm to train UBayFS feature selection model
+Genetic algorithm to train UBayFS feature selection model.
 }

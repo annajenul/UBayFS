@@ -2,20 +2,28 @@
 % Please edit documentation in R/admissibility.R
 \name{admissibility}
 \alias{admissibility}
+\alias{block_admissibility}
 \title{admissibility function (kappa)}
 \usage{
 admissibility(state, constraints, log = TRUE)
+
+block_admissibility(state, constraints, log = TRUE)
 }
 \arguments{
 \item{state}{a binary membership vector describing a feature set}
 
-\item{constraints}{a list constaining a matrix A and a vector b representing the inequality system Ax<=b and a vector rho}
+\item{constraints}{a list containing a matrix A and a vector b representing the inequality system Ax<=b and a vector rho}
 
 \item{log}{whether the admissibility should be returned on log scale}
 }
 \value{
-an admissibility value
+An admissibility value.
 }
 \description{
-evaluates the value of the admissibility function kappa
+Evaluate the value of the admissibility function kappa.
 }
+\section{Functions}{
+\itemize{
+\item \code{block_admissibility}: Evaluates the value of the admissibility function kappa for block constraints.
+}}
+

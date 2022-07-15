@@ -2,7 +2,7 @@
 % Please edit documentation in R/runInteractive.R
 \name{runInteractive}
 \alias{runInteractive}
-\title{runs an interactive shiny app for demonstration}
+\title{Run an interactive shiny app for demonstration.}
 \usage{
 runInteractive()
 }

@@ -1,4 +1,4 @@
-#' runs an interactive shiny app for demonstration
+#' Run an interactive shiny app for demonstration.
 #' @description starts a shiny application in the browser
 #' @import shiny
 #' @export

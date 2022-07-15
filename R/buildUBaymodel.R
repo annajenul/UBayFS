@@ -15,8 +15,19 @@
 #' @param optim_method the method to evaluate the posterior distribution. Options "GA" (genetic algorithm) and "MH" (Metropolis-Hastrings MCMC) are supported.
 #' @param popsize size of the initial population of the genetic algorithm for model optimization
 #' @param maxiter maximum number of iterations of the genetic algorithm for model optimization
+#' @param decorr add cannot link constraint between high correlated features
 #' @param shiny TRUE indicates that the function is called from Shiny dashboard
-#' @return a UBaymodel object containing the following list elements: data, target, user.params (parameters representing user knowledge), ensemble.params (parameters representing the likelihood) and optim.params (parameters for genetic algorithm)
+#' @return A UBaymodel object containing the following list elements:
+#' \itemize{
+#'   \item data - The input dataset.
+#'   \item target - The input target.
+#'   \item lambda - The input lambda value (constraint strength).
+#'   \item prior_model - The chosen prior model.
+#'   \item ensemble.params -  Parameters representing the likelihood.
+#'   \item constraint.params -  Parameters representing the constraints.
+#'   \item user.params - Parameters representing the user's prior knowledge.
+#'   \item optim.params - Genetic algorithm parameters.
+#' }
 #' @examples
 #' # build a UBayFS model using Wisconsin breast cancer dataset
 #' data(wbc) # dataset
@@ -50,21 +61,26 @@
 #' @import glmnet
 #' @import mRMRe
 #' @import shiny
+#' @importFrom rpart rpart
+#' @importFrom GSelection feature.selection
 #' @export
 
-build.UBaymodel = function(data, target, 															# data + labels
-                       M = 100, tt_split = 0.75, 												# number of train-test-splits, split ratio
-                       nr_features = 10,														# number of features to select by elementary FS
-                       method = "mRMR",
-                       prior_model = "dirichlet",
-                       weights = 1, 														# user weights
-                       constraints = NULL,
-                       block_constraints = NULL,
-                       lambda = 1, 														# constraint strength
-                       optim_method = "GA",
-                       popsize = 50, 														# number of initial candidates (total)
-                       maxiter = 100,
-                       shiny = FALSE){														# elementary FS to use
+build.UBaymodel = function(data,
+                           target,
+                           M = 100,
+                           tt_split = 0.75,
+                           nr_features = 10,
+                           method = "mRMR",
+                           prior_model = "dirichlet",
+                           weights = 1,
+                           constraints = NULL,
+                           block_constraints = NULL,
+                           lambda = 1,
+                           optim_method = "GA",
+                           popsize = 50,
+                           maxiter = 100,
+                           decorr = 0.5,
+                           shiny = FALSE){
 
   # check input
   if(!is.matrix(data)){
@@ -164,7 +180,7 @@ build.UBaymodel = function(data, target, 															# data + labels
         rf_data = as.data.frame(cbind(train_labels, train_data))
         colnames(rf_data) <- make.names(colnames(rf_data))
         tree = rpart::rpart(train_labels~., data = rf_data)
-        ranks = which(colnames(train_data) %in% names(rpart:::importance(tree))[1:nr_features])
+        ranks = which(colnames(train_data) %in% names(tree$variable.importance)[1:nr_features])
       }
 
       else{
@@ -219,3 +235,96 @@ build.UBaymodel = function(data, target, 															# data + labels
 
   return(obj)
 }
+
+
+#' Check whether an object is a UBaymodel.
+#' @description perform consistency checks of a UBaymodel
+#' @param x an object to be checked for class consistency
+#' @export
+
+is.UBaymodel <- function(x){
+  return(class(x) == "UBaymodel")
+}
+
+
+#' Set optimization parameters in UBaymodel object
+#' @description Set the optimization parameters in a UBaymodel object.
+#' @param model a UBaymodel object created using build.UBaymodel
+#' @param method the method to evaluate the posterior distribution. Options "GA" (genetic algorithm) and "MH" (Metropolis-Hastrings MCMC) are supported.
+#' @param popsize size of the initial population of the genetic algorithm for model optimization
+#' @param maxiter maximum number of iterations of the genetic algorithm for model optimization
+#' @return a UBaymodel object with updated optimization parameters
+#' @seealso build.UBaymodel
+#' @export
+
+setOptim = function(model, method = "GA", popsize, maxiter){
+
+  if(class(model) != "UBaymodel"){
+    stop("Wrong class of model")
+  }
+
+  if(is.null(method) | !(method %in% c("GA", "MH"))){
+    stop("Error: method not supported")
+  }
+
+  if(popsize < 10 | maxiter < 10){
+    stop("Error: popsize or maxiter < 10 does not make sense")
+  }
+
+  model$optim.params <- list(method = method,
+                             popsize = popsize,
+                             maxiter = maxiter)
+
+  return(model)
+}
+
+#' Set weights in UBaymodel object
+#' @description Set the prior weights in a UBaymodel object.
+#' @param model a UBaymodel object created using build.UBaymodel
+#' @param weights the vector of user-defined prior weights for each feature
+#' @param block_list the list of feature indices for each block; only required, if block-wise weights are specified and block_matrix is NULL
+#' @param block_matrix the matrix containing affiliations of features to each block; only required, if block-wise weights are specified and block_list is NULL
+#' @return a UBaymodel object with updated prior weights
+#' @seealso build.UBaymodel
+#' @export
+
+setWeights = function(model, weights, block_list = NULL, block_matrix = NULL){
+
+  if(class(model) != "UBaymodel"){
+    stop("Wrong class of model")
+  }
+
+  if(is.null(weights)){
+    stop("Error: weights cannot be empty")
+  }
+
+
+  if(!is.null(block_matrix) | !is.null(block_list)){
+    if(is.null(block_matrix)){
+      block_matrix = matrix(0, nrow = length(block_list), ncol = max(unlist(block_list)))
+      for(i in 1:length(block_list)){
+        block_matrix[i,block_list[[i]]] <- 1
+      }
+    }
+    if(nrow(block_matrix) != length(weights)){
+      stop("Error: wrong length of weights vector: must match number of blocks, if block_matrix or block_list are provided")
+    }
+    weights = as.vector(t(block_matrix) %*% weights)
+  }
+
+  if((length(weights) > 1) & (length(weights) != ncol(model$data))){
+    stop("Error: length of prior weights does not match data matrix")
+  }
+  else if(length(weights) == 1){
+    weights = rep(weights, ncol(model$data))
+  }
+
+  if(any(weights <= 0)){
+    stop("Error: weights must be positive")
+  }
+
+  model$user.params$weights = weights
+
+  return(model)
+}
+

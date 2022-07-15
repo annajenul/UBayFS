@@ -1,5 +1,5 @@
 #' Build constraint system
-#' @description builds a inequation system from constraints provided by the user
+#' @description Build am inequation system from constraints provided by the user.
 #' @details The function transforms user information about relations between features (must-link or cannot-link constraints) and maximum feature set size (max-size) into a linear inequation system. In addition, the relaxation paramter rho can be specified to achieve soft constraints.
 #' @param constraint_types a vector of strings denoting the type of constraint to be added; options: "max_size", "must_link", "cannot_link"
 #' @param constraint_vars a list of parameters defining the constraints; in case of max-size constraints, the list element must contain an integer denoting the maximum size of the feature set, in case of max-link or cannot link, the list element must be a vector of feature indices to be linked
@@ -7,7 +7,7 @@
 #' @param rho a positive parameter denoting the level of relaxation; Inf denotes no relaxation
 #' @param block_list the list of feature indices for each block; only required, if block-wise constraints are built and block_matrix is NULL
 #' @param block_matrix the matrix containing affiliations of features to each block; only required, if block-wise constraints are built and block_list is NULL
-#' @return a list constaining a matrix A and a vector b representing the inequality system Ax<=b, and a vector rho
+#' @return A list containing a matrix A and a vector b representing the inequality system Ax<=b, and a vector rho.
 #' @examples
 #' # given a dataset with 10 features, we create a max-size constraint limiting
 #' # the set to 5 features and a cannot-link constraint between features 1 and 2
@@ -121,3 +121,161 @@ buildConstraints = function(constraint_types, constraint_vars, num_elements, rho
     const
   )
 }
+
+
+
+#' build decorrelation constraints
+#' @description build a cannot link constraint between highly correlated features. The user defines the correlation threshold.
+#' @param data the dataset in the UbayFS model.
+#' @param level the threshold correlation-level
+#' @param method the method used to compute correlation. Must be one of "pearson", "spearman" or "kendall".
+#' @return A list containing a matrix A and a vector b representing the inequality system Ax<=b, a vector rho and a block matrix.
+#' @export
+
+buildDecorrConstraints = function(data, level = 0.5, method = "spearman"){
+
+  corr_matrix = cor(data, method = method)
+  corr_matrix <- abs(corr_matrix)
+  num_features = ncol(corr_matrix)
+
+  A_corr <- matrix(0, nrow = choose(num_features, 2), ncol = num_features)
+  A_corr[cbind(rep(1:choose(num_features,2), each = 2), as.vector(combn(num_features,2)))] <- 1
+  b_corr <- rep(1, choose(num_features, 2))
+  rho_corr <- corr_matrix[lower.tri(corr_matrix)]
+
+  #restrict to positive rho
+  pos_corr <- rho_corr > level
+  A_corr <- A_corr[pos_corr,]
+
+  if(is.vector(A_corr)){A_corr = t(A_corr)}
+
+  b_corr <- b_corr[pos_corr]
+  rho_corr <- rho_corr[pos_corr]
+  rho_corr <- rho_corr / (1-rho_corr)# logit function # TODO: transform for level != 0.5!
+
+  const <- list(A = A_corr,
+                b = b_corr,
+                rho = rho_corr,
+                block_matrix = NULL)
+
+  return(
+    const
+  )
+}
+
+
+#' Checks whether a list object implements proper UBayFS user constraints.
+#' @param x UBayFS model
+#' @return boolean value
+checkConstraints <- function(x){
+
+  if(is.null(x)){
+    return(TRUE)
+  }
+
+  if(!is.list(x)){
+    return(FALSE)
+  }
+
+  A = x$A
+  b = x$b
+  rho = x$rho
+
+  if(!is.null(A) | !is.null(b) | !is.null(rho)){
+    if(nrow(A) != length(b) | length(b) != length(rho)){
+      return(FALSE)
+    }
+  }
+
+  return(TRUE)
+
+}
+
+
+#' Set constraints in UBaymodel object.
+#' @description sets the constraints in a UBaymodel object
+#' @param model a UBaymodel object created using build.UBaymodel
+#' @param constraints a list containing a relaxed system Ax<=b of user constraints, given as matrix A, vector b and vector or scalar rho (relaxation parameters); see buildConstraints function
+#' @param append if TRUE, constraints are appended to the existing constraint system
+#' @return a UBaymodel object with updated constraint parameters
+#' @seealso build.UBaymodel
+#' @export
+
+setConstraints = function(model, constraints, append = FALSE){
+
+  if(class(model) != "UBaymodel"){
+    stop("Error: wrong class of model")
+  }
+
+  if(!checkConstraints(constraints)){
+    stop("Error: inconsistent constraints provided")
+  }
+
+  if(!is.null(constraints)){
+    if(ncol(model$data) != ncol(constraints$A)){
+      stop("Error: inconsistent constraints provided")
+    }
+  }
+
+  if(append){
+    const = model$constraint.params$constraints
+    constraints = list(A = rbind(const$A, constraints$A),
+                       b = c(const$b, constraints$b),
+                       rho = c(const$rho, constraints$rho),
+                       block_matrix = const$block_matrix)
+    #const <- model$user.params$constraints
+    #constraints$A <- rbind(const$A, constraints$A)
+    #constraints$b <- c(const$b, constraints$b)
+    #constraints$rho <- c(const$rho, constraints$rho)
+    #constraints$block_matrix <- rbind(const$block_matrix, constraints$block_matrix)
+  }
+  model$constraint.params$constraints = constraints
+
+  return(model)
+}
+
+
+#' Set block constraints in UBaymodel object.
+#' @description sets the block constraints in a UBaymodel object
+#' @param model a UBaymodel object created using build.UBaymodel
+#' @param constraints a list containing a relaxed system Ax<=b of user constraints on feature blocks, given as matrix A, vector b and vector or scalar rho (relaxation parameters); see buildConstraints function
+#' @param append whether the constraint should be appended to previous constraints or overwrite...
+#' @return a UBaymodel object with updated constraint parameters
+#' @seealso build.UBaymodel
+#' @export
+
+setBlockConstraints = function(model, constraints, append = FALSE){
+
+  if(class(model) != "UBaymodel"){
+    stop("Error: wrong class of model")
+  }
+
+  if(!checkConstraints(constraints)){
+    stop("Error: inconsistent constraints provided")
+  }
+
+  if(!is.null(constraints)){
+    if(ncol(model$data) != ncol(constraints$block_matrix)){
+      stop("Error: inconsistent constraints provided")
+    }
+    if(nrow(constraints$block_matrix) != ncol(constraints$A)){
+      stop("Error: inconsistent constraints provided")
+    }
+  }
+
+  if(!is.null(model$constraint.params$block_constraints$block_matrix) && model$constraint.params$block_constraints$block_matrix != constraints$block_matrix){
+    stop("Error: block matrix must match previously defined blocks")
+  }
+
+  if(append){
+    const = model$constraint.params$block_constraints
+    constraints = list(A = rbind(const$A, constraints$A),
+                       b = c(const$b, constraints$b),
+                       rho = c(const$rho, constraints$rho),
+                       block_matrix = constraints$block_matrix)
+  }
+  model$constraint.params$block_constraints = constraints
+
+  return(model)
+}
+

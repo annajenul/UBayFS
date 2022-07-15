@@ -49,6 +49,9 @@ In this vignette we use the Wisconsin breast cancer dataset [@wolberg:wisconsin]
 - utils
 - ggplot2
 - ggpubr
+- utils
+- knitr
+- hyper2
 
 In addition, some functionality of the package (in particular, the interactive Shiny interface) requires the following depedencies:
 
@@ -151,7 +154,20 @@ model = build.UBaymodel(data = wbc$data,
                         M = 100, 
                         tt_split = 0.75,
                         nr_features = 10,
-                        method = "mRMR")
+                        method = "mRMR",
+                        prior_model ="dirichlet",
+                        weights = 0.01,
+                        lambda = 1,
+                        constraints = buildConstraints(constraint_types = c("max_size"), 
+                                                       constraint_vars = list(3), 
+                                                       num_elements = dim(wbc$data)[2], 
+                                                       rho = list(1)),
+                        block_constraints = NULL,
+                        optim_method = "GA",
+                        popsize = 100,
+                        maxiter = 100,
+                        shiny = FALSE
+                        )
 summary(model)
 ```
 ## User knowledge

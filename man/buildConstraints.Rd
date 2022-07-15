@@ -27,10 +27,10 @@ buildConstraints(
 \item{block_matrix}{the matrix containing affiliations of features to each block; only required, if block-wise constraints are built and block_list is NULL}
 }
 \value{
-a list constaining a matrix A and a vector b representing the inequality system Ax<=b, and a vector rho
+A list containing a matrix A and a vector b representing the inequality system Ax<=b, and a vector rho.
 }
 \description{
-builds a inequation system from constraints provided by the user
+Build am inequation system from constraints provided by the user.
 }
 \details{
 The function transforms user information about relations between features (must-link or cannot-link constraints) and maximum feature set size (max-size) into a linear inequation system. In addition, the relaxation paramter rho can be specified to achieve soft constraints.

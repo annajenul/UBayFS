@@ -2,20 +2,30 @@
 % Please edit documentation in R/evaluateFS.R
 \name{evaluateFS}
 \alias{evaluateFS}
-\title{evaluate feature set}
+\alias{evaluateMultiple}
+\title{Evaluate feature set}
 \usage{
 evaluateFS(state, model, method = "spearman", log = TRUE)
+
+evaluateMultiple(state, model, method = "spearman", log = TRUE)
 }
 \arguments{
 \item{state}{a binary membership vector describing a feature set}
 
 \item{model}{a UBaymodel object created using build.UBaymodel}
 
+\item{method}{type of correlation}
+
 \item{log}{whether the admissibility should be returned on log scale}
 }
 \value{
-a posterior probability value
+A posterior probability value.
 }
 \description{
-evaluates a feature set under the UBayFS model framework
+Evaluates a feature set under the UBayFS model framework
 }
+\section{Functions}{
+\itemize{
+\item \code{evaluateMultiple}: evaluate multiple feature sets
+}}
+

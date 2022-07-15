@@ -17,14 +17,14 @@ Imports: GA,
          Rdimtools,
          caret,
          DirichletReg,
-         dplyr,
-         plyr,
          glmnet,
          ggplot2,
          ggpubr,
          utils,
-         knitr,
-         hyper2
+         hyper2,
+         rpart,
+         GSelection,
+         knitr
 Suggests: 
     shinyWidgets,
     DT,
@@ -34,8 +34,9 @@ Suggests:
     shinythemes,
     shinyBS,
     testthat (>= 3.0.0),
-    knitr,
     rmarkdown,
-    prettydoc
+    prettydoc,
+    dplyr,
+    plyr
 Config/testthat/edition: 3
 VignetteBuilder: knitr

@@ -3,12 +3,12 @@ library(UBayFS)
 test_that("correct results in train.UBaymodel",{
 
   set.seed(1)
-  data(wbc) # dataset
-  c <- buildConstraints("max_size", list(10), ncol(wbc$data), rho = 1) # prior constraints
-  w <- rep(1, ncol(wbc$data)) # weights
+  data(bcw) # dataset
+  c <- buildConstraints("max_size", list(10), ncol(bcw$data), rho = 1) # prior constraints
+  w <- rep(1, ncol(bcw$data)) # weights
   model <- build.UBaymodel(
-    data = wbc$data,
-    target = wbc$labels,
+    data = bcw$data,
+    target = bcw$labels,
     constraints = c,
     block_constraint = NULL,
     weights = w,

@@ -29,16 +29,16 @@
 #'   \item optim.params - Genetic algorithm parameters.
 #' }
 #' @examples
-#' # build a UBayFS model using Wisconsin breast cancer dataset
-#' data(wbc) # dataset
+#' # build a UBayFS model using Breast Cancer Wisconsin dataset
+#' data(bcw) # dataset
 #' c <- buildConstraints(constraint_types = "max_size",
 #'                       constraint_vars = list(10),
-#'                       num_elements = ncol(wbc$data),
+#'                       num_elements = ncol(bcw$data),
 #'                       rho = 1) # prior constraints
-#' w <- rep(1, ncol(wbc$data)) # weights
+#' w <- rep(1, ncol(bcw$data)) # weights
 #' model <- build.UBaymodel(
-#'                      data = wbc$data,
-#'                      target = wbc$labels,
+#'                      data = bcw$data,
+#'                      target = bcw$labels,
 #'                      constraints = c,
 #'                      weights = w
 #' )
@@ -46,12 +46,12 @@
 #' # include block-constraints
 #' c_block <- buildConstraints(constraint_types = "max_size",
 #'                             constraint_vars = list(2),
-#'                             num_elements = length(wbc$blocks),
+#'                             num_elements = length(bcw$blocks),
 #'                             rho = 10,
-#'                             block_list = wbc$blocks)
+#'                             block_list = bcw$blocks)
 #' model <- build.UBaymodel(
-#'                      data = wbc$data,
-#'                      target = wbc$labels,
+#'                      data = bcw$data,
+#'                      target = bcw$labels,
 #'                      constraints = c,
 #'                      block_constraints = c_block,
 #'                      weights = w
@@ -112,7 +112,7 @@ build.UBaymodel = function(data,
   # initialize matrix
   ensemble_matrix = c()
   family = ifelse(is.factor(target), "binomial", "gaussian")
-  if(method %in% c("lasso", "LASSO")){cv.lasso <- cv.glmnet(as.matrix(data), target, intercept = FALSE, alpha = 1, family = family, nfolds=3)}
+  if(any(method %in% c("lasso", "LASSO"))){cv.lasso <- cv.glmnet(as.matrix(data), target, intercept = FALSE, alpha = 1, family = family, nfolds=3)}
 
   for(i in 1:M){																				# perform M runs
 
@@ -131,7 +131,6 @@ build.UBaymodel = function(data,
 
     # generate elementary FS
     for(f in method){
-
       if(f %in% c("laplace", "Laplacian score")){												# type: Laplacian score
         ranks = do.lscore(train_data,ndim = nr_features)$featidx									# use do.lscore function (package Rdimtools)
       }

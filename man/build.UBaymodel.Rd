@@ -76,16 +76,16 @@ builds a data structure for UBayFS and trains an ensemble of elementary feature 
 The function aggregates input parameters for UBayFS - including data, parameters defining ensemble and user knowledge and parameters specifying the optimization procedure - and trains the ensemble model
 }
 \examples{
-# build a UBayFS model using Wisconsin breast cancer dataset
-data(wbc) # dataset
+# build a UBayFS model using Breast Cancer Wisconsin dataset
+data(bcw) # dataset
 c <- buildConstraints(constraint_types = "max_size",
                       constraint_vars = list(10),
-                      num_elements = ncol(wbc$data),
+                      num_elements = ncol(bcw$data),
                       rho = 1) # prior constraints
-w <- rep(1, ncol(wbc$data)) # weights
+w <- rep(1, ncol(bcw$data)) # weights
 model <- build.UBaymodel(
-                     data = wbc$data,
-                     target = wbc$labels,
+                     data = bcw$data,
+                     target = bcw$labels,
                      constraints = c,
                      weights = w
 )
@@ -93,12 +93,12 @@ model <- build.UBaymodel(
 # include block-constraints
 c_block <- buildConstraints(constraint_types = "max_size",
                             constraint_vars = list(2),
-                            num_elements = length(wbc$blocks),
+                            num_elements = length(bcw$blocks),
                             rho = 10,
-                            block_list = wbc$blocks)
+                            block_list = bcw$blocks)
 model <- build.UBaymodel(
-                     data = wbc$data,
-                     target = wbc$labels,
+                     data = bcw$data,
+                     target = bcw$labels,
                      constraints = c,
                      block_constraints = c_block,
                      weights = w

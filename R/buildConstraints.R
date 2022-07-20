@@ -237,11 +237,7 @@ setConstraints = function(model, constraints, append = FALSE){
 
 #' Set block constraints in UBaymodel object.
 #' @description sets the block constraints in a UBaymodel object
-#' @param model a UBaymodel object created using build.UBaymodel
-#' @param constraints a list containing a relaxed system Ax<=b of user constraints on feature blocks, given as matrix A, vector b and vector or scalar rho (relaxation parameters); see buildConstraints function
-#' @param append whether the constraint should be appended to previous constraints or overwrite...
-#' @return a UBaymodel object with updated constraint parameters
-#' @seealso build.UBaymodel
+#' @describeIn setConstraints  sets the block constraints in a UBaymodel object
 #' @export
 
 setBlockConstraints = function(model, constraints, append = FALSE){

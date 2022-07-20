@@ -137,5 +137,4 @@ posteriorExpectation <- function(model){
   }
 
   return(post_scores)
-
 }

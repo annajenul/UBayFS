@@ -98,7 +98,7 @@ shinyUI(fluidPage(
                                             bsTooltip("input_blocks", "Are block names provided in row 1 (without rownames) or row 2 (with rownames) of your input files?")
                                         ),
                                         tabPanel("demo",
-                                            h5("Wisconsin breast cancer"),
+                                            h5("Breast Cancer Wisconsin"),
                                             fluidRow(
                                                 actionButton("demo_data","load data"),
                                                 align = "center",

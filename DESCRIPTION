@@ -27,6 +27,7 @@ Imports: GA,
          knitr
 Suggests: 
     shinyWidgets,
+    shinyalert,
     DT,
     RColorBrewer,
     tcltk,

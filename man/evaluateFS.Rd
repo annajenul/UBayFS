@@ -14,7 +14,7 @@ evaluateMultiple(state, model, method = "spearman", log = TRUE)
 
 \item{model}{a UBaymodel object created using build.UBaymodel}
 
-\item{method}{type of correlation}
+\item{method}{type of correlation ("pearson","kendall", or "spearman")}
 
 \item{log}{whether the admissibility should be returned on log scale}
 }

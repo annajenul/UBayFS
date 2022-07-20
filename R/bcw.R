@@ -1,4 +1,4 @@
-#' Wisconsin breast cancer dataset
+#' Breast Cancer Wisconsin dataset
 #'
 #' A dataset containing features computed from digitized images of a fine needle aspirate (FNA) of a breast mass.
 #' The target function contains two classes representing patient diagnoses (M...malignant and B...benign).
@@ -17,4 +17,4 @@
 #'         \item{a list of feature indices representing feature blocks.}
 #'        }
 #' @source \url{ftp://ftp.ics.uci.edu/pub/machine-learning-databases}
-"wbc"
+"bcw"

@@ -1,4 +1,5 @@
 library(shiny)
+library(shinyalert)
 library(DT)
 library(ggplot2)
 library(tcltk)
@@ -163,8 +164,8 @@ shinyServer(function(input, output, session) {
     })
 
     observeEvent(input$demo_data,{
-      data(wbc)
-      dat <- wbc
+      data(bcw)
+      dat <- bcw
 
       model(append(model(), list(data = dat$data)))
       model(append(model(), list(target = dat$labels)))
@@ -208,6 +209,8 @@ shinyServer(function(input, output, session) {
 
     # === LIKELIHOOD INPUT HANDLING ===
     observeEvent(input$confirmParam, {
+      print(input$method)
+      print(is.vector(input$method))
       withProgress(min = 0, max = 1, value = 0, message = "building elementary models", {
         tryCatch({model(UBayFS::build.UBaymodel(model()$data,
                                      model()$target,
@@ -269,7 +272,9 @@ shinyServer(function(input, output, session) {
         if(class(model()) == "UBaymodel"){
           if(any(sapply(names(input), grepl, pattern = "blockweight"))){
           blockweights <- sapply(paste0("blockweight_", unique(blocks())), function(x){return(input[[x]])})
-          addWeights(as.numeric(blockweights))
+          if(!any(is.na(as.integer(blockweights))) && all(blockweights>0)){addWeights(as.numeric(blockweights))}
+          else if(any(blockweights<=0)){shinyalert("All weights must be >0", type="error")}
+
           }
         }
       }
@@ -284,18 +289,13 @@ shinyServer(function(input, output, session) {
 
     observeEvent(optim_expressions(), {
       if(!is.null(model())){
-        if(grepl(input$optim_method, pattern = "(MH)")){
-          optim_method = "MH"
-        }
-        else{
           optim_method = "GA"
-        }
-        if(class(model()) == "UBaymodel"){
+      }
+      if(class(model()) == "UBaymodel"){
           model(setOptim(model(),
                          method = optim_method,
                          popsize = input$popsize,
                          maxiter = input$maxiter))
-        }
       }
     })
 
@@ -549,7 +549,7 @@ shinyServer(function(input, output, session) {
 
     output$rho_plot <- renderPlot({
       x <- seq(-10,10,by = 0.01)
-      ggplot2::ggplot(data = data.frame(x = x, y = sapply(x, admissibility, constraints = list( A = matrix(1, nrow = 1, ncol = 1), b = 0, rho = input$rho), log = FALSE)),
+      ggplot2::ggplot(data = data.frame(x = x, y = 1 - sapply(x, admissibility, constraints = list( A = matrix(1, nrow = 1, ncol = 1), b = 0, rho = input$rho), log = FALSE)),
                       aes(x = x, y = y, group = 1)) +
         geom_line() +
         xlab(label = "ax-b") +
@@ -559,7 +559,7 @@ shinyServer(function(input, output, session) {
 
     output$rho_block_plot <- renderPlot({
       x <- seq(-10,10,by = 0.01)
-      ggplot2::ggplot(data = data.frame(x = x, y = sapply(x, admissibility, constraints = list( A = matrix(1, nrow = 1, ncol = 1), b = 0, rho = input$rho_block), log = FALSE)),
+      ggplot2::ggplot(data = data.frame(x = x, y = 1 - sapply(x, admissibility, constraints = list( A = matrix(1, nrow = 1, ncol = 1), b = 0, rho = input$rho_block), log = FALSE)),
                       aes(x = x, y = y, group = 1)) +
         geom_line() +
         xlab(label = "ax-b") +
@@ -599,7 +599,10 @@ shinyServer(function(input, output, session) {
       column(12,
         pickerInput("method", "select elementary filter(s)",
                   choices = c("mRMR",
-                              "Laplacian score"),
+                              "Laplacian score",
+                              "lasso",
+                              "rfe",
+                              "fisher"),
                   selected = sel_method,
                   multiple = TRUE),
         bsTooltip("method", "Select the feature selection method type(s) to be used for elementary feature selector"),
@@ -641,8 +644,7 @@ shinyServer(function(input, output, session) {
 
     output$fs_sliders <- renderUI({
 
-      optim_method_choices <- c("Genetic Algorithm (GA)",
-                                "Metropolis-Hastings Algorithm (MH)")
+      optim_method_choices <- c("Genetic Algorithm (GA)")
       optim_method_choices_short <- c("GA", "MH")
       popsize_choices <- c(10, 20, 50, 100, 500, 1000, 5000)
       maxiter_choices <- c(10, 20, 30, 40, 50,
@@ -664,10 +666,10 @@ shinyServer(function(input, output, session) {
                          selected = sel_optim_method,
                          multiple = FALSE),
         bsTooltip("optim_method", "Select the method to be used for optimizing the feature set"),
-        sliderTextInput("popsize", withMathJax('$$q$$'), choices = popsize_choices,
+        sliderTextInput("popsize", "sample size", choices = popsize_choices,
                         selected = sel_popsize),
         bsTooltip("popsize", "Select the full size of the initial population in the optimization/sampling algorithm"),
-        sliderTextInput("maxiter", withMathJax('$$T$$'), choices = maxiter_choices,
+        sliderTextInput("maxiter", "no. iterations", choices = maxiter_choices,
                         selected = sel_maxiter),
         bsTooltip("maxiter", "Select the maximum number of iterations used in the optimization/sampling algorithm")
       )

@@ -1,67 +1,67 @@
 library(UBayFS)
 
 test_that("loading demo dataset is possible",{
-  data(wbc)
-  expect_equal(names(wbc), c("data", "labels","blocks"))
-  expect_equal(dim(wbc$data), c(569, 30))
-  expect_equal(length(wbc$labels), 569)
+  data(bcw)
+  expect_equal(names(bcw), c("data", "labels","blocks"))
+  expect_equal(dim(bcw$data), c(569, 30))
+  expect_equal(length(bcw$labels), 569)
 })
 
 test_that("correct input types in build.UBaymodel",{
 
-  data(wbc) # dataset
-  c <- buildConstraints("max_size", list(10), ncol(wbc$data), rho = 1) # prior constraints
-  w <- rep(1, ncol(wbc$data)) # weights
+  data(bcw) # dataset
+  c <- buildConstraints("max_size", list(10), ncol(bcw$data), rho = 1) # prior constraints
+  w <- rep(1, ncol(bcw$data)) # weights
 
   # run with wrong input
   expect_error(build.UBaymodel(
      data = NULL,
-     target = wbc$labels,
+     target = bcw$labels,
      constraints = c,
      weights = w
   ))
   expect_error(build.UBaymodel(
-    data = wbc$data,
+    data = bcw$data,
     target = NULL,
     constraints = c,
     weights = w
   ))
   expect_error(build.UBaymodel(
-    data = wbc$data,
-    target = wbc$labels,
+    data = bcw$data,
+    target = bcw$labels,
     constraints = 1,
     weights = w
   ))
   expect_error(build.UBaymodel(
     data = NULL,
-    target = wbc$labels,
+    target = bcw$labels,
     constraints = c,
     weights = -3
   ))
   expect_error(build.UBaymodel(
     data = NULL,
-    target = wbc$labels,
+    target = bcw$labels,
     constraints = c,
     weights = w,
     M = 0
   ))
   expect_error(build.UBaymodel(
     data = NULL,
-    target = wbc$labels,
+    target = bcw$labels,
     constraints = c,
     weights = w,
     tt_split = 1
   ))
   expect_error(build.UBaymodel(
     data = NULL,
-    target = wbc$labels,
+    target = bcw$labels,
     constraints = c,
     weights = w,
     nr_features = 0
   ))
   expect_error(build.UBaymodel(
     data = NULL,
-    target = wbc$labels,
+    target = bcw$labels,
     constraints = c,
     weights = w,
     method = "none"
@@ -72,18 +72,18 @@ test_that("correct input types in build.UBaymodel",{
 test_that("ensemble is trained correctly",{
 
   set.seed(1)
-  data(wbc) # dataset
+  data(bcw) # dataset
 
   model <- build.UBaymodel(
-    data = wbc$data,
-    target = wbc$labels,
+    data = bcw$data,
+    target = bcw$labels,
   )
   expect_equal(unname(model$ensemble.params$output$counts),
                c(0, 10, 74, 0, 0, 0, 100, 100, 0, 0, 0, 0, 6, 100, 0, 0, 6, 0, 0, 0, 100, 86, 100, 100, 2, 16, 100, 100, 0, 0))
 
   model <- build.UBaymodel(
-    data = wbc$data,
-    target = wbc$labels,
+    data = bcw$data,
+    target = bcw$labels,
     tt_split = 0.9,
     nr_features = 2,
   )
@@ -91,8 +91,8 @@ test_that("ensemble is trained correctly",{
                c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100, 0, 0, 0, 0, 100, 0, 0))
 
   model <- build.UBaymodel(
-    data = wbc$data,
-    target = wbc$labels,
+    data = bcw$data,
+    target = bcw$labels,
     M = 10,
     method = "Laplacian score",
   )

@@ -1,0 +1,77 @@
+---
+title: "Block feature selection with UBayFS"
+author: "Anna Jenul, Stefan Schrunner, Oliver Tomic,  Jürgen Pilz"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+<style>
+  body {
+  text-align: justify;
+  padding: 1em}
+</style>
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Intro Block feature selection
+grouplasso,...
+
+```{r, include = TRUE, cache = TRUE}
+library(UBayFS)
+data(bcw)
+```
+
+
+
+```{r, include = TRUE}
+
+
+block_list = list()
+block_list[[1]] = c(1:10)
+block_list[[2]] = c(11:20)
+block_list[[3]] = c(21:30)
+
+blocks = rep(c(1,2,3), each = 10)					# block structure of WBC dataset
+
+build_block_weights = function(blocks, weights){
+	return(weights[blocks])
+}
+
+model = build.UBaymodel(data = bcw$data,
+                        target = bcw$labels,
+                        M = 100, 
+                        tt_split = 0.75,
+                        nr_features = 10,
+                        method = "mRMR",
+                        prior_model ="dirichlet",
+                        weights = 0.01,
+                        lambda = 1,
+                        constraints = buildConstraints(constraint_types = c("max_size"), 
+                                                       constraint_vars = list(3), 
+                                                       num_elements = dim(bcw$data)[2], 
+                                                       rho = 1),
+                        block_constraints = buildConstraints("max_size", list(1), 3, rho=1, block_list = block_list),
+                        optim_method = "GA",
+                        popsize = 100,
+                        maxiter = 100,
+                        shiny = FALSE
+                        )
+summary(model)
+
+
+model = train(model)
+summary(model)
+plot(model)
+
+#evaluateFS(state = unlist(model$output$feature_set), model = model)
+#admissibility(state = unlist(model$output$feature_set), constraints = constraints)
+```

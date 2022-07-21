@@ -4,3 +4,5 @@
 .Ruserdata
 NAMESPACE
 HD_UBay.Rdata
+vignettes/UBayFS_cache
+UBayFS.html

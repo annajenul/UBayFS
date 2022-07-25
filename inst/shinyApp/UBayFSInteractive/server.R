@@ -168,7 +168,7 @@ shinyServer(function(input, output, session) {
       dat <- bcw
 
       model(append(model(), list(data = dat$data)))
-      model(append(model(), list(target = dat$labels)))
+      model(append(model(), list(target = as.factor(dat$labels))))
 
       block_vec <- rep(0, ncol(dat$data))
       for(i in 1:length(dat$blocks)){
@@ -209,8 +209,6 @@ shinyServer(function(input, output, session) {
 
     # === LIKELIHOOD INPUT HANDLING ===
     observeEvent(input$confirmParam, {
-      print(input$method)
-      print(is.vector(input$method))
       withProgress(min = 0, max = 1, value = 0, message = "building elementary models", {
         tryCatch({model(UBayFS::build.UBaymodel(model()$data,
                                      model()$target,

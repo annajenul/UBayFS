@@ -256,8 +256,6 @@ shinyUI(fluidPage(
         column(6,
             div(strong("Anna Jenul"), "<", a("anna.jenul@nmbu.no", href = "mailto:anna.jenul@nmbu.no"),">"),
             div(strong("Stefan Schrunner"), "<", a("stefan.schrunner@nmbu.no", href = "mailto:stefan.schrunner@nmbu.no"),">"),
-            div(strong("Oliver Tomic"), "<", a("oliver.tomic@nmbu.no", href = "mailto:oliver.tomic@nmbu.no"),">"),
-            div(strong("Jürgen Pilz"), "<", a("juergen.pilz@aau.at", href = "mailto:juergen.pilz@aau.at"),">"),
             align = "left",
             style = "padding-top: 10px"
         ),

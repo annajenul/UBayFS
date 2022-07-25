@@ -22,11 +22,14 @@ vignette: >
 
 
 ```{r, include = FALSE}
+library(knitr)
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-library(knitr)
+knitr::opts_chunk$set(fig.height = 5)
+knitr::opts_chunk$set(fig.width = 8)
+knitr::opts_chunk$set(fig.align = 'center')
 ```
 
 
@@ -228,7 +231,7 @@ plot(model)
 
 The final feature set and its admissibility can be evaluated with ``evaluateFS()`` and ``admissibility()``:
 ```{r, include=TRUE}
-#evaluateFS(state = unlist(model$output$feature_set), model = model)
+evaluateMultiple(state = model$output$feature_set, model = model)
 #admissibility(state = unlist(model$output$feature_set), constraints = constraints)
 ```
 ## Shiny dashboard

@@ -204,8 +204,6 @@ sampleInitial <- function(post_scores, constraints, block_constraints, size){
     return(x)
   }))
 
-  #return(unique(x_start)) # unique removes duplicated rows (feature sets) before returning
-
   #always add feature set with best scores
   ms <- constraints$b[which(apply(constraints$A == 1, 1, all))]
   if(is.numeric(ms)){

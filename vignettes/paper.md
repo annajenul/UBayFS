@@ -1,11 +1,8 @@
 ---
-title: 'Gala: A Python package for galactic dynamics'
+title: 'UBayFS'
 tags:
-  - Python
-  - astronomy
-  - dynamics
-  - galactic dynamics
-  - milky way
+  - R
+  - feature selection
 authors:
   - name: Anna Jenul
     orcid: 0000-0002-6919-3483

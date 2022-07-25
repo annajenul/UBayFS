@@ -37,8 +37,11 @@ The must-link constraints make the final feature selection set more stable, mean
 # Concept and structure of UBayFS
 
 Based on the Bayes theorem two random variables $\theta$ representing the unknown feature importances and $y$ representing the distribution of the data over ensembles
+
 $$p(\theta|y)\propto p(y|\theta)\cdot p(\theta),$$
+
 UBayFS consists of a data-driven part $p(y|\theta)$ (multinomial likelihood) and the user knowledge as prior $p(\theta)$(Dirichlet distributed prior). As the Dirichlet distribution is the conjugated prior for a multinomal likelihood , the posterior distribution is Dirichlet distributed as well. Similar to the ensemble feature selector RENT [@jenul2021rent] UBayFS builds $M$ ensembles of elementary feature selectors, where each elementary feature selector $1,…,M$ selects features, meaning that the count of each feature is between $0$ (never selected) and $M$ (always selected). In the binary membership vector $\delta^{m}$, a component $\delta_i^m=1$ indicates that feature $i\in\{1,\dots,N\}$ is selected in selection $m$, and $\delta_i^m=0$ otherwise. Statistically, we interpret the result from each elementary feature selector as realization from a multinomial distribution with parameters $\theta$ and $l$, where $\theta\in[0,1]^N$ defines the success probabilities of sampling each feature in an individual feature selection and $l$ corresponds to the number of feature selected in $\delta^{m}$.Constraints are represented as a linear optimization problem $A\cdot \delta-b\leq 0$, where $A\in\mathbb{R}^{K\times N}$ and $b\in\mathbb{R}^K$. $K$ is defined as the total number of constraints. In general, a feature set $\delta$ is admissible only if $\left(a^{(k)}\right)^T\delta - b^{(k)} \leq 0$, according to the inadmissibility function
+
 $$ \kappa_k(\delta) = \left\{\begin{array}{l l}
     0 & \text{if}~ \left(a^{(k)}\right)^T\delta - b^{(k)} \leq 0 \\
     1 & \text{otherwise},\end{array}\right.$$
@@ -57,8 +60,10 @@ $$
     
 where $\rho\in\mathbb{R}^+ \cup {\infty}$ denotes a relaxation parameter and
 $\xi_{k,\rho} = \exp\left(-\rho \left(\left( a^{(k)}\right)^T\delta - b^{(k)}\right)\right)$ defines the exponential term of a logistic function. To handle $K$ different constraints for one feature selection problem, the joint admissibility function is given as
+
 $$ \kappa(\delta)
     = 1 - \prod\limits_{k=1}^{K} \left(1 -\kappa_{k,\rho}(\delta)\right)$$
+
 which originates from the idea that $\kappa = 1$ (maximum penalization) if at least one $\kappa_{k,\rho}=1$, while $\kappa=0$ (no penalization) if all $\kappa_{k,\rho}=0$. 
 
 The target function to select an optimal feature set $\delta$ is given by an expected utility given the posterior parameter $\delta | y$, as well as the inadmissibility function $\kappa(.)$.
@@ -74,16 +79,5 @@ The function `build.UBaymodel()` initializes the UBayFS model and performs ensem
 - published ? 
 
 # Acknowledgements
-
-
-Your paper should include:
-
-    A list of the authors of the software and their affiliations, using the correct format (see the example below).
-    A summary describing the high-level functionality and purpose of the software for a diverse, non-specialist audience.
-    A Statement of need section that clearly illustrates the research purpose of the software and places it in the context of related work.
-    A list of key references, including to other software addressing related needs. Note that the references should include full names of venues, e.g., journals and conferences, not abbreviations only understood in the context of a specific discipline.
-    Mention (if applicable) a representative set of past or ongoing research projects using the software and recent scholarly publications enabled by it.
-    Acknowledgement of any financial support.
-
 
 # References

@@ -5,7 +5,7 @@
 \alias{printResults}
 \alias{summary.UBaymodel}
 \alias{plot.UBaymodel}
-\title{Prints a UBayFS model}
+\title{Print a UBayFS model}
 \usage{
 \method{print}{UBaymodel}(x, ...)
 
@@ -25,13 +25,13 @@ printResults(model)
 \item{object}{a UBaymodel object created using build.UBaymodel}
 }
 \description{
-print details of an UBayFS model
+Print details of a UBayFS model.
 }
 \section{Functions}{
 \itemize{
-\item \code{printResults}: Displays and summarizes the results of UBayFS after feature selection.
+\item \code{printResults}: Display and summarize the results of UBayFS after feature selection.
 
-\item \code{summary.UBaymodel}: A summary of an UBayFS model.
+\item \code{summary.UBaymodel}: A summary of an UBayFS model
 
 \item \code{plot.UBaymodel}: A barplot of an UBayFS model containing prior weights, ensemble counts and the selected features.
 }}

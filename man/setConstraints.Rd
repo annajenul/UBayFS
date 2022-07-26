@@ -3,7 +3,7 @@
 \name{setConstraints}
 \alias{setConstraints}
 \alias{setBlockConstraints}
-\title{Set constraints in UBaymodel object.}
+\title{Set constraints in UBaymodel object}
 \usage{
 setConstraints(model, constraints, append = FALSE)
 
@@ -17,12 +17,12 @@ setBlockConstraints(model, constraints, append = FALSE)
 \item{append}{if TRUE, constraints are appended to the existing constraint system}
 }
 \value{
-a UBaymodel object with updated constraint parameters
+A UBaymodel object with updated constraint parameters
 }
 \description{
-sets the constraints in a UBaymodel object
+Set the constraints in a UBaymodel object.
 
-sets the block constraints in a UBaymodel object
+Set the block constraints in a UBaymodel object.
 }
 \section{Functions}{
 \itemize{

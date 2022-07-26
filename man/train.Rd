@@ -10,7 +10,7 @@ train(x)
 \item{x}{a UBaymodel created by build.UBaymodel}
 }
 \value{
-a UBaymodel with an additional list element output containing the maximum a-posteriori estimate (map)
+A UBaymodel with an additional list element output containing the maximum a-posteriori estimate (map)
 }
 \description{
 Genetic algorithm to train UBayFS feature selection model.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/admissibility.R
 \name{posteriorExpectation}
 \alias{posteriorExpectation}
-\title{Posterior expectation of features.}
+\title{Posterior expectation of features}
 \usage{
 posteriorExpectation(model)
 }

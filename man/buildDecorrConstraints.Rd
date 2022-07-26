@@ -2,20 +2,20 @@
 % Please edit documentation in R/buildConstraints.R
 \name{buildDecorrConstraints}
 \alias{buildDecorrConstraints}
-\title{build decorrelation constraints}
+\title{Build decorrelation constraints}
 \usage{
 buildDecorrConstraints(data, level = 0.5, method = "spearman")
 }
 \arguments{
-\item{data}{the dataset in the UbayFS model.}
+\item{data}{the dataset in the UbayFS model}
 
 \item{level}{the threshold correlation-level}
 
-\item{method}{the method used to compute correlation. Must be one of "pearson", "spearman" or "kendall".}
+\item{method}{the method used to compute correlation; must be one of "pearson", "spearman" or "kendall"}
 }
 \value{
-A list containing a matrix A and a vector b representing the inequality system Ax<=b, a vector rho and a block matrix.
+A list containing a matrix A and a vector b representing the inequality system Ax<=b, a vector rho and a block matrix
 }
 \description{
-build a cannot link constraint between highly correlated features. The user defines the correlation threshold.
+Build a cannot link constraint between highly correlated features. The user defines the correlation threshold.
 }

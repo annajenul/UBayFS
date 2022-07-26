@@ -40,13 +40,13 @@ build.UBaymodel(
 
 \item{weights}{the vector of user-defined prior weights for each feature}
 
-\item{constraints}{a list containing a relaxed system Ax<=b of user constraints, given as matrix A, vector b and vector or scalar rho (relaxation parameters); see buildConstraints function}
+\item{constraints}{a list containing a relaxed system Ax<=b of user constraints, given as matrix A, vector b and vector or scalar rho (relaxation parameters); see buildConstraints function; at least a max-size constraint must be built.}
 
 \item{block_constraints}{a list containing a relaxed system Ax<=b of user constraints on feature blocks, given as matrix A, vector b and vector or scalar rho (relaxation parameters); see buildConstraints function}
 
 \item{lambda}{a positive scalar denoting the overall strength of the constraints}
 
-\item{optim_method}{the method to evaluate the posterior distribution. Options "GA" (genetic algorithm) and "MH" (Metropolis-Hastrings MCMC) are supported.}
+\item{optim_method}{the method to evaluate the posterior distribution. Currently the option "GA" (genetic algorithm) is supportedmode}
 
 \item{popsize}{size of the initial population of the genetic algorithm for model optimization}
 
@@ -59,21 +59,21 @@ build.UBaymodel(
 \value{
 A UBaymodel object containing the following list elements:
 \itemize{
-  \item data - The input dataset.
-  \item target - The input target.
-  \item lambda - The input lambda value (constraint strength).
-  \item prior_model - The chosen prior model.
-  \item ensemble.params -  Parameters representing the likelihood.
-  \item constraint.params -  Parameters representing the constraints.
-  \item user.params - Parameters representing the user's prior knowledge.
-  \item optim.params - Genetic algorithm parameters.
+  \item data - the input dataset
+  \item target - the input target
+  \item lambda - the input lambda value (constraint strength)
+  \item prior_model - the chosen prior model
+  \item ensemble.params -  information about input and output of ensemble feature selection
+  \item constraint.params -  parameters representing the constraints
+  \item user.params - parameters representing the user's prior knowledge
+  \item optim.params - gptimization parameters
 }
 }
 \description{
-builds a data structure for UBayFS and trains an ensemble of elementary feature selectors
+Build a data structure for UBayFS and train an ensemble of elementary feature selectors.
 }
 \details{
-The function aggregates input parameters for UBayFS - including data, parameters defining ensemble and user knowledge and parameters specifying the optimization procedure - and trains the ensemble model
+The function aggregates input parameters for UBayFS - including data, parameters defining ensemble and user knowledge and parameters specifying the optimization procedure - and trains the ensemble model.
 }
 \examples{
 # build a UBayFS model using Breast Cancer Wisconsin dataset

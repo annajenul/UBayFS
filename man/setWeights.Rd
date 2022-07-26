@@ -16,7 +16,7 @@ setWeights(model, weights, block_list = NULL, block_matrix = NULL)
 \item{block_matrix}{the matrix containing affiliations of features to each block; only required, if block-wise weights are specified and block_list is NULL}
 }
 \value{
-a UBaymodel object with updated prior weights
+A UBaymodel object with updated prior weights
 }
 \description{
 Set the prior weights in a UBaymodel object.

@@ -1,7 +1,7 @@
 #' UBayFS feature selection
 #' @description Genetic algorithm to train UBayFS feature selection model.
 #' @param x a UBaymodel created by build.UBaymodel
-#' @return a UBaymodel with an additional list element output containing the maximum a-posteriori estimate (map)
+#' @return A UBaymodel with an additional list element output containing the maximum a-posteriori estimate (map)
 #' @importFrom GA ga
 #' @importFrom DirichletReg ddirichlet
 #' @importFrom matrixStats logSumExp
@@ -121,14 +121,13 @@ train_GA <- function(theta, lambda, constraints, block_constraints, optim_params
   return(list(x_optim, x_start))
 }
 
-#' Initial feature set sampling using probabilistic Greedy algorithm.
+#' Initial feature set sampling using probabilistic Greedy algorithm
 #' @description Sample initial solutions using a probabilistic version of Greedy algorithm.
 #' @param post_scores a vector of posterior scores (prior scores + likelihood) for each feature
 #' @param constraints a list containing feature-wise constraints
 #' @param block_constraints a list containing block-wise constraints
-# @param constraint_dropout_rate rate of dropping constraints in Greedy algorithm
 #' @param size initial number of samples to be created. The output sample size can be lower, since duplicates are removed.
-#' @return a matrix containing initial feature sets as rows.
+#' @return A matrix containing initial feature sets as rows
 
 sampleInitial <- function(post_scores, constraints, block_constraints, size){
 

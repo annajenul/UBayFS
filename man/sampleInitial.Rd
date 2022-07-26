@@ -2,7 +2,7 @@
 % Please edit documentation in R/trainUBaymodel.R
 \name{sampleInitial}
 \alias{sampleInitial}
-\title{Initial feature set sampling using probabilistic Greedy algorithm.}
+\title{Initial feature set sampling using probabilistic Greedy algorithm}
 \usage{
 sampleInitial(post_scores, constraints, block_constraints, size)
 }
@@ -16,7 +16,7 @@ sampleInitial(post_scores, constraints, block_constraints, size)
 \item{size}{initial number of samples to be created. The output sample size can be lower, since duplicates are removed.}
 }
 \value{
-a matrix containing initial feature sets as rows.
+A matrix containing initial feature sets as rows
 }
 \description{
 Sample initial solutions using a probabilistic version of Greedy algorithm.

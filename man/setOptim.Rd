@@ -2,21 +2,21 @@
 % Please edit documentation in R/buildUBaymodel.R
 \name{setOptim}
 \alias{setOptim}
-\title{Set optimization parameters in UBaymodel object}
+\title{Set optimization parameters in a UBaymodel object}
 \usage{
 setOptim(model, method = "GA", popsize, maxiter)
 }
 \arguments{
 \item{model}{a UBaymodel object created using build.UBaymodel}
 
-\item{method}{the method to evaluate the posterior distribution. Options "GA" (genetic algorithm) and "MH" (Metropolis-Hastrings MCMC) are supported.}
+\item{method}{the method to evaluate the posterior distribution; currently only"GA" (genetic algorithm) is supported}
 
 \item{popsize}{size of the initial population of the genetic algorithm for model optimization}
 
 \item{maxiter}{maximum number of iterations of the genetic algorithm for model optimization}
 }
 \value{
-a UBaymodel object with updated optimization parameters
+A UBaymodel object with updated optimization parameters
 }
 \description{
 Set the optimization parameters in a UBaymodel object.

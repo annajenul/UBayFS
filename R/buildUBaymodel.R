@@ -1,6 +1,6 @@
 #' Build an ensemble for UBayFS
-#' @description builds a data structure for UBayFS and trains an ensemble of elementary feature selectors
-#' @details The function aggregates input parameters for UBayFS - including data, parameters defining ensemble and user knowledge and parameters specifying the optimization procedure - and trains the ensemble model
+#' @description Build a data structure for UBayFS and train an ensemble of elementary feature selectors.
+#' @details The function aggregates input parameters for UBayFS - including data, parameters defining ensemble and user knowledge and parameters specifying the optimization procedure - and trains the ensemble model.
 #' @param data a matrix of input data
 #' @param target a vector (factor) of labels for data
 #' @param M the number of elementary models in the ensemble
@@ -10,23 +10,23 @@
 #' @param prior_model a string denoting the prior model to use; options: "dirichlet", "wong", "hankin"
 #' @param weights the vector of user-defined prior weights for each feature
 #' @param lambda a positive scalar denoting the overall strength of the constraints
-#' @param constraints a list containing a relaxed system Ax<=b of user constraints, given as matrix A, vector b and vector or scalar rho (relaxation parameters); see buildConstraints function
+#' @param constraints a list containing a relaxed system Ax<=b of user constraints, given as matrix A, vector b and vector or scalar rho (relaxation parameters); see buildConstraints function; at least a max-size constraint must be built.
 #' @param block_constraints a list containing a relaxed system Ax<=b of user constraints on feature blocks, given as matrix A, vector b and vector or scalar rho (relaxation parameters); see buildConstraints function
-#' @param optim_method the method to evaluate the posterior distribution. Options "GA" (genetic algorithm) and "MH" (Metropolis-Hastrings MCMC) are supported.
+#' @param optim_method the method to evaluate the posterior distribution. Currently the option "GA" (genetic algorithm) is supportedmode
 #' @param popsize size of the initial population of the genetic algorithm for model optimization
 #' @param maxiter maximum number of iterations of the genetic algorithm for model optimization
 #' @param decorr add cannot link constraint between high correlated features
 #' @param shiny TRUE indicates that the function is called from Shiny dashboard
 #' @return A UBaymodel object containing the following list elements:
 #' \itemize{
-#'   \item data - The input dataset.
-#'   \item target - The input target.
-#'   \item lambda - The input lambda value (constraint strength).
-#'   \item prior_model - The chosen prior model.
-#'   \item ensemble.params -  Parameters representing the likelihood.
-#'   \item constraint.params -  Parameters representing the constraints.
-#'   \item user.params - Parameters representing the user's prior knowledge.
-#'   \item optim.params - Genetic algorithm parameters.
+#'   \item data - the input dataset
+#'   \item target - the input target
+#'   \item lambda - the input lambda value (constraint strength)
+#'   \item prior_model - the chosen prior model
+#'   \item ensemble.params -  information about input and output of ensemble feature selection
+#'   \item constraint.params -  parameters representing the constraints
+#'   \item user.params - parameters representing the user's prior knowledge
+#'   \item optim.params - gptimization parameters
 #' }
 #' @examples
 #' # build a UBayFS model using Breast Cancer Wisconsin dataset
@@ -88,6 +88,9 @@ build.UBaymodel = function(data,
   }
   if(nrow(data) != length(target)){
     stop("Error: number of labels must match number of data rows")
+  }
+  if(is.null(constraints)){
+    stop("At least a max-size constraint must be defined")
   }
   if(M %% 1 != 0 | M <= 0){
     stop("Error: M must be a positive integer")
@@ -236,8 +239,8 @@ build.UBaymodel = function(data,
 }
 
 
-#' Check whether an object is a UBaymodel.
-#' @description perform consistency checks of a UBaymodel
+#' Check whether an object is a UBaymodel
+#' @description Perform consistency checks of a UBaymodel.
 #' @param x an object to be checked for class consistency
 #' @export
 
@@ -246,13 +249,13 @@ is.UBaymodel <- function(x){
 }
 
 
-#' Set optimization parameters in UBaymodel object
+#' Set optimization parameters in a UBaymodel object
 #' @description Set the optimization parameters in a UBaymodel object.
 #' @param model a UBaymodel object created using build.UBaymodel
-#' @param method the method to evaluate the posterior distribution. Options "GA" (genetic algorithm) and "MH" (Metropolis-Hastrings MCMC) are supported.
+#' @param method the method to evaluate the posterior distribution; currently only"GA" (genetic algorithm) is supported
 #' @param popsize size of the initial population of the genetic algorithm for model optimization
 #' @param maxiter maximum number of iterations of the genetic algorithm for model optimization
-#' @return a UBaymodel object with updated optimization parameters
+#' @return A UBaymodel object with updated optimization parameters
 #' @seealso build.UBaymodel
 #' @export
 
@@ -262,7 +265,7 @@ setOptim = function(model, method = "GA", popsize, maxiter){
     stop("Wrong class of model")
   }
 
-  if(is.null(method) | !(method %in% c("GA", "MH"))){
+  if(is.null(method) | !(method %in% c("GA"))){
     stop("Error: method not supported")
   }
 
@@ -283,7 +286,7 @@ setOptim = function(model, method = "GA", popsize, maxiter){
 #' @param weights the vector of user-defined prior weights for each feature
 #' @param block_list the list of feature indices for each block; only required, if block-wise weights are specified and block_matrix is NULL
 #' @param block_matrix the matrix containing affiliations of features to each block; only required, if block-wise weights are specified and block_list is NULL
-#' @return a UBaymodel object with updated prior weights
+#' @return A UBaymodel object with updated prior weights
 #' @seealso build.UBaymodel
 #' @export
 

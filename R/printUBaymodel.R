@@ -1,5 +1,5 @@
-#' Prints a UBayFS model
-#' @description print details of an UBayFS model
+#' Print a UBayFS model
+#' @description Print details of a UBayFS model.
 #' @param x a UBaymodel object created using build.UBaymodel
 #' @param ... additional print parameters
 #' @import utils
@@ -29,7 +29,7 @@ print.UBaymodel <- function(x,...){
 }
 
 #' Feature selection results
-#' @describeIn print.UBaymodel Displays and summarizes the results of UBayFS after feature selection.
+#' @describeIn print.UBaymodel Display and summarize the results of UBayFS after feature selection.
 #' @param model a UBaymodel object created using build.UBaymodel after training
 #' @importFrom knitr kable
 #' @export
@@ -50,7 +50,7 @@ printResults <- function(model){
 
 
 #' Summarizes a UBayFS model
-#' @describeIn print.UBaymodel A summary of an UBayFS model.
+#' @describeIn print.UBaymodel A summary of an UBayFS model
 #' @param object a UBaymodel object created using build.UBaymodel
 #' @export
 

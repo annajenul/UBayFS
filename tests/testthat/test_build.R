@@ -73,10 +73,11 @@ test_that("ensemble is trained correctly",{
 
   set.seed(1)
   data(bcw) # dataset
-
+  c <- buildConstraints("max_size", list(10), ncol(bcw$data), rho = 1) # prior constraints
   model <- build.UBaymodel(
     data = bcw$data,
     target = bcw$labels,
+    constraints = c
   )
   expect_equal(unname(model$ensemble.params$output$counts),
                c(0, 10, 74, 0, 0, 0, 100, 100, 0, 0, 0, 0, 6, 100, 0, 0, 6, 0, 0, 0, 100, 86, 100, 100, 2, 16, 100, 100, 0, 0))
@@ -84,6 +85,7 @@ test_that("ensemble is trained correctly",{
   model <- build.UBaymodel(
     data = bcw$data,
     target = bcw$labels,
+    constraints = c,
     tt_split = 0.9,
     nr_features = 2,
   )
@@ -94,6 +96,7 @@ test_that("ensemble is trained correctly",{
     data = bcw$data,
     target = bcw$labels,
     M = 10,
+    constraints = c,
     method = "Laplacian score",
   )
   expect_equal(unname(model$ensemble.params$output$counts),

@@ -3,7 +3,7 @@
 \name{evaluateFS}
 \alias{evaluateFS}
 \alias{evaluateMultiple}
-\title{Evaluate feature set}
+\title{Evaluate  a feature set}
 \usage{
 evaluateFS(state, model, method = "spearman", log = TRUE)
 
@@ -19,13 +19,13 @@ evaluateMultiple(state, model, method = "spearman", log = TRUE)
 \item{log}{whether the admissibility should be returned on log scale}
 }
 \value{
-A posterior probability value.
+A posterior probability value
 }
 \description{
-Evaluates a feature set under the UBayFS model framework
+Evaluates a feature set under the UBayFS model framework.
 }
 \section{Functions}{
 \itemize{
-\item \code{evaluateMultiple}: evaluate multiple feature sets
+\item \code{evaluateMultiple}: Evaluate multiple feature sets
 }}
 

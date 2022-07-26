@@ -2,7 +2,7 @@
 % Please edit documentation in R/buildUBaymodel.R
 \name{is.UBaymodel}
 \alias{is.UBaymodel}
-\title{Check whether an object is a UBaymodel.}
+\title{Check whether an object is a UBaymodel}
 \usage{
 is.UBaymodel(x)
 }
@@ -10,5 +10,5 @@ is.UBaymodel(x)
 \item{x}{an object to be checked for class consistency}
 }
 \description{
-perform consistency checks of a UBaymodel
+Perform consistency checks of a UBaymodel.
 }

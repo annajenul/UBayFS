@@ -2,7 +2,7 @@
 % Please edit documentation in R/buildConstraints.R
 \name{checkConstraints}
 \alias{checkConstraints}
-\title{Checks whether a list object implements proper UBayFS user constraints.}
+\title{Checks whether a list object implements proper UBayFS user constraints}
 \usage{
 checkConstraints(x)
 }
@@ -13,5 +13,5 @@ checkConstraints(x)
 boolean value
 }
 \description{
-Checks whether a list object implements proper UBayFS user constraints.
+Checks whether a list object implements proper UBayFS user constraints
 }

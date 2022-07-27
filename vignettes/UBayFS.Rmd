@@ -72,10 +72,10 @@ In addition, some functionality of the package (in particular, the interactive S
 - prettydoc
 - plyr
 
-UBayFS is implemented via a core S3-class 'UBaymodel', along with help functions. An overview of the 'UBaymodel' class and its main generic functions, is shown in the following UML diagram:
+UBayFS is implemented via a core S3-class 'UBaymodel', along with help functions. An overview of the 'UBaymodel' class and its main generic functions, is shown in the following diagram:
 
-```{r, out.width="45%", out.height="45%", fig.align="center", echo = FALSE}
-include_graphics("UBay_UML.png")
+```{r, out.width="70%", out.height="70%", fig.align="center", echo = FALSE}
+include_graphics("UBay_UML.jpg")
 ``` 
 
 The help function ``buildConstraints(...)`` provides an easy way to define side constraints for the model. Further, ``runInteractive()`` enters the Shiny dashboard, given that the required depedencies are available (see above).

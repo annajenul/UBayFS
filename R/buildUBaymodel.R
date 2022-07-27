@@ -15,7 +15,6 @@
 #' @param optim_method the method to evaluate the posterior distribution. Currently the option "GA" (genetic algorithm) is supportedmode
 #' @param popsize size of the initial population of the genetic algorithm for model optimization
 #' @param maxiter maximum number of iterations of the genetic algorithm for model optimization
-#' @param decorr add cannot link constraint between high correlated features
 #' @param shiny TRUE indicates that the function is called from Shiny dashboard
 #' @return A UBaymodel object containing the following list elements:
 #' \itemize{
@@ -79,7 +78,6 @@ build.UBaymodel = function(data,
                            optim_method = "GA",
                            popsize = 50,
                            maxiter = 100,
-                           decorr = 0.5,
                            shiny = FALSE){
 
   # check input
@@ -91,6 +89,13 @@ build.UBaymodel = function(data,
   }
   if(is.null(constraints)){
     stop("At least a max-size constraint must be defined")
+  }
+  ms = constraints$b[which(apply(constraints$A == 1, 1, all))]
+  if((!is.numeric(ms)) || (length(ms) == 0)){
+    stop("No max-size constraint among constraints")
+  }
+  else if (ms > ncol(constraints$A)){
+    stop("No max-size constraint among constraints")
   }
   if(M %% 1 != 0 | M <= 0){
     stop("Error: M must be a positive integer")

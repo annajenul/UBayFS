@@ -19,7 +19,6 @@ build.UBaymodel(
   optim_method = "GA",
   popsize = 50,
   maxiter = 100,
-  decorr = 0.5,
   shiny = FALSE
 )
 }
@@ -51,8 +50,6 @@ build.UBaymodel(
 \item{popsize}{size of the initial population of the genetic algorithm for model optimization}
 
 \item{maxiter}{maximum number of iterations of the genetic algorithm for model optimization}
-
-\item{decorr}{add cannot link constraint between high correlated features}
 
 \item{shiny}{TRUE indicates that the function is called from Shiny dashboard}
 }

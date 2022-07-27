@@ -11,9 +11,9 @@ Two vignettes in markdown format demonstrate the use of UBayFS:
 * [feature selection](https://github.com/annajenul/UBayFS/tree/master/vignettes/UBayFS.Rmd) 
 * [block feature selection](https://github.com/annajenul/UBayFS/tree/master/vignettes/BFS_UBayFS.Rmd)
 
-UBayFS is implemented via a core S3-class 'UBaymodel', along with help functions. An overview of the 'UBaymodel' class and its main generic functions, is shown in the following UML diagram:
+UBayFS is implemented via a core S3-class 'UBaymodel', along with help functions. An overview of the 'UBaymodel' class and its main generic functions, is shown in the following diagram:
 
-<img src="vignettes/UBay_UML.png" width="400"/>
+<img src="vignettes/UBay_UML.jpg" width="500"/>
 
 Requirements and dependencies
 -----------------------------

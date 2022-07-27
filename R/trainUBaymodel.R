@@ -205,7 +205,7 @@ sampleInitial <- function(post_scores, constraints, block_constraints, size){
 
   #always add feature set with best scores
   ms <- constraints$b[which(apply(constraints$A == 1, 1, all))]
-  if(is.numeric(ms)){
+  if((is.numeric(ms)) && (length(ms) != 0)){
     ms_sel <- order(post_scores, decreasing = TRUE)[1:ms]
     x_start <- rbind(x_start, 1:n %in% ms_sel)
   }

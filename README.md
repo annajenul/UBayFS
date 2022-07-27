@@ -53,4 +53,5 @@ In addition, some functionality of the package (in particular, the interactive S
 
 Installation
 ------------
-how to install the package..
+The development version of the package can be installed with \
+`remotes::install_github("annajenu/UBayFS", ref = "main")`

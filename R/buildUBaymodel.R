@@ -7,7 +7,7 @@
 #' @param tt_split the ratio of samples drawn for building an elementary model (train-test-split)
 #' @param nr_features number of features to select in each elementary model
 #' @param method a vector denoting the method(s) used as elementary models; options: "mRMR", "Laplacian score"
-#' @param prior_model a string denoting the prior model to use; options: "dirichlet", "wong", "hankin"
+#' @param prior_model a string denoting the prior model to use; options: "dirichlet", "wong", "hankin"; "hankin" is the most general prior model but also the most time consuming
 #' @param weights the vector of user-defined prior weights for each feature
 #' @param lambda a positive scalar denoting the overall strength of the constraints
 #' @param constraints a list containing a relaxed system Ax<=b of user constraints, given as matrix A, vector b and vector or scalar rho (relaxation parameters); see buildConstraints function; at least a max-size constraint must be built.

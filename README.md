@@ -55,3 +55,13 @@ Installation
 ------------
 The development version of the package can be installed with \
 `remotes::install_github("annajenul/UBayFS", ref = "main")`
+
+Contributing
+------------
+Your contribution to UBayFS is very welcome! 
+
+Contribution to the package requires the agreement of the [Contributor Code of Conduct](https://github.com/annajenul/UBayFS/tree/master/CODE_OF_CONDUCT.Rmd) terms.
+
+For the implementantion of a new feature or bug-fixing, we encourage you to send a Pull Request to https://github.com/annajenul/UBayFS. Please add a detailed and concise description of the invented feature or the bug. In case of fixing a bug, include comments about your solution. To improve UBayFS even more, feel free to send us issues with bugs, you are not sure about. We are thankful for any kind of constructive criticism and suggestions.
+
+When you are finished with your implementantions and bug-fixing, please send a Pull Request to https://github.com/NMBU-Data-Science/RENT.

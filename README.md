@@ -60,6 +60,6 @@ Contributing
 ------------
 Your contribution to UBayFS is very welcome! 
 
-Contribution to the package requires the agreement of the [Contributor Code of Conduct](https://github.com/annajenul/UBayFS/tree/master/CODE_OF_CONDUCT.Rmd) terms.
+Contribution to the package requires the agreement of the [Contributor Code of Conduct](https://github.com/annajenul/UBayFS/CODE_OF_CONDUCT.Rmd) terms.
 
 For the implementantion of a new feature or bug-fixing, we encourage you to send a Pull Request to [the repository](https://github.com/annajenul/UBayFS). Please add a detailed and concise description of the invented feature or the bug. In case of fixing a bug, include comments about your solution. To improve UBayFS even more, feel free to send us issues with bugs, you are not sure about. We are thankful for any kind of constructive criticism and suggestions.

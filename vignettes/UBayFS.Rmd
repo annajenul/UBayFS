@@ -228,7 +228,7 @@ model = train(x = model)
 summary(model)
 plot(model)
 ```
-
+The plot shows the selected features (red framed) and their selection-distribution between ensemble feature selection and prior weights. The constraints are shown in the top where a connecting line is drawn between features of one constraint.
 The final feature set and its admissibility can be evaluated with ``evaluateFS()`` and ``admissibility()``:
 ```{r, include=TRUE}
 evaluateMultiple(state = model$output$feature_set, model = model)

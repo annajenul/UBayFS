@@ -35,7 +35,7 @@ build.UBaymodel(
 
 \item{method}{a vector denoting the method(s) used as elementary models; options: "mRMR", "Laplacian score"}
 
-\item{prior_model}{a string denoting the prior model to use; options: "dirichlet", "wong", "hankin"}
+\item{prior_model}{a string denoting the prior model to use; options: "dirichlet", "wong", "hankin"; "hankin" is the most general prior model but also the most time consuming}
 
 \item{weights}{the vector of user-defined prior weights for each feature}
 

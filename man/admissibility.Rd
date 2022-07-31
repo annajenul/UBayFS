@@ -3,7 +3,7 @@
 \name{admissibility}
 \alias{admissibility}
 \alias{block_admissibility}
-\title{Inadmissibility function (kappa)}
+\title{Admissibility function (kappa)}
 \usage{
 admissibility(state, constraints, log = TRUE)
 
@@ -14,16 +14,16 @@ block_admissibility(state, constraints, log = TRUE)
 
 \item{constraints}{a list containing a matrix A and a vector b representing the inequality system Ax<=b and a vector rho}
 
-\item{log}{whether the inadmissibility should be returned on log scale}
+\item{log}{whether the admissibility should be returned on log scale}
 }
 \value{
-An inadmissibility value
+An admissibility value
 }
 \description{
-Evaluate the value of the inadmissibility function kappa.
+Evaluate the value of the admissibility function kappa.
 }
 \section{Functions}{
 \itemize{
-\item \code{block_admissibility}: Evaluates the value of the inadmissibility function kappa for block constraints.
+\item \code{block_admissibility}: Evaluates the value of the admissibility function kappa for block constraints.
 }}
 

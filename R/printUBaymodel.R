@@ -166,7 +166,9 @@ plot.UBaymodel <- function(x,...){
     geom_bar(aes(fill = .data$weights), stat = "identity", size = 1.5, width = 0.8) +
     scale_fill_manual(values = RColorBrewer::brewer.pal(3,"Blues")[c(2,3)])+
     theme_classic()+
-    theme(axis.text.x = element_text(angle = 90))
+    theme(axis.text.x = element_text(angle = 90),
+          legend.position = "bottom",
+          legend.direction = "vertical")
 
   # constraint plot
   if(!is.null(x$constraint.params$constraints$A)){
@@ -203,7 +205,8 @@ plot.UBaymodel <- function(x,...){
       theme(axis.title.x=element_blank(),
             axis.text.x=element_blank(),
             axis.ticks.x=element_blank(),
-            axis.line.x = element_blank())
+            axis.line.x = element_blank(),
+            legend.position = "top")
 
     ggarrange(q, p, nrow = 2, align = "v", heights = c(1,2))
   }

@@ -1,9 +1,9 @@
 #' Admissibility function (kappa)
-#' @description Evaluate the value of the admissibility function kappa.
+#' @description Evaluate the value of the admissibility function `kappa`.
 #' @param state a binary membership vector describing a feature set
-#' @param constraints a list containing a matrix A and a vector b representing the inequality system Ax<=b and a vector rho
+#' @param constraints a list containing a matrix `A` and a vector `b` representing the inequality system `Ax<=b` and a vector `rho`
 #' @param log whether the admissibility should be returned on log scale
-#' @return An admissibility value
+#' @return an admissibility value
 #' @importFrom matrixStats logSumExp
 #' @export
 
@@ -59,8 +59,7 @@ admissibility = function(state, constraints, log = TRUE){
 }
 
 # Block admissibility function (kappa)
-# @description Evaluates the value of the admissibility function kappa for block constraints.
-#' @describeIn admissibility  Evaluates the value of the admissibility function kappa for block constraints.
+#' @describeIn admissibility  Evaluates the value of the admissibility function `kappa` for block constraints.
 #' @importFrom matrixStats logSumExp
 #' @export
 #'
@@ -83,8 +82,8 @@ block_admissibility = function(state, constraints, log = TRUE){
 
 
 #' Posterior expectation of features
-#' @description Compute the posterior score for each feature.
-#' @param model UBayFS model
+#' @description compute the posterior score for each feature.
+#' @param model a `UBaymodel` object
 #' @import hyper2
 
 posteriorExpectation <- function(model){

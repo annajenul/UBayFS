@@ -1,7 +1,7 @@
 #' UBayFS feature selection
 #' @description Genetic algorithm to train UBayFS feature selection model.
-#' @param x a UBaymodel created by build.UBaymodel
-#' @return A UBaymodel with an additional list element output containing the maximum a-posteriori estimate (map)
+#' @param x a `UBaymodel` created by \link{build.UBaymodel}
+#' @return a `UBaymodel` with an additional list element output containing the optimized solution.
 #' @importFrom GA ga
 #' @importFrom DirichletReg ddirichlet
 #' @importFrom matrixStats logSumExp

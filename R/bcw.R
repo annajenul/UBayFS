@@ -12,8 +12,8 @@
 #'
 #' @format A list containing:
 #'        \itemize{
-#'         \item{a matrix 'data' with 569 rows and 30 columns representing features,}
-#'         \item{a vector 'labels' of factor type with 569 entries representing the binary target variable, and}
+#'         \item{a matrix `data` with 569 rows and 30 columns representing features,}
+#'         \item{a vector `labels` of factor type with 569 entries representing the binary target variable, and}
 #'         \item{a list of feature indices representing feature blocks.}
 #'        }
 #' @source \url{ftp://ftp.ics.uci.edu/pub/machine-learning-databases}

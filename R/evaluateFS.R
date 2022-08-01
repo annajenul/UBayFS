@@ -1,10 +1,10 @@
 #' Evaluate  a feature set
 #' @description Evaluates a feature set under the UBayFS model framework.
 #' @param state a binary membership vector describing a feature set
-#' @param model a UBaymodel object created using build.UBaymodel
-#' @param method type of correlation ("pearson","kendall", or "spearman")
+#' @param model a UBaymodel object created using \link{build.UBaymodel}
+#' @param method type of correlation (`pearson`,`kendall`, or `spearman`)
 #' @param log whether the admissibility should be returned on log scale
-#' @return A posterior probability value
+#' @return a posterior probability value
 #' @importFrom stats cor
 #' @export
 

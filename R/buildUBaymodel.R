@@ -2,30 +2,30 @@
 #' @description Build a data structure for UBayFS and train an ensemble of elementary feature selectors.
 #' @details The function aggregates input parameters for UBayFS - including data, parameters defining ensemble and user knowledge and parameters specifying the optimization procedure - and trains the ensemble model.
 #' @param data a matrix of input data
-#' @param target a vector (factor) of labels for data
-#' @param M the number of elementary models in the ensemble
+#' @param target a vector (factor) of input labels
+#' @param M the number of elementary models to be trained in the ensemble
 #' @param tt_split the ratio of samples drawn for building an elementary model (train-test-split)
 #' @param nr_features number of features to select in each elementary model
-#' @param method a vector denoting the method(s) used as elementary models; options: "mRMR", "Laplacian score"
-#' @param prior_model a string denoting the prior model to use; options: "dirichlet", "wong", "hankin"; "hankin" is the most general prior model but also the most time consuming
+#' @param method a vector denoting the method(s) used as elementary models; options: `mRMR`, `laplace` (Laplacian score)
+#' @param prior_model a string denoting the prior model to use; options: `dirichlet`, `wong`, `hankin`; `hankin` is the most general prior model, but also the most time consuming
 #' @param weights the vector of user-defined prior weights for each feature
 #' @param lambda a positive scalar denoting the overall strength of the constraints
-#' @param constraints a list containing a relaxed system Ax<=b of user constraints, given as matrix A, vector b and vector or scalar rho (relaxation parameters); see buildConstraints function; at least a max-size constraint must be built.
-#' @param block_constraints a list containing a relaxed system Ax<=b of user constraints on feature blocks, given as matrix A, vector b and vector or scalar rho (relaxation parameters); see buildConstraints function
-#' @param optim_method the method to evaluate the posterior distribution. Currently the option "GA" (genetic algorithm) is supportedmode
+#' @param constraints a list containing a relaxed system `Ax<=b` of user constraints, given as matrix `A`, vector `b` and vector or scalar `rho` (relaxation parameter). At least one max-size constraint must be contained. For details, see \link{buildConstraints}.
+#' @param block_constraints a list containing a relaxed system `Ax<=b` of user constraints on feature blocks, given as matrix `A`, vector `b` and vector or scalar `rho` (relaxation parameter). For details, see \link{buildConstraints}.
+#' @param optim_method the method to evaluate the posterior distribution. Currently, only the option `GA` (genetic algorithm) is supported.
 #' @param popsize size of the initial population of the genetic algorithm for model optimization
 #' @param maxiter maximum number of iterations of the genetic algorithm for model optimization
 #' @param shiny TRUE indicates that the function is called from Shiny dashboard
-#' @return A UBaymodel object containing the following list elements:
+#' @return a `UBaymodel` object containing the following list elements:
 #' \itemize{
-#'   \item data - the input dataset
-#'   \item target - the input target
-#'   \item lambda - the input lambda value (constraint strength)
-#'   \item prior_model - the chosen prior model
-#'   \item ensemble.params -  information about input and output of ensemble feature selection
-#'   \item constraint.params -  parameters representing the constraints
-#'   \item user.params - parameters representing the user's prior knowledge
-#'   \item optim.params - gptimization parameters
+#'   \item `data` - the input dataset
+#'   \item `target` - the input target
+#'   \item `lambda` - the input lambda value (constraint strength)
+#'   \item `prior_model` - the chosen prior model
+#'   \item `ensemble.params` -  information about input and output of ensemble feature selection
+#'   \item `constraint.params` -  parameters representing the constraints
+#'   \item `user.params` - parameters representing the user's prior knowledge
+#'   \item `optim.params` - gptimization parameters
 #' }
 #' @examples
 #' # build a UBayFS model using Breast Cancer Wisconsin dataset

@@ -1,13 +1,13 @@
 #' Build a constraint system
 #' @description Build an inequation system from constraints provided by the user.
-#' @details The function transforms user information about relations between features (must-link or cannot-link constraints) and maximum feature set size (max-size) into a linear inequation system. In addition, the relaxation paramter rho can be specified to achieve soft constraints.
-#' @param constraint_types a vector of strings denoting the type of constraint to be added; options: "max_size", "must_link", "cannot_link"
+#' @details The function transforms user information about relations between features (must-link or cannot-link constraints) and maximum feature set size (max-size) into a linear inequation system. In addition, the relaxation parameter `rho` can be specified to achieve soft constraints.
+#' @param constraint_types a vector of strings denoting the type of constraint to be added; options: `max_size`, `must_link`, `cannot_link`
 #' @param constraint_vars a list of parameters defining the constraints; in case of max-size constraints, the list element must contain an integer denoting the maximum size of the feature set, in case of max-link or cannot link, the list element must be a vector of feature indices to be linked
 #' @param num_elements the total number of features (feature-wise constraints) or blocks (block-wise constraints) in the dataset
-#' @param rho a positive parameter denoting the level of relaxation; Inf denotes no relaxation
-#' @param block_list the list of feature indices for each block; only required, if block-wise constraints are built and block_matrix is NULL
-#' @param block_matrix the matrix containing affiliations of features to each block; only required, if block-wise constraints are built and block_list is NULL
-#' @return A list containing a matrix A and a vector b representing the inequality system Ax<=b, and a vector rho
+#' @param rho a positive parameter denoting the level of relaxation; `Inf` denotes a hard constraint, i.e. no relaxation
+#' @param block_list the list of feature indices for each block; only required, if block-wise constraints are built and `block_matrix` is `NULL`
+#' @param block_matrix the matrix containing affiliations of features to each block; only required, if block-wise constraints are built and `block_list` is `NULL`
+#' @return a list containing a matrix `A` and a vector `b` representing the inequality system `Ax<=b`, and a vector `rho`
 #' @examples
 #' # given a dataset with 10 features, we create a max-size constraint limiting
 #' # the set to 5 features and a cannot-link constraint between features 1 and 2
@@ -126,10 +126,10 @@ buildConstraints = function(constraint_types, constraint_vars, num_elements, rho
 
 #' Build decorrelation constraints
 #' @description Build a cannot link constraint between highly correlated features. The user defines the correlation threshold.
-#' @param data the dataset in the UbayFS model
+#' @param data the dataset in the `UBaymodel` object
 #' @param level the threshold correlation-level
-#' @param method the method used to compute correlation; must be one of "pearson", "spearman" or "kendall"
-#' @return A list containing a matrix A and a vector b representing the inequality system Ax<=b, a vector rho and a block matrix
+#' @param method the method used to compute correlation; must be one of `pearson`, `spearman` or `kendall`
+#' @return A list containing a matrix `A` and a vector `b` representing the inequality system `Ax<=b`, a vector `rho` and a block matrix
 #' @export
 
 buildDecorrConstraints = function(data, level = 0.5, method = "spearman"){
@@ -165,7 +165,7 @@ buildDecorrConstraints = function(data, level = 0.5, method = "spearman"){
 
 
 #' Checks whether a list object implements proper UBayFS user constraints
-#' @param x UBayFS model
+#' @param x a `UBaymodel` object
 #' @return boolean value
 checkConstraints <- function(x){
 
@@ -193,11 +193,11 @@ checkConstraints <- function(x){
 
 
 #' Set constraints in UBaymodel object
-#' @description Set the constraints in a UBaymodel object.
-#' @param model a UBaymodel object created using build.UBaymodel
-#' @param constraints a list containing a relaxed system Ax<=b of user constraints, given as matrix A, vector b and vector or scalar rho (relaxation parameters); see buildConstraints function
-#' @param append if TRUE, constraints are appended to the existing constraint system
-#' @return A UBaymodel object with updated constraint parameters
+#' @description Set the constraints in a `UBaymodel` object.
+#' @param model a `UBaymodel` object created using \link{build.UBaymodel}
+#' @param constraints a list containing a relaxed system `Ax<=b` of user constraints, given as matrix `A`, vector `b` and vector or scalar `rho` (relaxation parameters); see buildConstraints function
+#' @param append if `TRUE`, constraints are appended to the existing constraint system
+#' @return a `UBaymodel` object with updated constraint parameters
 #' @seealso build.UBaymodel
 #' @export
 
@@ -230,9 +230,9 @@ setConstraints = function(model, constraints, append = FALSE){
 }
 
 
-#' Set block constraints in UBaymodel object.
-#' @description Set the block constraints in a UBaymodel object.
-#' @describeIn setConstraints  sets the block constraints in a UBaymodel object
+#' Set block constraints in a `UBaymodel` object.
+#' @description Set the block constraints in a `UBaymodel` object.
+#' @describeIn setConstraints  sets the block constraints in a `UBaymodel` object
 #' @export
 
 setBlockConstraints = function(model, constraints, append = FALSE){

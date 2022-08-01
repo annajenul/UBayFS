@@ -92,36 +92,36 @@ This section summarizes the core parts of UBayFS, where a central part is the Ba
 $$p(\theta|y)\propto p(y|\theta)\cdot p(\theta).$$
 
 ### Ensemble feature selection as likelihood
-The first step in UBayFS is to build $M$ ensembles of elementary feature selectors  --- each elementary feature selector $1,\dots,M$ selects features, denoted by a binary membership vector $\delta^{m} \in \{0,1\}^N$, based on a randomly selected training dataset, where $N$ denotes the total number of features in the dataset. In the binary membership vector $\delta^{m}$, a component $\delta_i^m=1$ indicates that feature $i\in\{1,\dots,N\}$ is selected, and $\delta_i^m=0$ otherwise. Statistically, we interpret the result from each elementary feature selector as realization from a multinomial distribution with parameters $\theta$ and $l$, where $\theta\in[0,1]^N$ defines the success probabilities of sampling each feature in an individual feature selection and $l$ corresponds to the number of feature selected in $\delta^{m}$. Therefore, the joint probability density of the observed data --- the likelihood function --- is of the form 
-$$ p(y|\theta) = \prod\limits_{m=1}^{M} f_{\text{mult}}(\delta^{m};\theta,l),$$
+The first step in UBayFS is to build $M$ ensembles of elementary feature selectors  --- each elementary feature selector $1,\dots,M$ selects features, denoted by a binary membership vector $\delta^{(m)} \in \{0,1\}^N$, based on a randomly selected training dataset, where $N$ denotes the total number of features in the dataset. In the binary membership vector $\delta^{(m)}$, a component $\delta_i^{(m)}=1$ indicates that feature $i\in\{1,\dots,N\}$ is selected, and $\delta_i^{(m)}=0$ otherwise. Statistically, we interpret the result from each elementary feature selector as realization from a multinomial distribution with parameters $\theta$ and $l$, where $\theta\in[0,1]^N$ defines the success probabilities of sampling each feature in an individual feature selection and $l$ corresponds to the number of feature selected in $\delta^{(m)}$. Therefore, the joint probability density of the observed data --- the likelihood function --- has the form 
+$$ p(y|\theta) = \prod\limits_{m=1}^{M} f_{\text{mult}}(\delta^{(m)};\theta,l),$$
 where $f_{\text{mult}}$ is the probability density function of the multinomial distribution.
 
 ### Expert knowledge as prior
-UBayFS includes to types of expert knowledge: prior feature weights and feature set constraints. 
+UBayFS includes two types of expert knowledge: prior feature weights and feature set constraints. 
 
 #### Prior feature weights
 
 To introduce expert knowledge about feature importance, the user may define a vector $\alpha = (\alpha_1,\dots,\alpha_N)$, $\alpha_i>0$ for all $i=1,\dots,N$, assigning a weight to each feature. High weights indicate that a feature is important. By default, if all features are equally important or no prior weighting is used, $\alpha$ is set to the 1-vector of length $N$. With the weighting in place, we assume the a-priori feature importance parameter $\theta$ follows a Dirichlet distribution [@R:DirichletReg]
 $$p(\theta) = f_{\text{Dir}}(\theta;\alpha),$$
 where the probability density function of the Dirichlet distribution is given as
-$$f_{\text{Dir}}(\theta;\alpha) = \frac{1}{\text{Be}(\alpha)} \prod\limits_{n=1}^N \theta_n^{\alpha_n-1},$$
-where $\text{Be}(.)$ denotes the multivariate Beta function. Generalizations of the Dirichlet distribution [@wong:gdirichlet,@hankin:hyperdirichlet] are implemented in UBayFS as well.
+$$f_{\text{Dir}}(\theta;\alpha) = \frac{1}{\text{B}(\alpha)} \prod\limits_{n=1}^N \theta_n^{\alpha_n-1},$$
+where $\text{B}(.)$ denotes the multivariate Beta function. Generalizations of the Dirichlet distribution [@wong:gdirichlet,@hankin:hyperdirichlet] are implemented in UBayFS as well.
 
 Since the Dirichlet distribution is the conjugate prior of the multinomial distribution, the posterior density is given as
 $$p(\theta|y) \propto f_{\text{Dir}}(\theta;\alpha^\circ),$$
 with
-$$\alpha^\circ = \left( \alpha_1 + \sum\limits_{m=1}^M \delta_1^{m}, \dots, \alpha_N + \sum\limits_{m=1}^M \delta_N^{m}  \right)$$
+$$\alpha^\circ = \left( \alpha_1 + \sum\limits_{m=1}^M \delta_1^{(m)}, \dots, \alpha_N + \sum\limits_{m=1}^M \delta_N^{(m)}  \right)$$
 representing the posterior parameter vector $\alpha^\circ$.
 
 #### Feature set constraints
 In addition to the prior weighting of features, the UBayFS user can also add different types of constraints to the feature selection:
 
 - *max-size constraint*: maximal number of features that shall be selected.
-- *must-link constraint*: used if a set of features must be selected together. (defined as binary constraints for each feature pair)
-- *cannot-link constraint*: used if a set of features must not be selected together.
+- *must-link constraint*: used if a set of features must be selected at the same time (defined as pairwise constraints, one for each pair of features).
+- *cannot-link constraint*: used if a set of features must not be selected at the same time.
 - *block-wise constraints*: define constraints between feature blocks (instead of individual features).
 
-Constraints are represented as a linear optimization problem $A\cdot \delta-b\leq 0$, where $A\in\mathbb{R}^{K\times N}$ and $b\in\mathbb{R}^K$. $K$ is defined as the total number of constraints. In general, a feature set $\delta$ is admissible only if $\left(a^{(k)}\right)^T\delta - b^{(k)} \leq 0$, according to the inadmissibility function
+Constraints are represented as a linear optimization problem $A\delta-b\leq 0$, where $A\in\mathbb{R}^{K\times N}$ and $b\in\mathbb{R}^K$. $K$ is defined as the total number of constraints. In general, a feature set $\delta$ is admissible only if $\left(a^{(k)}\right)^T\delta - b^{(k)} \leq 0$, according to the inadmissibility function (penalty term)
 $$ \kappa_k(\delta) = \left\{\begin{array}{l l}
     0 & \text{if}~ \left(a^{(k)}\right)^T\delta - b^{(k)} \leq 0 \\
     1 & \text{otherwise},\end{array}\right.$$
@@ -138,8 +138,8 @@ In UBayFS, $\kappa_k(\delta)$ is substituted by a relaxed inadmissibility functi
     \right.
 \end{align}
     
-where $\rho\in\mathbb{R}^+ \cup {\infty}$ denotes a relaxation parameter and
-$\xi_{k,\rho} = \exp\left(-\rho \left(\left( a^{(k)}\right)^T\delta - b^{(k)}\right)\right)$ defines the exponential term of a logistic function. To handle $K$ different constraints for one feature selection problem, the joint admissibility function is given as
+where $\rho\in\mathbb{R}^+ \cup \{\infty\}$ denotes a relaxation parameter and
+$\xi_{k,\rho} = \exp\left(-\rho \left(\left( a^{(k)}\right)^T\delta - b^{(k)}\right)\right)$ defines the exponential term of a logistic function. To handle $K$ different constraints for one feature selection problem, the joint inadmissibility function is given as
 $$ \kappa(\delta)
     = 1 - \prod\limits_{k=1}^{K} \left(1 -\kappa_{k,\rho}(\delta)\right)$$
 which originates from the idea that $\kappa = 1$ (maximum penalization) if at least one $\kappa_{k,\rho}=1$, while $\kappa=0$ (no penalization) if all $\kappa_{k,\rho}=0$. 
@@ -149,13 +149,13 @@ The target function to select an optimal feature set $\delta$ is given by an exp
 $$\mathbb{E}_{\theta|y}[U(\delta, \theta(y))] = \delta^T \mathbb{E}_{\theta|y}[\theta(y)]-\lambda\kappa(\delta)\longrightarrow \underset{\delta\in\{0,1\}^N}{\text{max}}
 $$
     
-Since an exact optimization is impossible due to the non-linear function $\kappa$, we use a heuristic genetic algorithm to find an appropriate feature set. In detail, the genetic algorithm starts with initial feature sets and computes combinations of the given feature sets with regard to a fitness function in each iteration.
+Since an exact optimization is impossible due to the non-linear function $\kappa$, we use a genetic algorithm to find an appropriate feature set. In detail, the genetic algorithm is initialized via a Greedy algorithm and computes combinations of the given feature sets with regard to a fitness function in each iteration.
 
 ## Ensemble Training
-The function ``build.UBaymodel()`` initializes the UBayFS and performs ensemble feature selection. The training dataset and target are initialized with the arguments ``data`` and ``target``. Although the UBayFS concept permits unsupervised, multiclass or regression setups, the current implementation supports binary target variables only. The input variable ``M`` defines the number ensembles of each feature selector in ``method`` shall be performed. Each ensemble model is computed on ``tt_split`` percent randomly selected samples of the whole sample space. Currently, the ``method`` parameter can be set to ``mRMR`` (minimum redundancy maximum relevance), see [@ding:mrmr], and ``lscore`` (Laplacian score), see [@he:laplacian]. The argument ``prior_model`` specifies whether the standard Dirichlet distribution, or a generalized variant should be used as prior model.
+The function ``build.UBaymodel()`` initializes the UBayFS model and performs ensemble feature selection. The training dataset and target are initialized with the arguments ``data`` and ``target``. Although the UBayFS concept permits unsupervised, multiclass or regression setups, the current implementation supports binary target variables only. The input variable ``M`` defines the number of ensembles of each feature selector in ``method`` shall be performed. Each ensemble model is computed on ``tt_split`` percent randomly selected samples of the whole sample space. Currently, the ``method`` parameter can be set to ``mRMR`` (minimum redundancy maximum relevance), see [@ding:mrmr], and ``laplace`` (Laplacian score), see [@he:laplacian]. The argument ``prior_model`` specifies whether the standard Dirichlet distribution, or a generalized variant should be used as prior model.
 Furthermore, the number of features selected in each ensemble can be controled with the parameter ``nr_features``.
 
-For the standard UBayFS initialization, all prior feature weights are set to 1 and no prior feature constraints are included, yet. The ``summary()`` function provides an overview  of the dataset, the prior weights and the likelihood --- ensemble counts indicate how often a feature was selected over the ensemble feature selections. 
+For the standard UBayFS initialization, all prior feature weights are set to 1 and no feature constraints are included, yet. The ``summary()`` function provides an overview  of the dataset, the prior weights and the likelihood --- ensemble counts indicate how often a feature was selected over the ensemble feature selections. 
 ```{r, include = TRUE}
 model = build.UBaymodel(data = bcw$data,
                         target = bcw$labels,
@@ -188,9 +188,9 @@ model = setWeights(model = model,
                    weights = weights)
 ```
 
-Prior feature constraints can defined with the function ``buildConstraints()``. The input ``constraint_types`` consists of a vector, where all onstraint types are defined. Then, with ``constraint_vars``, the user specifies details about the constraint: for max-size, the number of features to select is provided, while for must-link and cannot-link, the set of feature indices to be linked must be provided. Each list entry corresponds to one constraint in ``constraint_types``. In addition, ``num_features`` denotes the total number of features in the dataset and ``rho`` corresponds to the relaxation parameter of the admissibility function.  
+Feature constraints can defined with the function ``buildConstraints()``. The input ``constraint_types`` consists of a vector, where all onstraint types are defined. Then, with ``constraint_vars``, the user specifies details about the constraint: for max-size, the number of features to select is provided, while for must-link and cannot-link, the set of feature indices to be linked must be provided. Each list entry corresponds to one constraint in ``constraint_types``. In addition, ``num_features`` denotes the total number of features in the dataset and ``rho`` corresponds to the relaxation parameter of the admissibility function.  
 
-As ``print(constraints)`` shows, the matrix ``A`` has 10 rows for 4 constraints. While *max-size* and *cannot-link* can be expressed in one equation each, *must-link* is a pairwise constraint. In specific, the *must-link* constraint between $n$ features is split into $\frac{n!}{(n-2)!}$ elementary constraints. Hence, 6 equations represent the *must-link* constraint. The function ``setConstraints()`` integrates the constraints into the UBay model. 
+As ``print(constraints)`` shows, the matrix ``A`` has 10 rows for 4 constraints. While *max-size* and *cannot-link* can be expressed in one equation each, *must-link* is a pairwise constraint. In specific, the *must-link* constraint between $n$ features produces $\frac{n!}{(n-2)!}$ elementary constraints. Hence, 6 equations represent the *must-link* constraint. The function ``setConstraints()`` integrates the constraints into the UBay model. 
 ```{r, include=TRUE}
 constraints = buildConstraints(constraint_types = c("max_size", 
                                                     "must_link", 
@@ -211,7 +211,7 @@ model = setBlockConstraints(model = model, constraints = NULL)
 ```
 
 ## Optimization and evaluation
-A genetic algorithm, described by [@givens:compstat] and implemented in [@R:GA], searches for the maximum a posteriori estimate, delivering an estimation of the optimal feature set from the UBayFS framework. With ``setOptim()`` we initialize the genetic algorithm. ``popsize`` indicates the number of candidate feature set created in each iteration and ``maxiter`` is number of iterations. 
+A genetic algorithm, described by [@givens:compstat] and implemented in [@R:GA], searches for the optimal feature set in the UBayFS framework. With ``setOptim()`` we initialize the genetic algorithm. ``popsize`` indicates the number of candidate feature set created in each iteration and ``maxiter`` is number of iterations. 
   - train function with GA
   - print/summary/plot
 
@@ -222,7 +222,7 @@ model = setOptim(model = model,
 
 ```
 
-At this point, we are have initialized prior weights, prior constraints and the optimization procedure --- we can now train the UBayFS model with the generic function ``train``. The summary function provides an overview on all components, UBay exists of. The ``plot()`` function shows the prior feature information as bar charts, with the selected features marked with red borders. In addition, the constraints and the regularization parameter $\rho$ are presented. 
+At this point, we have initialized prior weights, constraints and the optimization procedure --- we can now train the UBayFS model with the generic function ``train``. The summary function provides an overview on all components, UBay exists of. The ``plot()`` function shows the prior feature information as bar charts, with the selected features marked with red borders. In addition, the constraints and the regularization parameter $\rho$ are presented. 
 ```{r, include=TRUE, fig.width=7, fig.height=6}
 model = train(x = model)
 summary(model)

@@ -2,6 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
+.Rd
 NAMESPACE
 HD_UBay.Rdata
 vignettes/UBayFS_cache

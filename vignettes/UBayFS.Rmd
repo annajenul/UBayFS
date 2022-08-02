@@ -9,12 +9,13 @@ output:
     hightlight: github
 bibliography: references.bib
 vignette: >
-  %\VignetteIndexEntry{UBayFS general}
+  %\VignetteIndexEntry{UBayFS}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 <style>
+
   body {
   text-align: justify;
   padding: 1em}

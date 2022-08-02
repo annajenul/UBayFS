@@ -167,8 +167,7 @@ plot.UBaymodel <- function(x,...){
     scale_fill_manual(values = RColorBrewer::brewer.pal(3,"Blues")[c(2,3)])+
     theme_classic()+
     theme(axis.text.x = element_text(angle = 90),
-          legend.position = "bottom",
-          legend.direction = "vertical")
+          legend.position = "bottom")
 
   # constraint plot
   if(!is.null(x$constraint.params$constraints$A)){

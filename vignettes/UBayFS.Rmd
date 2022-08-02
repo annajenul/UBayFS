@@ -1,7 +1,7 @@
 ---
 title: "A quick tour through UBayFS"
 author: "Anna Jenul, Stefan Schrunner"
-date: "July 2022"
+date: "`r Sys.Date()`"
 output: 
   prettydoc::html_pretty:
     theme: architect
@@ -34,9 +34,9 @@ knitr::opts_chunk$set(fig.align = 'center')
 
 
 ## Introduction
-The UBayFS package implements the framework proposed in [@jenul:UBayFS], together with an interactive Shiny dashbord, which makes UBayFS applicable to R-users with different levels of expertise. UBayFS is an ensemble feature selection technique, embedded in a Bayesian statistical framework. The method combines data and user knowledge, where the first is extracted via data-driven ensemble feature selection. The user can control the feature selection by assigning prior weights to features and penalizing specific feature combinations. In particular, the user can define a maximal number of selected features and must-link constraints (features must be selected together) or cannot-link constraints (features must not be selected together). Using relaxed constraints, a parameter $\rho$ regulates the penalty shape. Hence, violation of constraints can be valid but leads to a lower target value of the feature set that is derived from the violated constraints.
+The UBayFS package implements the framework proposed in [@jenul:UBayFS], together with an interactive Shiny dashboard, which makes UBayFS applicable to R-users with different levels of expertise. UBayFS is an ensemble feature selection technique embedded in a Bayesian statistical framework. The method combines data and user knowledge, where the first is extracted via data-driven ensemble feature selection. The user can control the feature selection by assigning prior weights to features and penalizing specific feature combinations. In particular, the user can define a maximal number of selected features and must-link constraints (features must be selected together) or cannot-link constraints (features must not be selected together). Using relaxed constraints, a parameter $\rho$ regulates the penalty shape. Hence, violation of constraints can be valid but leads to a lower target value of the feature set that is derived from the violated constraints.
 
-In this vignette we use the Breast Cancer Wisconsin dataset [@wolberg:wisconsin] for demonstration. Specifically, the dataset consists of 569 samples and 30 features, and can be downloaded as demo function using the function ``data(bcw)``. The dataset describes a classification problem, where the aim is to distinguish between malignant and benign cancer based on image data. Features are derived from 10 image characteristics, where each characteristic is represented by 3 features (summary statistics) in the dataset. For instance, the characteristic *radius* is represented by features *radius mean*, *radius standard deviation* and *radius worst*.
+In this vignette, we use the Breast Cancer Wisconsin dataset [@wolberg:wisconsin] for demonstration. Specifically, the dataset consists of 569 samples and 30 features and can be downloaded as a demo function using the function ``data(bcw)``. The dataset describes a classification problem, where the aim is to distinguish between malignant and benign cancer based on image data. Features are derived from 10 image characteristics, where each characteristic is represented by three features (summary statistics) in the dataset. For instance, the characteristic *radius* is represented by features *radius mean*, *radius standard deviation*, and *radius worst*.
 
 ### Requirements and dependencies
 - R (>= 3.5.0)
@@ -57,7 +57,7 @@ In this vignette we use the Breast Cancer Wisconsin dataset [@wolberg:wisconsin]
 - knitr
 
 
-In addition, some functionality of the package (in particular, the interactive Shiny interface) requires the following depedencies:
+In addition, some functionality of the package (in particular, the interactive Shiny interface) requires the following dependencies:
 
 - shinyWidgets
 - shinyalert
@@ -72,7 +72,7 @@ In addition, some functionality of the package (in particular, the interactive S
 - prettydoc
 - plyr
 
-UBayFS is implemented via a core S3-class 'UBaymodel', along with help functions. An overview of the 'UBaymodel' class and its main generic functions, is shown in the following diagram:
+UBayFS is implemented via a core S3-class ``UBaymodel``, along with help functions. An overview of the 'UBaymodel' class and its main generic functions is shown in the following diagram:
 
 ```{r, out.width="70%", out.height="70%", fig.align="center", echo = FALSE}
 include_graphics("UBay_UML.jpg")
@@ -92,7 +92,7 @@ This section summarizes the core parts of UBayFS, where a central part is the Ba
 $$p(\theta|y)\propto p(y|\theta)\cdot p(\theta).$$
 
 ### Ensemble feature selection as likelihood
-The first step in UBayFS is to build $M$ ensembles of elementary feature selectors  --- each elementary feature selector $1,\dots,M$ selects features, denoted by a binary membership vector $\delta^{(m)} \in \{0,1\}^N$, based on a randomly selected training dataset, where $N$ denotes the total number of features in the dataset. In the binary membership vector $\delta^{(m)}$, a component $\delta_i^{(m)}=1$ indicates that feature $i\in\{1,\dots,N\}$ is selected, and $\delta_i^{(m)}=0$ otherwise. Statistically, we interpret the result from each elementary feature selector as realization from a multinomial distribution with parameters $\theta$ and $l$, where $\theta\in[0,1]^N$ defines the success probabilities of sampling each feature in an individual feature selection and $l$ corresponds to the number of feature selected in $\delta^{(m)}$. Therefore, the joint probability density of the observed data --- the likelihood function --- has the form 
+The first step in UBayFS is to build $M$ ensembles of elementary feature selectors. Each elementary feature selector $1,\dots,M$ selects features, denoted by a binary membership vector $\delta^{(m)} \in \{0,1\}^N$, based on a randomly selected training dataset, where $N$ denotes the total number of features in the dataset. In the binary membership vector $\delta^{(m)}$, a component $\delta_i^{(m)}=1$ indicates that feature $i\in\{1,\dots,N\}$ is selected, and $\delta_i^{(m)}=0$ otherwise. Statistically, we interpret the result from each elementary feature selector as a realization from a multinomial distribution with parameters $\theta$ and $l$, where $\theta\in[0,1]^N$ defines the success probabilities of sampling each feature in an individual feature selection and $l$ corresponds to the number of features selected in $\delta^{(m)}$. Therefore, the joint probability density of the observed data --- the likelihood function --- has the form 
 $$ p(y|\theta) = \prod\limits_{m=1}^{M} f_{\text{mult}}(\delta^{(m)};\theta,l),$$
 where $f_{\text{mult}}$ is the probability density function of the multinomial distribution.
 
@@ -152,10 +152,10 @@ $$
 Since an exact optimization is impossible due to the non-linear function $\kappa$, we use a genetic algorithm to find an appropriate feature set. In detail, the genetic algorithm is initialized via a Greedy algorithm and computes combinations of the given feature sets with regard to a fitness function in each iteration.
 
 ## Ensemble Training
-The function ``build.UBaymodel()`` initializes the UBayFS model and performs ensemble feature selection. The training dataset and target are initialized with the arguments ``data`` and ``target``. Although the UBayFS concept permits unsupervised, multiclass or regression setups, the current implementation supports binary target variables only. The input variable ``M`` defines the number of ensembles of each feature selector in ``method`` shall be performed. Each ensemble model is computed on ``tt_split`` percent randomly selected samples of the whole sample space. Currently, the ``method`` parameter can be set to ``mRMR`` (minimum redundancy maximum relevance), see [@ding:mrmr], and ``laplace`` (Laplacian score), see [@he:laplacian]. The argument ``prior_model`` specifies whether the standard Dirichlet distribution, or a generalized variant should be used as prior model.
-Furthermore, the number of features selected in each ensemble can be controled with the parameter ``nr_features``.
+The function ``build.UBaymodel()`` initializes the UBayFS model and performs ensemble feature selection. The training dataset and target are initialized with the arguments ``data`` and ``target``. Although the UBayFS concept permits unsupervised, multiclass, or regression setups, the current implementation supports binary target variables only. The input variable ``M`` defines the number of ensembles of each feature selector in ``method`` shall be performed. Each ensemble model is computed on ``tt_split`` percent randomly selected samples of the whole sample space. Currently, the ``method`` parameter can be set to ``mRMR`` (minimum redundancy maximum relevance), see [@ding:mrmr], and ``laplace`` (Laplacian score), see [@he:laplacian]. The argument ``prior_model`` specifies whether the standard Dirichlet distribution or a generalized variant should be used as prior model.
+Furthermore, the number of features selected in each ensemble can be controlled with the parameter ``nr_features``.
 
-For the standard UBayFS initialization, all prior feature weights are set to 1 and no feature constraints are included, yet. The ``summary()`` function provides an overview  of the dataset, the prior weights and the likelihood --- ensemble counts indicate how often a feature was selected over the ensemble feature selections. 
+For the standard UBayFS initialization, all prior feature weights are set to 1, and no feature constraints are included yet. The ``summary()`` function provides an overview of the dataset, the prior weights, and the likelihood --- ensemble counts indicate how often a feature was selected over the ensemble feature selections. 
 ```{r, include = TRUE}
 model = build.UBaymodel(data = bcw$data,
                         target = bcw$labels,
@@ -178,8 +178,9 @@ model = build.UBaymodel(data = bcw$data,
                         )
 summary(model)
 ```
+
 ## User knowledge
-With the function ``setWeights()`` the user can change the feature weights from the standard initialization to desired values. In our example dataset we assign features representing common image characteristics the same weight.  
+With the function ``setWeights()`` the user can change the feature weights from the standard initialization to desired values. In our example dataset, we assign features representing common image characteristics of the same weight.  
 ```{r, include=TRUE}
 weights = rep(c(10,15,20,16,15,10,12,17,21,14), 3)
 print(weights)
@@ -188,9 +189,9 @@ model = setWeights(model = model,
                    weights = weights)
 ```
 
-Feature constraints can defined with the function ``buildConstraints()``. The input ``constraint_types`` consists of a vector, where all onstraint types are defined. Then, with ``constraint_vars``, the user specifies details about the constraint: for max-size, the number of features to select is provided, while for must-link and cannot-link, the set of feature indices to be linked must be provided. Each list entry corresponds to one constraint in ``constraint_types``. In addition, ``num_features`` denotes the total number of features in the dataset and ``rho`` corresponds to the relaxation parameter of the admissibility function.  
+Feature constraints can defined with the function ``buildConstraints()``. The input ``constraint_types`` consists of a vector, where all constraint types are defined. Then, with ``constraint_vars``, the user specifies details about the constraint: for max-size, the number of features to select is provided, while for must-link and cannot-link, the set of feature indices to be linked must be provided. Each list entry corresponds to one constraint in ``constraint_types``. In addition, ``num_features`` denotes the total number of features in the dataset and ``rho`` corresponds to the relaxation parameter of the admissibility function.  
 
-As ``print(constraints)`` shows, the matrix ``A`` has 10 rows for 4 constraints. While *max-size* and *cannot-link* can be expressed in one equation each, *must-link* is a pairwise constraint. In specific, the *must-link* constraint between $n$ features produces $\frac{n!}{(n-2)!}$ elementary constraints. Hence, 6 equations represent the *must-link* constraint. The function ``setConstraints()`` integrates the constraints into the UBay model. 
+As ``print(constraints)`` shows, the matrix ``A`` has ten rows for four constraints. While *max-size* and *cannot-link* can be expressed in one equation each, *must-link* is a pairwise constraint. In specific, the *must-link* constraint between $n$ features produces $\frac{n!}{(n-2)!}$ elementary constraints. Hence, six equations represent the *must-link* constraint. The function ``setConstraints()`` integrates the constraints into the UBay model. 
 ```{r, include=TRUE}
 constraints = buildConstraints(constraint_types = c("max_size", 
                                                     "must_link", 
@@ -211,9 +212,7 @@ model = setBlockConstraints(model = model, constraints = NULL)
 ```
 
 ## Optimization and evaluation
-A genetic algorithm, described by [@givens:compstat] and implemented in [@R:GA], searches for the optimal feature set in the UBayFS framework. With ``setOptim()`` we initialize the genetic algorithm. ``popsize`` indicates the number of candidate feature set created in each iteration and ``maxiter`` is number of iterations. 
-  - train function with GA
-  - print/summary/plot
+A genetic algorithm, described by [@givens:compstat] and implemented in [@R:GA], searches for the optimal feature set in the UBayFS framework. With ``setOptim()`` we initialize the genetic algorithm. Furthermore, ``popsize`` indicates the number of candidate feature sets created in each iteration, and ``maxiter`` is the number of iterations. 
 
 ```{r, include=TRUE}
 model = setOptim(model = model,
@@ -222,20 +221,20 @@ model = setOptim(model = model,
 
 ```
 
-At this point, we have initialized prior weights, constraints and the optimization procedure --- we can now train the UBayFS model with the generic function ``train``. The summary function provides an overview on all components, UBay exists of. The ``plot()`` function shows the prior feature information as bar charts, with the selected features marked with red borders. In addition, the constraints and the regularization parameter $\rho$ are presented. 
+At this point, we have initialized prior weights, constraints, and the optimization procedure --- we can now train the UBayFS model with the generic function ``train()``, relying on a genetic algorithm. The ``summary()`` function provides an overview of all components of UBayFS. The ``plot()`` function shows the prior feature information as bar charts, with the selected features marked with red borders. In addition, the constraints and the regularization parameter $\rho$ are presented. 
 ```{r, include=TRUE, fig.width=7, fig.height=6}
 model = train(x = model)
 summary(model)
 plot(model)
 ```
-The plot shows the selected features (red framed) and their selection-distribution between ensemble feature selection and prior weights. The constraints are shown in the top where a connecting line is drawn between features of one constraint.
+The plot shows the selected features (red framed) and their selection distribution between ensemble feature selection and prior weights. The constraints are shown at the top, where a connecting line is drawn between features of one constraint.
 The final feature set and its admissibility can be evaluated with ``evaluateFS()`` and ``admissibility()``:
 ```{r, include=TRUE}
 evaluateMultiple(state = model$output$feature_set, model = model)
 #admissibility(state = unlist(model$output$feature_set), constraints = constraints)
 ```
 ## Shiny dashboard
-``UBayFS`` provides an interactive ``R Shiny`` dashboard as GUI. With its intuitive user interface, the user can load data, set likelihood parameters and even control the admissibility regularization strength of each constraint. Histograms and further plots help to get an overview on the users settings. The interactive dashboard offers ``save`` and ``load`` buttons, in order to save or load UBayFS models as RData files.
+``UBayFS`` provides an interactive ``R Shiny`` dashboard as GUI. With its intuitive user interface, the user can load data, set likelihood parameters, and even control the admissibility regularization strength of each constraint. Histograms and plots help to get an overview of the user's settings. The interactive dashboard offers ``save`` and ``load`` buttons to save or load UBayFS models as RData files.
 ```{r,eval=FALSE}
 runInteractive()
 ```
@@ -245,7 +244,7 @@ include_graphics("UBay_Shiny_Screenshot.png")
 ``` 
 
 ## Conclusion
-Although the current version of UBayFS is limited to ``mRMR`` and ``Laplacian score``, it will be extended with additional feature selectors that provide a scoring of the features. With the methodology in place, UBayFS is applicable to a large range of feature selection problems with multiple sources of information. The likelihood parameters, steering the number of elementary models, mainly affect the stability and runtime of the result --- the latter linearly increases with the number of models. Especially the Shiny dashboard delivers insight into the single UBayFS steps. Nevertheless, the dashboard is only applicable for smaller datasets, while larger datasets should be computed in the console. 
+With the methodology in place, UBayFS is applicable to a large range of feature selection problems with multiple sources of information. The likelihood parameters, steering the number of elementary models, mainly affect the stability and runtime of the result --- the latter linearly increases with the number of models. Especially the Shiny dashboard delivers insight into the single UBayFS steps. Nevertheless, the dashboard only applies to smaller datasets, while larger ones should be computed in the console. 
 
 
 ## References

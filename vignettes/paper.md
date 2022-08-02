@@ -1,22 +1,23 @@
 ---
-title: 'UBayFS'
+title: "UBayFS"
 tags:
-  - R
-  - feature selection
+- R
+- feature selection
+date: "13 August 2022"
+output: pdf_document
 authors:
-  - name: Anna Jenul
-    orcid: 0000-0002-6919-3483
-    equal-contrib: true
-    affiliation: 1
-  - name: Stefan Schrunner
-    orcid: 0000-0003-1327-4855
-    equal-contrib: true
-    affiliation: 1
-affiliations:
- - name: Norwegian University of Life Sciences, Ås, Norway
-   index: 1
-date: 13 August 2022
+- name: Anna Jenul
+  orcid: 0000-0002-6919-3483
+  equal-contrib: yes
+  affiliation: 1
+- name: Stefan Schrunner
+  orcid: 0000-0003-1327-4855
+  equal-contrib: yes
+  affiliation: 1
 bibliography: paper.bib
+affiliations:
+- name: Norwegian University of Life Sciences, Ås, Norway
+  index: 1
 ---
 
 # Summary

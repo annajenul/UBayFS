@@ -10,10 +10,16 @@ output:
     geometry: width=400cm
 bibliography: references.bib
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{UBayFS block feature selection}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
+
+<style>
+  body {
+  text-align: justify;
+  padding: 1em}
+</style>
 
 ```{r set-options, echo=FALSE, cache=FALSE}
 options(width = 10000)
@@ -30,37 +36,78 @@ knitr::opts_chunk$set(fig.width = 8)
 knitr::opts_chunk$set(fig.align = 'center')
 ```
 
-## Intro Block feature selection
-Block feature selection is essential in different application fields, such as healthcare. For diseases like cancer, multiple sources of data are usually collected, including clinical data, genetic data, or image data, where measurements from each source present a separate feature block. Imagine that not all data sources are relevant for machine learning models and data analysis. Suppose we knew that image data do not contain additional information to other feature blocks. In that case, a hospital might save a lot of resources and money by not collecting those data in advance. Block feature selection can be used for such purposes. A prominent method for block feature selection is the group Lasso [@yuan:groupLasso] which is a crossover of the lasso method on block variables. Though, UBayFS is more flexible and needs no hyperparameter estimation as in group Lasso.
+## Introduction
+Block feature selection is essential in different application fields, including treatment outcome prediction in healthcare (for diseases such as cancer). Usually, multiple sources of data are collected, including clinical data, genetic data, and image data, where measurements from a common source represent a feature block. In many cases, however, not all data sources are relevant for machine learning models: Suppose we knew that image data do not contain additional information to other feature blocks. In that case, resources and money are saved by not collecting those data in advance. In order to detect that a model does not rely on single feature blocks, block feature selection can be deployed. A prominent method for block feature selection is the group Lasso [@yuan:groupLasso] which is a crossover of the lasso method on block variables. Though, UBayFS is more flexible and needs no hyperparameter estimation as in group Lasso.
 
 ## UBayFS example
-At first we load the package and the Breast Cancer Wisconsin (BCW) dataset, which is described in the main vignette.
+At first we load the package and the Breast Cancer Wisconsin (BCW) example dataset, which is described in the main vignette.
 ```{r, include = TRUE, cache = TRUE}
 library(UBayFS)
 data(bcw)
 ```
 
-
-For block feature selection, it is necessary to define each feature's block affiliation, which can be done either (a) by a block list, or (b) directly by a matrix as input. 
+For block feature selection, it is necessary to define each feature's block affiliation, which is provided either (a) by a block list, or (b) by a block matrix. 
 
 ### Version (a): block list
-The first example demonstrates version (a). We define three blocks for the BCW dataset, where the first block contains features 1 to 10, block two features 11 to 20, and block three features 21 to 30.
+The first example demonstrates how the block structure of the dataset can be provided by a list of block indices. We define three blocks for the BCW dataset, where the first block contains features with indices 1 to 10, block two features with indices 11 to 20, and block three features with indices 21 to 30.
 ```{r, include = TRUE}
 block_list = list()
-block_list[[1]] = c(1:10)
-block_list[[2]] = c(11:20)
-block_list[[3]] = c(21:30)
+block_list[[1]] = 1:10
+block_list[[2]] = 11:20
+block_list[[3]] = 21:30
+
+block_list
 ```
 
-Furthermore, we define a help function to build block weights, simplifying the weight affiliation. Features from the same block get the same prior weight. In this example, features from block 1 get a weight of 0.5, features from block 2 get a weight of 1, and features from block 3 gain weight of 2.
+For the UBayFS model, we define a max-size block constraint restricting the number of selected blocks to (up to) one. Thus, the `constraint_vars` parameter is set to the maximum number of blocks to be selected, and `num_elements` contains the number of blocks, which equals to the number of elements in the block_list.
+
+```{r, include = TRUE}
+block_constraints = buildConstraints(constraint_types = c("max_size"), 
+                                     constraint_vars = list(1), 
+                                     num_elements = length(block_list), 
+                                     rho = 1, 
+                                     block_list = block_list)
+
+block_constraints
+```
+
+### Version (b): block matrix
+Assuming the same block structure as for the block list, we demonstrate how to specify the block structure in UBayFS via a block matrix. The block matrix is a binary assignment matrix consisting of rows representing the blocks, and columns representing the features in the dataset. Note that, in general, a feature may be assigned to an arbitrary number of blocks (i.e. the row and column sums are not restricted).
+
+```{r, include = TRUE}
+block_matrix = matrix(0, nrow = 3, ncol = ncol(bcw$data))
+block_matrix[1, 1:10] = 1
+block_matrix[2, 11:20] = 1
+block_matrix[3, 21:30] = 1
+
+block_matrix
+```
+
+The same block feature constraints as for the block list can be produced using the block matrix. However, note that the  `num_elements` parameter, specifying the number of blocks, has to be set to the number of rows in the block matrix:
+
+```{r, include = TRUE}
+block_constraints = buildConstraints(constraint_types = c("max_size"), 
+                                     constraint_vars = list(1), 
+                                     num_elements = nrow(block_matrix), 
+                                     rho = 1, 
+                                     block_matrix = block_matrix)
+
+block_constraints
+```
+
+### Block-wise prior weights
+
+Not only block-wise constraints are useful in many cases, but also prior weights are easier to specify on block-level than on feature-level. Thus, we define a help function to build the vector of prior block weights. Features from the same block get assigned the same prior weight. In this example, feature weights in block 1 are set to 0.5, feature weights in block 2 are set to 1, and feature weights in block 3 are set to 2.
 ```{r, include = TRUE}
 build_block_weights = function(blocks, weights){
 	return(weights[blocks])
 }
-build_block_weights(blocks = rep(c(1,2,3), each = 10), weights = c(0.5,1,2))
+prior_weights = build_block_weights(blocks = rep(c(1, 2, 3), each = 10), weights = c(0.5, 1, 2))
 ```
 
-For the UBayFS model, we define a max size constraint with three features and a max size block constraint with maximal one block.
+### Evaluation of block feature selection results
+
+After specifying the block constraints, we initialize the UBayFS model. In addition to the block constraints, we require that at most three features are selected in total (max-size constraint).
 
 ```{r, include = TRUE}
 set.seed(1) # for reproducibility
@@ -71,18 +118,13 @@ model = build.UBaymodel(data = bcw$data,
                         nr_features = 10,
                         method = "mRMR",
                         prior_model ="dirichlet",
-                        weights = build_block_weights(blocks = rep(c(1,2,3), each = 10),
-                                                      weights = c(1,1,1)),
+                        weights = prior_weights,
                         lambda = 1,
                         constraints = buildConstraints(constraint_types = c("max_size"), 
                                                        constraint_vars = list(3), 
-                                                       num_elements = dim(bcw$data)[2], 
+                                                       num_elements = ncol(bcw$data), 
                                                        rho = 1),
-                        block_constraints = buildConstraints(constraint_types = c("max_size"), 
-                                                             constraint_vars = list(1), 
-                                                             num_elements = 3, 
-                                                             rho = 1, 
-                                                             block_list = block_list),
+                        block_constraints = block_constraints,
                         optim_method = "GA",
                         popsize = 100,
                         maxiter = 100,
@@ -98,60 +140,7 @@ summary(model)
 plot(model)
 ```
 
-```{r, include = TRUE}
-evaluateMultiple(state = model$output$feature_set[1,], model = model)
-block_admissibility(state = unlist(model$output$feature_set[1,]), 
-                    constraints = model$constraint.params$block_constraints)
-```
-
-### Version (b): block matrix
-In version (b), the block structure can be a direct input which we define as an R matrix. Again, the first block contains features 1 to 10, block two features 11 to 20, and block three features 21 to 30.
-
-```{r, include = TRUE}
-block_matrix = matrix(0, nrow = 3, ncol = ncol(model$data))
-block_matrix[1, 1:10] = 1
-block_matrix[2, 11:20] = 1
-block_matrix[3, 21:30] = 1
-
-block_matrix
-```
-
-The rest of the evaluation is the same for version (a) and (b). Setting the same seed, we achieve the same result of selected features.
-```{r, include = TRUE}
-set.seed(1)
-model = build.UBaymodel(data = bcw$data,
-                        target = bcw$labels,
-                        M = 100, 
-                        tt_split = 0.75,
-                        nr_features = 10,
-                        method = "mRMR",
-                        prior_model ="dirichlet",
-                        weights = build_block_weights(blocks = rep(c(1,2,3), each = 10),
-                                                      weights = c(1,1,1)),
-                        lambda = 1,
-                        constraints = buildConstraints(constraint_types = c("max_size"), 
-                                                       constraint_vars = list(3), 
-                                                       num_elements = dim(bcw$data)[2], 
-                                                       rho = 1),
-                        block_constraints = buildConstraints(constraint_types = c("max_size"), 
-                                                             constraint_vars = list(1), 
-                                                             num_elements = 3, 
-                                                             rho = 1, 
-                                                             block_matrix = block_matrix),
-                        optim_method = "GA",
-                        popsize = 100,
-                        maxiter = 100,
-                        shiny = FALSE
-                        )
-summary(model)
-```
-
-
-```{r, include = TRUE}
-model = train(model)
-summary(model)
-plot(model)
-```
+In the plot, block constraints are shown with dashed lines, while ordinary (feature-)constraints are represented by solid lines.
 
 ```{r, include = TRUE}
 evaluateMultiple(state = model$output$feature_set[1,], model = model)
@@ -159,5 +148,8 @@ block_admissibility(state = unlist(model$output$feature_set[1,]),
                     constraints = model$constraint.params$block_constraints)
 ```
 
+## Conclusion
+
+The specification of block constraints in the UBayFS model follows the same syntax as ordinary feature set constraints. Thus, block constraints can be easily integrated and combined with feature-wise constraints. Further, the framework allows to set arbitrary linear constraints for blocks, as well as for single features.
 
 ## References

@@ -19,6 +19,16 @@ train.UBaymodel = function(x){
   if(class(x) != "UBaymodel"){
     stop("Wrong class of model")
   }
+  if(is.null(x$constraint.params$constraints)){
+    stop("At least a max-size constraint must be defined")
+  }
+  ms = x$constraint.params$constraints$b[which(apply(x$constraint.params$constraints$A == 1, 1, all))]
+  if((!is.numeric(ms)) || (length(ms) == 0)){
+    stop("No max-size constraint among constraints")
+  }
+  else if (ms > ncol(x$constraint.params$constraints$A)){
+    stop("No max-size constraint among constraints")
+  }
 
   # define posterior expected parameter
   theta = posteriorExpectation(x)

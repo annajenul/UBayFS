@@ -2,6 +2,7 @@ library(shiny)
 library(shinyalert)
 library(DT)
 library(ggplot2)
+library(ggpubr)
 library(tcltk)
 library(RColorBrewer)
 
@@ -17,12 +18,7 @@ shinyServer(function(input, output, session) {
         newA <- params$A
         newb <- params$b
         newrho <- params$rho
-        #}
-        #else{
-        #  newA <- rbind(model()$user.params$block_constraints$A, params$A)
-        #  newb <- c(model()$user.params$block_constraints$b, params$b)
-        #  newrho <- c(model()$user.params$block_constraints$rho, params$rho)
-        #}
+
         model(UBayFS::setBlockConstraints(model(),
                                           list(A = newA, b = newb, rho = as.numeric(newrho), block_matrix = block_matrix()),
                                           append = TRUE))
@@ -101,7 +97,7 @@ shinyServer(function(input, output, session) {
     })
 
     # === FILE INPUT HANDLING ===
-    observeEvent(input$upload_data,{
+    observeEvent(input$load_csv,{
       if(!is.null(input$upload_data)){
         tryCatch({
           header <- ifelse(input$input_colnames, TRUE, FALSE)
@@ -137,7 +133,7 @@ shinyServer(function(input, output, session) {
       }
     })
 
-    observeEvent(input$upload_labels,{
+    observeEvent(input$load_csv,{
       if(!is.null(input$upload_labels)){
         tryCatch({
           header <- ifelse(input$input_colnames, TRUE, FALSE)
@@ -151,7 +147,10 @@ shinyServer(function(input, output, session) {
           if(!is.null(model()$data)){
             names(lab) <- rownames(model()$data)
           }
+          print(is.vector(lab))
+          ifelse(is.factor(lab), {lab = lab}, {lab = as.factor(lab)})
           model(append(model(), list(target = lab)))
+          print(model())
         },
         error = function(cond){
           upload_error(cond)
@@ -168,7 +167,7 @@ shinyServer(function(input, output, session) {
       dat <- bcw
 
       model(append(model(), list(data = dat$data)))
-      model(append(model(), list(target = as.factor(dat$labels))))
+      model(append(model(), list(target = dat$labels)))
 
       block_vec <- rep(0, ncol(dat$data))
       for(i in 1:length(dat$blocks)){
@@ -217,7 +216,8 @@ shinyServer(function(input, output, session) {
                                      constraints = model()$user.params$constraints,
                                      method = input$method,
                                      nr_features = input$n_feats,
-                                     shiny = TRUE))},
+                                     shiny = TRUE))
+          print(summary(model()))},
                  error = function(cond){build_error(cond)},
                  warning = function(cond){build_error(cond)}
         )
@@ -265,7 +265,7 @@ shinyServer(function(input, output, session) {
       }
     })
 
-    observe({
+    observeEvent(input$setweights, {
       if(!is.null(model())){
         if(class(model()) == "UBaymodel"){
           if(any(sapply(names(input), grepl, pattern = "blockweight"))){
@@ -298,7 +298,15 @@ shinyServer(function(input, output, session) {
     })
 
     observeEvent(input$run_UBay, {
-      print(model())
+      print(summary(model()))
+      ms = model()$constraint.params$constraints$b[which(apply(model()$constraint.params$constraints$A == 1, 1, all))]
+      if((!is.numeric(ms)) || (length(ms) == 0)){
+        shinyalert("No max-size constraint among constraints! Add one.", type="error")
+      }
+      else if (ms > ncol(model()$constraint.params$constraints$A)){
+        shinyalert("No max-size constraint among constraints! Add one.", type="error")
+      }
+      else{
       withProgress(min = 0, max = 1, value = 0, message = "optimizing posterior function", {
         tryCatch({
           model(UBayFS::train(model()))
@@ -307,6 +315,7 @@ shinyServer(function(input, output, session) {
                  warning = function(cond){build_error(cond)}
         )
       })
+      }
     })
 
     # === STATUS SETTINGS ===
@@ -597,7 +606,7 @@ shinyServer(function(input, output, session) {
       column(12,
         pickerInput("method", "select elementary filter(s)",
                   choices = c("mRMR",
-                              "Laplacian score",
+                              "laplace",
                               "lasso",
                               "rfe",
                               "fisher"),
@@ -643,7 +652,7 @@ shinyServer(function(input, output, session) {
     output$fs_sliders <- renderUI({
 
       optim_method_choices <- c("Genetic Algorithm (GA)")
-      optim_method_choices_short <- c("GA", "MH")
+      optim_method_choices_short <- c("GA")
       popsize_choices <- c(10, 20, 50, 100, 500, 1000, 5000)
       maxiter_choices <- c(10, 20, 30, 40, 50,
                            60, 70, 80, 90, 100,
@@ -827,5 +836,10 @@ shinyServer(function(input, output, session) {
         )
       )
       )
+    })
+
+    observe({
+      if (input$stop_app)
+        stopApp()
     })
 })

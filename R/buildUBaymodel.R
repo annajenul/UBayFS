@@ -87,16 +87,6 @@ build.UBaymodel = function(data,
   if(nrow(data) != length(target)){
     stop("Error: number of labels must match number of data rows")
   }
-  if(is.null(constraints)){
-    stop("At least a max-size constraint must be defined")
-  }
-  ms = constraints$b[which(apply(constraints$A == 1, 1, all))]
-  if((!is.numeric(ms)) || (length(ms) == 0)){
-    stop("No max-size constraint among constraints")
-  }
-  else if (ms > ncol(constraints$A)){
-    stop("No max-size constraint among constraints")
-  }
   if(M %% 1 != 0 | M <= 0){
     stop("Error: M must be a positive integer")
   }

@@ -59,6 +59,7 @@ shinyUI(fluidPage(
                                       status = "info"),
                        actionButton("load_model", "load model", style = "width: 150px"),
                        downloadButton("save_model", "save model", style = "width: 150px"),
+                       actionButton("stop_app", "stop app", style = "width: 150px"),
                        margin = "10px",
                        width = "200px"
                    ),
@@ -95,7 +96,8 @@ shinyUI(fluidPage(
                                             checkboxInput("input_blocks", "feature blocks provided?", value = TRUE),
                                             bsTooltip("input_rownames", "Are rownames provided in column 1 of your input files?"),
                                             bsTooltip("input_colnames", "Are colnames provided in row 1 of your input files?"),
-                                            bsTooltip("input_blocks", "Are block names provided in row 1 (without rownames) or row 2 (with rownames) of your input files?")
+                                            bsTooltip("input_blocks", "Are block names provided in row 1 (without rownames) or row 2 (with rownames) of your input files?"),
+                                            actionButton("load_csv", "load data")
                                         ),
                                         tabPanel("demo",
                                             h5("Breast Cancer Wisconsin"),
@@ -148,8 +150,10 @@ shinyUI(fluidPage(
                                             uiOutput("blocktable"),
                                             style='border: 1px solid black; border-radius: 30px; padding: 10px; margin: 10px;
                                             height: 400px; overflow-y: scroll; overflow-x: hidden'
-                                     ))
-                                 ),
+                                     )),
+                                     tabPanel("set_weights",
+                                              actionButton("setweights", "set weights")
+                                 )),
                                 uiOutput("output_weights")
                              )
                     ),

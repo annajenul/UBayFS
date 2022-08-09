@@ -147,10 +147,8 @@ shinyServer(function(input, output, session) {
           if(!is.null(model()$data)){
             names(lab) <- rownames(model()$data)
           }
-          print(is.vector(lab))
           ifelse(is.factor(lab), {lab = lab}, {lab = as.factor(lab)})
           model(append(model(), list(target = lab)))
-          print(model())
         },
         error = function(cond){
           upload_error(cond)
@@ -217,7 +215,7 @@ shinyServer(function(input, output, session) {
                                      method = input$method,
                                      nr_features = input$n_feats,
                                      shiny = TRUE))
-          print(summary(model()))},
+          },
                  error = function(cond){build_error(cond)},
                  warning = function(cond){build_error(cond)}
         )
@@ -299,22 +297,27 @@ shinyServer(function(input, output, session) {
 
     observeEvent(input$run_UBay, {
       print(summary(model()))
-      ms = model()$constraint.params$constraints$b[which(apply(model()$constraint.params$constraints$A == 1, 1, all))]
-      if((!is.numeric(ms)) || (length(ms) == 0)){
-        shinyalert("No max-size constraint among constraints! Add one.", type="error")
-      }
-      else if (ms > ncol(model()$constraint.params$constraints$A)){
-        shinyalert("No max-size constraint among constraints! Add one.", type="error")
+      if(!is.null(model()$constraint.params$constraints)){
+        ms = model()$constraint.params$constraints$b[which(apply(model()$constraint.params$constraints$A == 1, 1, all))]
+        if((!is.numeric(ms)) || (length(ms) == 0) || is.null(ms)){
+          shinyalert("No max-size constraint among constraints! Add one.", type="error")
+        }
+        else if (ms > ncol(model()$constraint.params$constraints$A)){
+          shinyalert("No max-size constraint among constraints! Add one.", type="error")
+        }
+        else{
+        withProgress(min = 0, max = 1, value = 0, message = "optimizing posterior function", {
+          tryCatch({
+            model(UBayFS::train(model()))
+          },
+                   error = function(cond){build_error(cond)},
+                   warning = function(cond){build_error(cond)}
+          )
+        })
+        }
       }
       else{
-      withProgress(min = 0, max = 1, value = 0, message = "optimizing posterior function", {
-        tryCatch({
-          model(UBayFS::train(model()))
-        },
-                 error = function(cond){build_error(cond)},
-                 warning = function(cond){build_error(cond)}
-        )
-      })
+        shinyalert("No max-size constraint among constraints! Add one.", type="error")
       }
     })
 

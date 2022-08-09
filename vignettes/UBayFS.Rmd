@@ -179,6 +179,8 @@ model = build.UBaymodel(data = bcw$data,
                         )
 summary(model)
 ```
+The prior constraints are shown as a linear inequation system together with the penalty term $\rho$. Further, the current prior weight and the ensemble feature counts (likelihood) for each feature are printed. As the model is not trained yet, the final featre selection resutls (MAP) is empty.
+
 
 ## User knowledge
 With the function ``setWeights()`` the user can change the feature weights from the standard initialization to desired values. In our example dataset, we assign features representing common image characteristics of the same weight.  
@@ -228,12 +230,27 @@ model = train(x = model)
 summary(model)
 plot(model)
 ```
-The plot shows the selected features (red framed) and their selection distribution between ensemble feature selection and prior weights. The constraints are shown at the top, where a connecting line is drawn between features of one constraint.
-The final feature set and its admissibility can be evaluated with ``evaluateFS()`` and ``admissibility()``:
+After training the model, we receive a feature selection result. More than one optimal feature set with the same MAP score is possible. The plot shows the selected features (red framed) and their selection distribution between ensemble feature selection and prior weights. The constraints are shown at the top, where a connecting line is drawn between features of one constraint.
+The final feature set and its additional properties can be evaluated with ``evaluateFS()``:
+
+
 ```{r, include=TRUE}
+# evaluation feature set
 evaluateMultiple(state = model$output$feature_set, model = model)
-admissibility(state = unlist(model$output$feature_set), constraints = model$constraint.params$constraints, log = FALSE)
 ```
+
+The evaluation can be read as follows:
+
+* **cardinality**: number of selected features
+* **log total neg-loss**: ?
+* **log selected posterior scores**: ?
+* **log admissibility**: if 0 all constraints fulfilled, otherwise at least one constraint violated
+* **log block admissibility**: same as *log admissibility* but for block constraints
+* **number violated constraints**: number of violated constraints
+* **number violated block-constraints**: number of violated block constraints; NA if no block structure given
+* **avg feature correlation**: average correlation between features in dataset
+
+
 ## Shiny dashboard
 ``UBayFS`` provides an interactive ``R Shiny`` dashboard as GUI. With its intuitive user interface, the user can load data, set likelihood parameters, and even control the admissibility regularization strength of each constraint. Histograms and plots help to get an overview of the user's settings. The interactive dashboard offers ``save`` and ``load`` buttons to save or load UBayFS models as RData files.
 ```{r,eval=FALSE}

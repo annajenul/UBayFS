@@ -5,6 +5,7 @@
 #' @importFrom GA ga
 #' @importFrom DirichletReg ddirichlet
 #' @importFrom matrixStats logSumExp
+#' @importFrom methods is
 #' @export train
 
 train <- function(x){
@@ -16,7 +17,7 @@ train <- function(x){
 
 train.UBaymodel = function(x){
 
-  if(class(x) != "UBaymodel"){
+  if(!is(x, "UBaymodel")){
     stop("Wrong class of model")
   }
   if(is.null(x$constraint.params$constraints)){

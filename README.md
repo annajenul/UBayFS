@@ -34,6 +34,7 @@ Requirements and dependencies
 - rpart
 - GSelection
 - knitr
+- methods
 
 
 In addition, some functionality of the package (in particular, the interactive Shiny interface) requires the following depedencies:

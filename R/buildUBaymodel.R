@@ -252,11 +252,12 @@ is.UBaymodel <- function(x){
 #' @param maxiter maximum number of iterations of the genetic algorithm for model optimization
 #' @return A UBaymodel object with updated optimization parameters
 #' @seealso build.UBaymodel
+#' @importFrom methods is
 #' @export
 
 setOptim = function(model, method = "GA", popsize, maxiter){
 
-  if(class(model) != "UBaymodel"){
+  if(!is(model, "UBaymodel")){
     stop("Wrong class of model")
   }
 
@@ -283,11 +284,12 @@ setOptim = function(model, method = "GA", popsize, maxiter){
 #' @param block_matrix the matrix containing affiliations of features to each block; only required, if block-wise weights are specified and block_list is NULL
 #' @return A UBaymodel object with updated prior weights
 #' @seealso build.UBaymodel
+#' @importFrom methods is
 #' @export
 
 setWeights = function(model, weights, block_list = NULL, block_matrix = NULL){
 
-  if(class(model) != "UBaymodel"){
+  if(!is(model, "UBaymodel")){
     stop("Wrong class of model")
   }
 

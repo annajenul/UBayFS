@@ -5,6 +5,7 @@ library(ggplot2)
 library(ggpubr)
 library(tcltk)
 library(RColorBrewer)
+library(methods)
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output, session) {
@@ -265,7 +266,7 @@ shinyServer(function(input, output, session) {
 
     observeEvent(input$setweights, {
       if(!is.null(model())){
-        if(class(model()) == "UBaymodel"){
+        if(is(model(), "UBaymodel")){
           if(any(sapply(names(input), grepl, pattern = "blockweight"))){
           blockweights <- sapply(paste0("blockweight_", unique(blocks())), function(x){return(input[[x]])})
           if(!any(is.na(as.integer(blockweights))) && all(blockweights>0)){addWeights(as.numeric(blockweights))}
@@ -287,7 +288,7 @@ shinyServer(function(input, output, session) {
       if(!is.null(model())){
           optim_method = "GA"
       }
-      if(class(model()) == "UBaymodel"){
+      if(is(model(), "UBaymodel")){
           model(setOptim(model(),
                          method = optim_method,
                          popsize = input$popsize,
@@ -714,7 +715,7 @@ shinyServer(function(input, output, session) {
 
     output$result_barplot <- renderPlot({
       if(!is.null(model())){
-        if(class(model()) == "UBaymodel"){
+        if(is(model(), "UBaymodel")){
           plot(model())
         }
       }

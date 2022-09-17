@@ -2,12 +2,13 @@
 #' @description Print details of a UBayFS model.
 #' @param x a `UBaymodel` object created using \link{build.UBaymodel}
 #' @param ... additional print parameters
-#' @import utils
+#' @importFrom utils str
+#' @importFrom methods is
 #' @export
 
 print.UBaymodel <- function(x,...){
 
-  if(class(x) != "UBaymodel"){
+  if(!is(x, "UBaymodel")){
     stop("Wrong class of x")
   }
 
@@ -52,12 +53,13 @@ printResults <- function(model){
 #' Summarizes a UBayFS model
 #' @describeIn print.UBaymodel A summary of a UBayFS model
 #' @param object a `UBaymodel` object created using \link{build.UBaymodel}
+#' @importFrom methods is
 #' @export
 
 
 summary.UBaymodel <- function(object,...){
 
-  if(class(object) != "UBaymodel"){
+  if(!is(object, "UBaymodel")){
     stop("Wrong class of object")
   }
 
@@ -125,11 +127,12 @@ summary.UBaymodel <- function(object,...){
 #' @describeIn print.UBaymodel A barplot of an UBayFS model containing prior weights, ensemble counts and the selected features.
 #' @import ggplot2
 #' @import ggpubr
+#' @importFrom methods is
 #' @export
 
 plot.UBaymodel <- function(x,...){
 
-  if(class(x) != "UBaymodel"){
+  if(!is(x, "UBaymodel")){
     stop("Wrong class of x")
   }
 

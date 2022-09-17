@@ -85,10 +85,11 @@ block_admissibility = function(state, constraints, log = TRUE){
 #' @description compute the posterior score for each feature.
 #' @param model a `UBaymodel` object
 #' @import hyper2
+#' @importFrom methods is
 
 posteriorExpectation <- function(model){
 
-  if(class(model) != "UBaymodel"){
+  if(!is(model, "UBaymodel")){
     stop("Wrong class of model")
   }
 

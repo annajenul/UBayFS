@@ -130,6 +130,7 @@ buildConstraints = function(constraint_types, constraint_vars, num_elements, rho
 #' @param level the threshold correlation-level
 #' @param method the method used to compute correlation; must be one of `pearson`, `spearman` or `kendall`
 #' @return A list containing a matrix `A` and a vector `b` representing the inequality system `Ax<=b`, a vector `rho` and a block matrix
+#' @importFrom utils combn
 #' @export
 
 buildDecorrConstraints = function(data, level = 0.5, method = "spearman"){
@@ -199,11 +200,12 @@ checkConstraints <- function(x){
 #' @param append if `TRUE`, constraints are appended to the existing constraint system
 #' @return a `UBaymodel` object with updated constraint parameters
 #' @seealso build.UBaymodel
+#' @importFrom methods is
 #' @export
 
 setConstraints = function(model, constraints, append = FALSE){
 
-  if(class(model) != "UBaymodel"){
+  if(!is(model, "UBaymodel")){
     stop("Error: wrong class of model")
   }
 
@@ -233,11 +235,12 @@ setConstraints = function(model, constraints, append = FALSE){
 #' Set block constraints in a `UBaymodel` object.
 #' @description Set the block constraints in a `UBaymodel` object.
 #' @describeIn setConstraints  sets the block constraints in a `UBaymodel` object
+#' @importFrom methods is
 #' @export
 
 setBlockConstraints = function(model, constraints, append = FALSE){
 
-  if(class(model) != "UBaymodel"){
+  if(!is(model, "UBaymodel")){
     stop("Error: wrong class of model")
   }
 

@@ -175,19 +175,18 @@ plot.UBaymodel <- function(x,...){
   # constraint plot
   if(!is.null(x$constraint.params$constraints$A)){
     A_c = x$constraint.params$constraints$A
-    A = A_c[which(!as.data.frame(abs(A_c)) %>% duplicated),]
+    A = A_c[which(!as.data.frame(abs(A_c)) %>% duplicated),,drop=FALSE]
     rho = x$constraint.params$constraints$rho[which(!as.data.frame(abs(A_c)) %>% duplicated)]
     num_feat_const = ifelse(is.matrix(A), nrow(A), 1)
 
     if(!is.null(x$constraint.params$block_constraints)){
       A_b = x$constraint.params$block_constraints$A %*% x$constraint.params$block_constraints$block_matrix
-      A = rbind(A, A_b[which(!as.data.frame(abs(A_b)) %>% duplicated),])
+      A = rbind(A, A_b[which(!as.data.frame(abs(A_b)) %>% duplicated),, drop=FALSE])
       rho = c(rho, x$constraint.params$block_constraints$rho[which(!as.data.frame(abs(A_b)) %>% duplicated)])
     }
     df1 <- data.frame(feature = c(), constraint = c(), type = c(), level = c())
 
     for(i in 1:nrow(A)){
-      print(i)
       df1 <- rbind(df1, data.frame(feature = factor(names_feats[which(A[i,] != 0)], levels = names_feats),
                                    constraint = i,
                                    type = ifelse(all(A[i,] == 1), "max-size",

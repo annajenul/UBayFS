@@ -15,7 +15,6 @@ shinyServer(function(input, output, session) {
     # help functions
     addConstraint <- function(params, block_constraint = FALSE){
       if(block_constraint){
-        #if(is.null(model()$user.params$block_constraints$A)){
         newA <- params$A
         newb <- params$b
         newrho <- params$rho
@@ -28,17 +27,10 @@ shinyServer(function(input, output, session) {
         selectRows(proxy, c())
       }
       else{
-        #if(is.null(model()$user.params$constraints$A)){
         newA <- params$A
         newb <- params$b
         newrho <- params$rho
         colnames(newA) <- names_feats()
-        #}
-        #else{
-        #  newA <- rbind(model()$user.params$constraints$A, params$A)
-        #  newb <- c(model()$user.params$constraints$b, params$b)
-        #  newrho <- c(model()$user.params$constraints$rho, params$rho)
-        #}
 
         model(UBayFS::setConstraints(model(),
                                      list(A = newA, b = newb, rho = as.numeric(newrho)),
@@ -613,7 +605,8 @@ shinyServer(function(input, output, session) {
                               "laplace",
                               "lasso",
                               "rfe",
-                              "fisher"),
+                              "fisher",
+                              "hsic"),
                   selected = sel_method,
                   multiple = TRUE),
         bsTooltip("method", "Select the feature selection method type(s) to be used for elementary feature selector"),
@@ -641,14 +634,16 @@ shinyServer(function(input, output, session) {
     output$output_constraints <- renderUI({
       column(output_width(),
              uiOutput("constraints"),
-             align = 'center'
+             align = 'center',
+             style = "overflow-x: auto;"
       )
     })
 
     output$output_block_constraints <- renderUI({
       column(output_width(),
              uiOutput("block_constraints"),
-             align = 'center'
+             align = 'center',
+             style = "overflow-x: auto;"
       )
     })
 

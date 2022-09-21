@@ -67,6 +67,4 @@ For the implementantion of a new feature or bug-fixing, we encourage you to send
 
 Citation
 ------------
-If you use the method and the package, please cite both.
-
 Jenul, A., Schrunner, S., Pilz, J. et al. A user-guided Bayesian framework for ensemble feature selection in life science applications (UBayFS). Mach Learn (2022). https://doi.org/10.1007/s10994-022-06221-9

@@ -30,7 +30,7 @@ shinyUI(fluidPage(
                    img(src = "logo.png", width = "100px"),
             ),
             column(11,
-                   h2("A User-Guided Bayesian Framework for Ensemble Feature Selection in Life Science Applications"),
+                   h2("A User-Guided Bayesian Framework for Ensemble Feature Selection"),
                    align = "right",
                    style = "background-color: #2E75B6;
                             color:white;

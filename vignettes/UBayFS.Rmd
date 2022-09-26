@@ -56,7 +56,7 @@ In this vignette, we use the Breast Cancer Wisconsin dataset [@wolberg:wisconsin
 - rpart
 - GSelection
 - knitr
-
+- methods
 
 In addition, some functionality of the package (in particular, the interactive Shiny interface) requires the following dependencies:
 
@@ -106,7 +106,7 @@ To introduce expert knowledge about feature importance, the user may define a ve
 $$p(\boldsymbol{\theta}) = f_{\text{Dir}}(\boldsymbol{\theta};\boldsymbol{\alpha}),$$
 where the probability density function of the Dirichlet distribution is given as
 $$f_{\text{Dir}}(\boldsymbol{\theta};\boldsymbol{\alpha}) = \frac{1}{\text{B}(\boldsymbol{\alpha})} \prod\limits_{n=1}^N \theta_n^{\alpha_n-1},$$
-where $\text{B}(.)$ denotes the multivariate Beta function. Generalizations of the Dirichlet distribution [@wong:gdirichlet,@hankin:hyperdirichlet] are implemented in UBayFS as well.
+where $\text{B}(.)$ denotes the multivariate Beta function. Generalizations of the Dirichlet distribution [@wong:gdirichlet,@hankin:hyperdirichlet] are also implemented in UBayFS.
 
 Since the Dirichlet distribution is the conjugate prior of the multinomial distribution, the posterior density is given as
 $$p(\boldsymbol{\theta}|\boldsymbol{y}) \propto f_{\text{Dir}}(\boldsymbol{\theta};\boldsymbol{\alpha}^\circ),$$

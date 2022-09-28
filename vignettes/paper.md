@@ -29,6 +29,7 @@ UBayFS allows to specify a full sysem of inequalities as side constraints --- th
 - consider constraints to the feature set as side conditions during optimization. The framework is demonstrated in \autoref{fig:UBayFS}.
 
 The presented $\mathtt{R}$ package UBayFS provides an implementation along with an interactive Shiny dashboard, which makes feature selection applicable for $\mathtt{R}$-users with different levels of expertise. The implementation allows the user to choose from multiple state-of-the-art feature selectors as elementary model types for building the generic ensemble of UBayFS. The current choice includes but are not limited to: 
+
 - Laplacian score
 - Fisher score
 - mRMR

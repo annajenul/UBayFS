@@ -37,6 +37,10 @@ print.UBaymodel <- function(x,...){
 
 printResults <- function(model){
 
+  if(is.null(model$output$feature_set)){
+    stop("Train model first!")
+  }
+
   feature_sets = apply(model$output$feature_set, 1, function(x){
     paste0(which(x == 1), collapse = ",")
   })

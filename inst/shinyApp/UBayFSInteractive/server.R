@@ -103,6 +103,10 @@ shinyServer(function(input, output, session) {
 
           dat <- read.csv(input$upload_data$datapath, header = header, row.names = rownames)
 
+          if(nrow(dat) > 1000 | ncol(dat) > 100){
+            showNotification("Caution: dataset might be too large to compute in the dashboard.", type= "warning")
+          }
+
           if(!header){
             colnames(dat) <- paste0("F", 1:ncol(dat))
           }

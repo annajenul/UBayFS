@@ -37,7 +37,7 @@ knitr::opts_chunk$set(fig.align = 'center')
 ```
 
 ## Introduction
-Block feature selection is essential in different application fields, including treatment outcome prediction in healthcare (for diseases such as cancer). Usually, multiple sources of data are collected, including clinical, genetic, and image data, where measurements from a common source represent a feature block. In many cases, however, not all data sources are relevant for machine learning models: Suppose we knew that image data do not contain additional information to other feature blocks. In that case, resources and money are saved by not collecting those data in advance. In order to detect that a model does not rely on single feature blocks, block feature selection can be deployed. A prominent method for block feature selection is the group Lasso [@yuan:groupLasso], which is a crossover of the lasso method on block variables. Though, UBayFS is more flexible and needs no hyperparameter estimation as in group Lasso.
+Block feature selection is essential in different fields of application, including treatment outcome prediction in healthcare (for diseases such as cancer). Commonly, data is available from multiple sources, including clinical, genetic, and image data, where measurements from a common source are aggregated into a feature block. In many cases, however, not all data sources are relevant for machine learning models: Suppose we suspected that image data would not contain additional information to the other feature blocks. In that case, it might be easier in terms of data acquisition and availability, to favor models that do not depend on all data sources at once. In order to detect that a single feature block does not provide any additional information, block feature selection can be deployed. UBayFS is able to cover this scenario by specifying constraints on block level.
 
 ## UBayFS example
 At first we load the package and the Breast Cancer Wisconsin (BCW) example dataset, which is described in the main vignette.
@@ -46,7 +46,7 @@ library(UBayFS)
 data(bcw)
 ```
 
-For block feature selection, it is necessary to define each feature's block affiliation, which is provided either (a) by a block list, or (b) by a block matrix. 
+For block feature selection, it is necessary to define each feature's block affiliation, which is provided either (a) via a block list, or (b) via a block matrix. 
 
 ### Version (a): block list
 The first example demonstrates how a list of block indices can provide the block structure of the dataset. We define three blocks for the BCW dataset, where the first block contains features with indices 1 to 10, block two features with indices 11 to 20, and block three features with indices 21 to 30.
@@ -72,7 +72,7 @@ block_constraints
 ```
 
 ### Version (b): block matrix
-Assuming the same block structure as for the block list, we demonstrate how to specify the block structure in UBayFS via a block matrix. The block matrix is a binary assignment matrix consisting of rows representing the blocks and columns representing the features in the dataset. Note that, in general, a feature may be assigned to an arbitrary number of blocks (i.e., the row and column sums are not restricted).
+Assuming the same block structure as for the block list, we demonstrate how to specify the block structure in UBayFS via a block matrix. The block matrix is a binary assignment matrix consisting of rows representing the feature blocks and columns representing the features in the dataset. Note that, in general, a feature may be assigned to an arbitrary number of blocks (i.e., the row and column sums are not restricted), but in practice, a partition of the feature set is sufficient in most cases.
 
 ```{r, include = TRUE}
 block_matrix = matrix(0, nrow = 3, ncol = ncol(bcw$data))
@@ -97,7 +97,7 @@ block_constraints
 
 ### Block-wise prior weights
 
-Not only are block-wise constraints useful in many cases, but prior weights are also easier to specify at the block level than at the feature level. Thus, we define a help function to build the vector of prior block weights. Features from the same block get assigned the same prior weight. In this example, feature weights in block 1 are set to 0.5, feature weights in block 2 are set to 1, and feature weights in block 3 are set to 2.
+In addition to block-wise constraints, also prior weights may be specified on block level rather than on feature level. Thus, we define a help function to build the vector of prior block weights. Features from the same block get assigned the same prior weight. In this example, feature weights in block 1 are set to 0.5, feature weights in block 2 are set to 1, and feature weights in block 3 are set to 2.
 ```{r, include = TRUE}
 build_block_weights = function(blocks, weights){
 	return(weights[blocks])

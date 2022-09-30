@@ -36,7 +36,7 @@ evaluateFS <- function(state, model, method = "spearman", log = TRUE){
           sum(model$constraint.params$block_constraints$A %*% (model$constraint.params$block_constraints$block_matrix %*% state) - model$constraint.params$block_constraints$b > 0)),
     ifelse(is.matrix(c), round((sum(c) - sum(diag(c))) / (sum(state) * (sum(state) - 1)),2), NA))
 
-  colnames <- c("cardinality", "total neg-loss", "selected posterior scores", "admissibility", "block admissibility", "number violated constraints", "number violated block-constraints", "avg feature correlation")
+  colnames <- c("cardinality", "total neg-loss", "total utility", "admissibility", "block admissibility", "number violated constraints", "number violated block-constraints", "avg feature correlation")
   if(log){
     colnames[2:5] <- paste("log", colnames[2:5])
   }

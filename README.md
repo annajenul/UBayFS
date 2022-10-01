@@ -1,7 +1,7 @@
 UBayFS <img src="/inst/shinyApp/UBayFSInteractive/www/logo.png" align ="right" width=200 >
 ======
 
-The UBayFS package implements the framework proposed in the article [A User-Guided Bayesian Framework for Ensemble Feature Selection in Life Science Applications (UBayFS)](https://link.springer.com/article/10.1007/s10994-022-06221-9), together with an interactive Shiny dashbord, which makes UBayFS applicable to R-users with different levels of expertise. UBayFS is an ensemble feature selection technique, embedded in a Bayesian statistical framework. The method combines data and user knowledge, where the first is extracted via data-driven ensemble feature selection. The user can control the feature selection by assigning prior weights to features and penalizing specific feature combinations. In particular, the user can define a maximal number of selected features and must-link constraints (features must be selected together) or cannot-link constraints (features must not be selected together). Using relaxed constraints, a parameter $\rho$ regulates the penalty shape. Hence, violation of constraints can be valid but leads to a lower target value of the feature set that is derived from the violated constraints. UBayFS can be used for common feature selection and also for block feature selection.
+The UBayFS package implements the framework proposed in the article [Jenul et al. (2022)](https://link.springer.com/article/10.1007/s10994-022-06221-9), together with an interactive Shiny dashbord, which makes UBayFS applicable to R-users with different levels of expertise. UBayFS is an ensemble feature selection technique, embedded in a Bayesian statistical framework. The method combines data and user knowledge, where the first is extracted via data-driven ensemble feature selection. The user can control the feature selection by assigning prior weights to features and penalizing specific feature combinations. In particular, the user can define a maximal number of selected features and must-link constraints (features must be selected together) or cannot-link constraints (features must not be selected together). Using relaxed constraints, a parameter $\rho$ regulates the penalty shape. Hence, violation of constraints can be valid but leads to a lower target value of the feature set that is derived from the violated constraints. UBayFS can be used for common feature selection and also for block feature selection.
 
 Example
 -------
@@ -51,6 +51,14 @@ In addition, some functionality of the package (in particular, the interactive S
 - rmarkdown
 - prettydoc
 - plyr
+
+Implementation details
+----------------------
+In the original paper, Jenul et al. (2022) optimize the following utility function $U_1$
+$$U_1(\boldsymbol{\delta},\boldsymbol{\theta}) = \boldsymbol{\delta}^T \boldsymbol{\theta}-\lambda \kappa(\boldsymbol{\delta})\rightarrow \max, \lambda>0, $$
+where the penalty is subtracted from the utility from cumulated importances of selected features. The UBayFS package optimization is slightly different by adding the utility from cumulated importances of selected features with $1-$ the penalty term, see $U_2$.  
+$$U_2(\boldsymbol{\delta},\boldsymbol{\theta}) = \boldsymbol{\delta}^T \boldsymbol{\theta}+\lambda (1-\kappa(\boldsymbol{\delta})) = \boldsymbol{\delta}^T \boldsymbol{\theta}-\lambda \kappa(\boldsymbol{\delta}) +\lambda\rightarrow \max, \lambda>0.$$
+The two utility functions differ only in a constant, which is redundant in terms of optimization.
 
 Installation
 ------------

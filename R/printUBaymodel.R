@@ -45,11 +45,11 @@ printResults <- function(model){
     paste0(which(x == 1), collapse = ",")
   })
 
-  cat("=== MAP feature sets ===\n")
+  cat("=== feature sets ===\n")
   print(kable(cbind(feature_sets, t(model$output$metrics))))
 
 
-  cat("=== MAP feature set similarities ===\n")
+  cat("=== feature set similarities ===\n")
   print(model$output$mutual_similarity)
 }
 
@@ -109,7 +109,7 @@ summary.UBaymodel <- function(object,...){
       " weights: (", paste0(object$user.params$weights, collapse = ","),") \n\n",
       " === likelihood === \n",
       " ensemble counts: (", paste0(object$ensemble.params$output$counts, collapse = ","),") \n\n",
-      " === feature selection results (MAP) === \n",
+      " === feature selection results === \n",
       ifelse(is.null(object$output$feature_set), "no output produced yet",
              paste0(
                apply(object$output$feature_set, 1, function(x){

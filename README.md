@@ -67,7 +67,7 @@ Thus, the function values of $U(\boldsymbol{\delta},\boldsymbol{\theta})$ and $\
 Installation
 ------------
 The development version of the package can be installed with \
-`remotes::install_github("annajenul/UBayFS")`
+`remotes::install_github("annajenul/UBayFS", build_vignettes = TRUE)`
 
 Contributing
 ------------

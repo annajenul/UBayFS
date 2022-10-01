@@ -58,7 +58,7 @@ In the original paper, Jenul et al. (2022) optimize the following utility functi
 $$U_1(\boldsymbol{\delta},\boldsymbol{\theta}) = \boldsymbol{\delta}^T \boldsymbol{\theta}-\lambda \kappa(\boldsymbol{\delta})\rightarrow \max, \lambda>0, $$
 where the penalty is subtracted from the utility from cumulated importances of selected features. The UBayFS package optimization is slightly different by adding the utility from cumulated importances of selected features with $1-$ the penalty term, see $U_2$.  
 $$U_2(\boldsymbol{\delta},\boldsymbol{\theta}) = \boldsymbol{\delta}^T \boldsymbol{\theta}+\lambda (1-\kappa(\boldsymbol{\delta})) = \boldsymbol{\delta}^T \boldsymbol{\theta}-\lambda \kappa(\boldsymbol{\delta}) +\lambda\rightarrow \max, \lambda>0.$$
-The two utility functions differ only in a constant, which is redundant in terms of optimization.
+The two utility functions differ only in a constant $\lambda$, which is redundant in terms of optimization.
 
 Installation
 ------------

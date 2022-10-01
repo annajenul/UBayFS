@@ -8,7 +8,7 @@
 #' @importFrom stats cor
 #' @export
 
-evaluateFS <- function(state, model, method = "spearman", log = TRUE){
+evaluateFS <- function(state, model, method = "spearman", log = FALSE){
   if(sum(state) > 1){
     c <- abs(cor(model$data[, state == 1], method = method))
   }
@@ -17,7 +17,8 @@ evaluateFS <- function(state, model, method = "spearman", log = TRUE){
   }
   post_scores <- posteriorExpectation(model)
   log_post <- logSumExp(post_scores[state == 1])
-  loss <- getNegLoss(state, model, log = log)
+  loss <- getNegLoss(state, model, log = FALSE) - model$lambda # substract lambda due to transformation of utility
+  if(log){loss = log(loss)}
 
   # calculate output metrics
   vec <- c(
@@ -33,10 +34,10 @@ evaluateFS <- function(state, model, method = "spearman", log = TRUE){
     ifelse(is.null(model$constraint.params$constraints$A), NA,
            sum(model$constraint.params$constraints$A %*% state - model$constraint.params$constraints$b > 0)),
     ifelse(is.null(model$constraint.params$block_constraints$A), NA,
-          sum(model$constraint.params$block_constraints$A %*% (model$constraint.params$block_constraints$block_matrix %*% state) - model$constraint.params$block_constraints$b > 0)),
+          sum(model$constraint.params$block_constraints$A %*% (model$constraint.params$block_constraints$block_matrix %*% state > 0) - model$constraint.params$block_constraints$b > 0)),
     ifelse(is.matrix(c), round((sum(c) - sum(diag(c))) / (sum(state) * (sum(state) - 1)),2), NA))
 
-  colnames <- c("cardinality", "total neg-loss", "total utility", "admissibility", "block admissibility", "number violated constraints", "number violated block-constraints", "avg feature correlation")
+  colnames <- c("cardinality", "total utility", "posterior feature utility", "admissibility", "block admissibility", "number violated constraints", "number violated block-constraints", "avg feature correlation")
   if(log){
     colnames[2:5] <- paste("log", colnames[2:5])
   }

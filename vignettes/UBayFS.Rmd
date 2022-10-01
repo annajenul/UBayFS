@@ -243,9 +243,9 @@ evaluateMultiple(state = model$output$feature_set, model = model)
 The evaluation can be read as follows:
 
 * **cardinality**: number of selected features
-* **log total neg-loss**: ?
 * **log total utility**: value of the target function for optimization
-* **log admissibility**: cumulated feature importances (target function before substracting penalty terms $(<0)$
+* **log posterior feature utility**: cumulated importances of selected features before substracting a penalization term
+* **log admissibility**: if 0 all constraints ful�lled, otherwise at least one constraint violated
 * **log block admissibility**: same as *log admissibility* but for block constraints
 * **number violated constraints**: number of violated constraints
 * **number violated block-constraints**: number of violated block constraints; NA if no block structure given

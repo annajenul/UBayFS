@@ -26,7 +26,7 @@ The $\mathtt{R}$ package UBayFS implements the user-guided framework for feature
 
 In summary, UBayFS has the potential to cover both expert knowledge and information from an ensemble of elementary feature selectors jointly in a Bayesian framework, as well as
 consider constraints to the feature set as side conditions during optimization. The framework is demonstrated in \autoref{fig:UBayFS}.
-The presented $\mathtt{R}$ package UBayFS provides an implementation along with an interactive Shiny dashboard, which makes feature selection available to $\mathtt{R}$-users with different levels of expertise. The implementation allows the user to choose from multiple state-of-the-art feature selectors for building the generic ensemble feature selectors covering the data-driven component of feature selectors covering the data-driven component of UBayFS. The current choice includes:
+The presented $\mathtt{R}$ package UBayFS provides an implementation along with an interactive Shiny dashboard, which makes feature selection available to $\mathtt{R}$-users with different levels of expertise. The implementation allows the user to choose from multiple state-of-the-art feature selectors for building the generic ensemble of feature selectors covering the data-driven component of UBayFS. The current choice includes:
 
 - Laplacian score
 - Fisher score

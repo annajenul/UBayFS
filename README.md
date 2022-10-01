@@ -54,7 +54,7 @@ In addition, some functionality of the package (in particular, the interactive S
 
 Implementation details
 ----------------------
-The original paper (Jenul et al. 2022) defines the following utility function $U(\boldsymbol{\delta},\boldsymbol{\theta})$ for optimization with respect to $\boldsymbol{\delta}\in \lbrace 0,1\rbrace ^N$:
+The original paper defines the following utility function $U(\boldsymbol{\delta},\boldsymbol{\theta})$ for optimization with respect to $\boldsymbol{\delta}\in \lbrace 0,1\rbrace ^N$:
 $$U(\boldsymbol{\delta},\boldsymbol{\theta}) = \boldsymbol{\delta}^T \boldsymbol{\theta}-\lambda \kappa(\boldsymbol{\delta})\rightarrow \underset{\boldsymbol{\delta}\in\lbrace 0,1\rbrace ^N}{\max}, $$
 for fixed $\lambda>0$.
 

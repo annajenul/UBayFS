@@ -54,11 +54,15 @@ In addition, some functionality of the package (in particular, the interactive S
 
 Implementation details
 ----------------------
-In the original paper, Jenul et al. (2022) optimize the following utility function $U_1$
-$$U_1(\boldsymbol{\delta},\boldsymbol{\theta}) = \boldsymbol{\delta}^T \boldsymbol{\theta}-\lambda \kappa(\boldsymbol{\delta})\rightarrow \max, \lambda>0, $$
-where the penalty is subtracted from the utility from cumulated importances of selected features. The UBayFS package optimization is slightly different by adding the utility from cumulated importances of selected features with $1-$ the penalty term, see $U_2$.  
-$$U_2(\boldsymbol{\delta},\boldsymbol{\theta}) = \boldsymbol{\delta}^T \boldsymbol{\theta}+\lambda (1-\kappa(\boldsymbol{\delta})) = \boldsymbol{\delta}^T \boldsymbol{\theta}-\lambda \kappa(\boldsymbol{\delta}) +\lambda\rightarrow \max, \lambda>0.$$
-The two utility functions differ only in a constant $\lambda$, which is redundant in terms of optimization.
+The original paper, Jenul et al. (2022) defines the following utility function $U(\boldsymbol{\delta},\boldsymbol{\theta})$ for optimization with respect to $\boldsymbol{\delta}\in \{ 0,1\}^N$:
+$$U(\boldsymbol{\delta},\boldsymbol{\theta}) = \boldsymbol{\delta}^T \boldsymbol{\theta}-\lambda \kappa(\boldsymbol{\delta})\rightarrow \underset{\boldsymbol{\delta}\in\{0,1\}^N}{\max}, $$
+for fixed $\lambda>0$.
+
+
+For practical reasons, the implementation in the UBayFS package uses a modified utility function $\tilde{U}(\boldsymbol{\delta},\boldsymbol{\theta})$ which adds an admissibility term $1-\kappa(\boldsymbol{\delta})$ rather than subtracting an inadmissibility term $\kappa(\boldsymbol{\delta})$
+$$\tilde{U}(\boldsymbol{\delta},\boldsymbol{\theta}) = \boldsymbol{\delta}^T \boldsymbol{\theta}+\lambda (1-\kappa(\boldsymbol{\delta})) = \boldsymbol{\delta}^T \boldsymbol{\theta}-\lambda \kappa(\boldsymbol{\delta}) +\lambda\rightarrow \underset{\boldsymbol{\delta}\in\{0,1\}^N}{\max}.$$
+Thus, the function values of $U(\boldsymbol{\delta},\boldsymbol{\theta})$ and $\tilde{U}(\boldsymbol{\delta},\boldsymbol{\theta})$ deviate by a constant $\lambda$ --- however, the optimal feature set $\boldsymbol{\delta}^\star = \underset{\boldsymbol{\delta}\in\{0,1\}^N}{\text{arg max}}~ U(\boldsymbol{\delta},\boldsymbol{\theta}) = \underset{\boldsymbol{\delta}\in\{0,1\}^N}{\text{arg max}}~ \tilde{U}(\boldsymbol{\delta},\boldsymbol{\theta})$ remains uneffected.
+
 
 Installation
 ------------

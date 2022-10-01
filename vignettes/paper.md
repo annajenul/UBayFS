@@ -10,7 +10,7 @@ authors:
   orcid: 0000-0002-6919-3483
   equal-contrib: yes
   affiliation: 1
-- name: Stefan Schrunner
+- name: Stefan Schrunner^[co-first author]
   orcid: 0000-0003-1327-4855
   equal-contrib: yes
   affiliation: 1

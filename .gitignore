@@ -4,7 +4,6 @@
 .Ruserdata
 *.Rd
 *.log
-NAMESPACE
 HD_UBay.Rdata
 vignettes/UBayFS_cache
 UBayFS.html

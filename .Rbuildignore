@@ -6,3 +6,4 @@ CODE_OF_CONDUCT.md
 vignettes/paper.bib
 vignettes/paper.md
 vignettes/paper.log
+^\.github$

@@ -82,6 +82,7 @@ test_that("ensemble is trained correctly",{
   expect_equal(unname(model$ensemble.params$output$counts),
                c(0, 10, 74, 0, 0, 0, 100, 100, 0, 0, 0, 0, 6, 100, 0, 0, 6, 0, 0, 0, 100, 86, 100, 100, 2, 16, 100, 100, 0, 0))
 
+  set.seed(1)
   model <- build.UBaymodel(
     data = bcw$data,
     target = bcw$labels,
@@ -92,6 +93,7 @@ test_that("ensemble is trained correctly",{
   expect_equal(unname(model$ensemble.params$output$counts),
                c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100, 0, 0, 0, 0, 100, 0, 0))
 
+  set.seed(1)
   model <- build.UBaymodel(
     data = bcw$data,
     target = bcw$labels,
@@ -100,6 +102,6 @@ test_that("ensemble is trained correctly",{
     method = "Laplacian score",
   )
   expect_equal(unname(model$ensemble.params$output$counts),
-               c(10, 0, 10, 10, 0, 0, 10, 10, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 10, 0, 10, 10, 0, 0, 0, 10, 0, 0))
+               c(10, 2, 10, 10, 0, 0, 10, 10, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 10, 7, 10, 10, 2, 0, 0, 8, 0, 0))
 
 })

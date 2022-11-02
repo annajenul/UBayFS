@@ -25,7 +25,8 @@ Imports: GA,
          rpart,
          GSelection,
          knitr,
-         methods
+         methods,
+         prettydoc
 Suggests: 
     shinyWidgets,
     shinyalert,
@@ -37,7 +38,6 @@ Suggests:
     shinyBS,
     testthat (>= 3.0.0),
     rmarkdown,
-    prettydoc,
     dplyr,
     plyr
 Config/testthat/edition: 3

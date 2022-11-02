@@ -72,8 +72,8 @@ The development version of the package can be installed with \
 Continuous Integration (CI)
 ---------------------------
 <!-- badges: start -->
-  [![R-CMD-check](https://github.com/annajenul/UBayFS/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/annajenul/UBayFS/actions/workflows/R-CMD-check.yaml)
-  <!-- badges: end -->
+[![R-CMD-check](https://github.com/annajenul/UBayFS/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/annajenul/UBayFS/actions/workflows/R-CMD-check.yaml)
+<!-- badges: end -->
 
 Contributing
 ------------

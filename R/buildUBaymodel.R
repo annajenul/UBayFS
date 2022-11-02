@@ -188,7 +188,7 @@ build.UBaymodel = function(data,
 
       # remove unknown or duplicated features from feature set
       vec = rep(0, ncol(data))
-      if (!f %in% c("hsic", "HSIC") || class(hsic_try) == "try-error"){
+      if (!f %in% c("hsic", "HSIC") || is(hsic_try, "try-error")){
       vec[
         nconst_cols[unique(ranks)[unique(ranks) <= ncol(train_data)]]
       ] = 1

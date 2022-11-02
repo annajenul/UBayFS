@@ -35,6 +35,7 @@ Requirements and dependencies
 - GSelection
 - knitr
 - methods
+- prettydoc
 
 
 In addition, some functionality of the package (in particular, the interactive Shiny interface) requires the following depedencies:
@@ -49,7 +50,6 @@ In addition, some functionality of the package (in particular, the interactive S
 - shinyBS
 - testthat (>= 3.0.0)
 - rmarkdown
-- prettydoc
 - plyr
 
 Implementation details
@@ -68,6 +68,12 @@ Installation
 ------------
 The development version of the package can be installed with \
 `remotes::install_github("annajenul/UBayFS", build_vignettes = TRUE)`
+
+Continuous Integration (CI)
+---------------------------
+<!-- badges: start -->
+  [![R-CMD-check](https://github.com/annajenul/UBayFS/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/annajenul/UBayFS/actions/workflows/R-CMD-check.yaml)
+  <!-- badges: end -->
 
 Contributing
 ------------

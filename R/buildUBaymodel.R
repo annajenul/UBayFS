@@ -170,8 +170,10 @@ build.UBaymodel = function(data,
       }
       else if(f %in% c("hsic", "HSIC")){
         ifelse(is.factor(train_labels), {tl = as.numeric(as.integer(train_labels)-1)}, {tl = train_labels})
+        hsic_try <- try({
         results = feature.selection(train_data, tl, nr_features)
         ranks = results$hsic_selected_feature_index
+        })
       }
       else if(f %in% c("dtree", "DTREE")){
         rf_data = as.data.frame(cbind(train_labels, train_data))
@@ -186,10 +188,11 @@ build.UBaymodel = function(data,
 
       # remove unknown or duplicated features from feature set
       vec = rep(0, ncol(data))
+      if (!f %in% c("hsic", "HSIC") || class(hsic_try) == "try-error"){
       vec[
         nconst_cols[unique(ranks)[unique(ranks) <= ncol(train_data)]]
       ] = 1
-
+      }
       # generate matrix of selected features
       ensemble_matrix = rbind(ensemble_matrix, vec)
       rownames(ensemble_matrix)[nrow(ensemble_matrix)] = paste(f, i)

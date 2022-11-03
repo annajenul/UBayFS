@@ -39,6 +39,17 @@ jobs:
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
+      - name: Install GDAL + qpdf / Linux
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get install qpdf
+
+      - name: Install GDAL + qpdf / Mac OS
+        if: runner.os == 'macOS'
+        run: |
+          brew install qpdf
+          brew cask install xquartz
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck

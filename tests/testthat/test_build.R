@@ -99,9 +99,9 @@ test_that("ensemble is trained correctly",{
     target = bcw$labels,
     M = 10,
     constraints = c,
-    method = "Laplacian score",
+    method = "dtree",
   )
   expect_equal(unname(model$ensemble.params$output$counts),
-               c(10, 2, 10, 10, 0, 0, 10, 10, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 10, 7, 10, 10, 2, 0, 0, 8, 0, 0))
+               c(10, 0, 10, 10, 1, 1, 9, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 2, 10, 10, 1, 1, 6, 10, 0, 1))
 
 })

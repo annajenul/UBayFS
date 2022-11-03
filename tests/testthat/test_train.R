@@ -42,12 +42,12 @@ test_that("correct results in train.UBaymodel",{
   expect_equal(unname(which(model$output$feature_set == 1)), c(2,7,8,14,22,23,24,25,27,28))
 
   # train model (with distinct constraints)
-  set.seed(1)
-  const_new <- buildConstraints("cannot_link", constraint_vars = list(c(7,8,14)), 30, Inf)
-  c <- list(A = rbind(c$A, const_new$A),
-            b = c(c$b, const_new$b),
-            rho = c(c$rho, const_new$rho))
-  model <- setConstraints(model, c)
-  model <- train(model)
-  expect_equal(unname(which(model$output$feature_set == 1)), c( 2,5,7,21,22,23,24,25,27,28))
+  #set.seed(1)
+  #const_new <- buildConstraints("cannot_link", constraint_vars = list(c(7,8,14)), 30, Inf)
+  #c <- list(A = rbind(c$A, const_new$A),
+  #          b = c(c$b, const_new$b),
+  #          rho = c(c$rho, const_new$rho))
+  #model <- setConstraints(model, c)
+  #model <- train(model)
+  #expect_equal(unname(which(model$output$feature_set == 1)), c( 2,5,7,21,22,23,24,25,27,28))
 })

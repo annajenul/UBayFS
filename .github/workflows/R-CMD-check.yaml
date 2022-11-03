@@ -38,6 +38,7 @@ jobs:
           r-version: ${{ matrix.config.r }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
+      - run: CI="" npm run build
 
       - name: Install qpdf / Linux
         if: runner.os == 'Linux'

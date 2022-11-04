@@ -49,10 +49,18 @@ jobs:
         run: |
           brew install xquartz --cask
 
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck
           needs: check
+
+      - name: Check
+        env:
+          RGL_USE_NULL: TRUE
+          DISPLAY: ":99"
+        run: Rscript -e "rcmdcheck::rcmdcheck(args = '--no-manual', error_on = 'warning', check_dir = 'check')"
+
 
       - uses: r-lib/actions/check-r-package@v2
         with:

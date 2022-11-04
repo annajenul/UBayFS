@@ -50,6 +50,8 @@ jobs:
         run: |
           brew install xquartz --cask
 
+      - name: Install dependencies
+        run: Rscript -e "library(remotes)" -e "update(readRDS('depends.Rds'))" -e "remotes::install_cran('rcmdcheck')"
 
      # - uses: r-lib/actions/setup-r-dependencies@v2
     #    with:

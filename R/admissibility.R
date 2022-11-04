@@ -6,7 +6,6 @@
 #' @return an admissibility value
 #' @importFrom matrixStats logSumExp
 #' @export
-
 admissibility = function(state, constraints, log = TRUE){
 
   # parse input

@@ -74,7 +74,7 @@ Installation
 The development version of the package can be installed with \
 `remotes::install_github("annajenul/UBayFS", build_vignettes = TRUE)`.
 
-In you use a macOS operator system, make sure you have [XQuartz](https://www.xquartz.org/) installed.
+If you use a macOS operator system, make sure you have [XQuartz](https://www.xquartz.org/) installed.
 
 Contributing
 ------------

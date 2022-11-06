@@ -49,5 +49,5 @@ test_that("correct results in train.UBaymodel",{
            rho = c(c$rho, const_new$rho))
   model <- setConstraints(model, c)
   model <- train(model)
-  expect_equal(any(apply(model$output$feature_set[1,]==1, 1, which) == c( 2,5,7,21,22,23,24,25,27,28)), TRUE)
+  expect_equal(unname(which(model$output$feature_set==1)), c(2,7,12,21,22,23,24,25,27,28))
 })

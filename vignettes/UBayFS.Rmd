@@ -53,17 +53,16 @@ include_graphics("UBay_UML.jpg")
 - shiny
 - mRMRe
 - Rdimtools
-- caret
 - DirichletReg
 - glmnet
 - ggplot2
-- ggpubr
+- gridExtra
 - utils
 - hyper2
-- rpart
 - GSelection
-- knitr
 - methods
+- prettydoc
+- caret
 
 In addition, some functionality of the package (in particular, the interactive Shiny interface) requires the following dependencies:
 
@@ -77,8 +76,9 @@ In addition, some functionality of the package (in particular, the interactive S
 - shinyBS
 - testthat (>= 3.0.0)
 - rmarkdown
-- prettydoc
+- dplyr
 - plyr
+- knitr
 
 Like other R packages, UBayFS is loaded using the ``library(UBayFS)`` command. The sample dataset is accessed via ``data(bcw)``.
 ```{r, include = TRUE, cache = TRUE}

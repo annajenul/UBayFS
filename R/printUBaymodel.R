@@ -32,7 +32,6 @@ print.UBaymodel <- function(x,...){
 #' Feature selection results
 #' @describeIn print.UBaymodel Display and summarize the results of UBayFS after feature selection.
 #' @param model a `UBaymodel` object created using \link{build.UBaymodel} after training
-#' @importFrom knitr kable
 #' @export
 
 printResults <- function(model){
@@ -46,9 +45,13 @@ printResults <- function(model){
   })
 
   cat("=== feature sets ===\n")
-  print(kable(cbind(feature_sets, t(model$output$metrics))))
+  print(feature_sets)
+  cat("                     \n")
 
+  cat("=== output metrics ===\n")
+  print(t(model$output$metrics))
 
+  cat("                               \n")
   cat("=== feature set similarities ===\n")
   print(model$output$mutual_similarity)
 }
@@ -130,7 +133,7 @@ summary.UBaymodel <- function(object,...){
 #' Plot a UBayFS model
 #' @describeIn print.UBaymodel A barplot of an UBayFS model containing prior weights, ensemble counts and the selected features.
 #' @import ggplot2
-#' @import ggpubr
+#' @import gridExtra
 #' @importFrom methods is
 #' @export
 
@@ -179,14 +182,14 @@ plot.UBaymodel <- function(x,...){
   # constraint plot
   if(!is.null(x$constraint.params$constraints$A)){
     A_c = x$constraint.params$constraints$A
-    A = A_c[which(!as.data.frame(abs(A_c)) %>% duplicated),,drop=FALSE]
-    rho = x$constraint.params$constraints$rho[which(!as.data.frame(abs(A_c)) %>% duplicated)]
+    A = A_c[which(!duplicated(as.data.frame(abs(A_c)))),,drop=FALSE]
+    rho = x$constraint.params$constraints$rho[which(!duplicated(as.data.frame(abs(A_c))))]
     num_feat_const = ifelse(is.matrix(A), nrow(A), 1)
 
     if(!is.null(x$constraint.params$block_constraints)){
       A_b = x$constraint.params$block_constraints$A %*% x$constraint.params$block_constraints$block_matrix
-      A = rbind(A, A_b[which(!as.data.frame(abs(A_b)) %>% duplicated),, drop=FALSE])
-      rho = c(rho, x$constraint.params$block_constraints$rho[which(!as.data.frame(abs(A_b)) %>% duplicated)])
+      A = rbind(A, A_b[which(!duplicated(as.data.frame(abs(A_b)))),, drop=FALSE])
+      rho = c(rho, x$constraint.params$block_constraints$rho[which(!duplicated(as.data.frame(abs(A_b))))])
     }
     df1 <- data.frame(feature = c(), constraint = c(), type = c(), level = c())
 
@@ -216,10 +219,9 @@ plot.UBaymodel <- function(x,...){
             axis.line.x = element_blank(),
             legend.position = "top")
 
-    ggarrange(q, p, nrow = 2, align = "v", heights = c(1,2))
+    grid.arrange(q, p, nrow = 2,  heights = c(1,2))
   }
   else{
     p
   }
-
 }

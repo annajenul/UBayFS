@@ -56,11 +56,10 @@
 #'                      weights = w
 #' )
 #' @import Rdimtools
-#' @import caret
 #' @import glmnet
 #' @import mRMRe
 #' @import shiny
-#' @importFrom rpart rpart
+#' @import caret
 #' @importFrom GSelection feature.selection
 #' @export
 
@@ -121,6 +120,9 @@ build.UBaymodel = function(data,
     test_index = setdiff(1:length(target),
                          train_index)
 
+    train_index = build_train_set(target, tt_split)
+    test_index = setdiff(1:length(target), train_index)
+
     # data preprocessing
     nconst_cols = which(apply(data[train_index,], 2, 											# identify columns with constant features
                               function(x){return(length(unique(x)))}) > 1)
@@ -177,9 +179,20 @@ build.UBaymodel = function(data,
       }
       else if(f %in% c("dtree", "DTREE")){
         rf_data = as.data.frame(cbind(train_labels, train_data))
-        colnames(rf_data) <- make.names(colnames(rf_data))
-        tree = rpart::rpart(train_labels~., data = rf_data)
-        ranks = which(colnames(train_data) %in% names(tree$variable.importance)[1:nr_features])
+        #colnames(rf_data) <- make.names(colnames(rf_data))
+        #tree = rpart::rpart(train_labels~., data = rf_data)
+        #
+        if(is.factor(train_labels)){
+          tree = caret::train(as.factor(train_labels) ~ .,
+                data=rf_data,
+                method="rpart")
+        }
+        else{
+          tree = caret::train(train_labels ~ .,
+                              data=rf_data,
+                              method="rpart")
+        }
+        ranks = which(colnames(train_data) %in% names(tree$finalModel$variable.importance)[1:nr_features])
       }
 
       else{
@@ -328,5 +341,29 @@ setWeights = function(model, weights, block_list = NULL, block_matrix = NULL){
   model$user.params$weights = weights
 
   return(model)
+}
+
+
+#' Perform stratified data partition.
+#' @description Sample indices for training from the data.
+#' @param y a column, often the target, by which the data shall be partitioned.
+#' @param tt_split the percentage of data used for training in each ensemble model.
+#' @return Data indices for training ensembles
+
+build_train_set <- function(y, tt_split){
+  n = length(unique(y))
+  if(n == 1){stop("Error: Target must have more than one unique value!")}
+  else if(n > 2){
+    return(sample(1:length(y), floor(tt_split*length(y))))
+  }
+  else{
+    uv = unique(y)
+    s = c()
+    for (i in 1:length(uv)) {
+      group = which(y == uv[i])
+      s = c(s, sample(group, floor(tt_split*length(group))))
+    }
+    return(s)
+  }
 }
 

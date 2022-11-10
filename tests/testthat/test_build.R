@@ -80,7 +80,7 @@ test_that("ensemble is trained correctly",{
     constraints = c
   )
   expect_equal(unname(model$ensemble.params$output$counts),
-               c(0,11,81,0,0,0,100,100,0,0,0,0,1,100,0,0,3,0,0,0,100,87,100,100,3,14,100,100,0,0))
+               c(0,9,76,0,0,0,100,100,0,0,0,0,3,100,0,0,4,0,0,0,100,89,100,100,1,18,100,100,0,0))
 
   set.seed(1)
   model <- build.UBaymodel(
@@ -99,9 +99,9 @@ test_that("ensemble is trained correctly",{
     target = bcw$labels,
     M = 10,
     constraints = c,
-    method = "dtree",
+    method = "fisher",
   )
   expect_equal(unname(model$ensemble.params$output$counts),
-               c(10, 0, 10, 10, 0, 1, 6, 6, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 10, 0, 10, 10, 0, 6, 4, 9, 2, 1))
+               c(10, 0, 10, 10, 0, 0, 10, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 10, 10, 0, 0, 10, 10, 0, 0))
 
 })

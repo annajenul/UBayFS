@@ -31,15 +31,15 @@ test_that("correct results in train.UBaymodel",{
 
   # train model (standard)
   set.seed(1)
-  model <- train(model)
+  model <- UBayFS::train(model)
   expect_s3_class(model, "UBaymodel")
   expect_equal(unname(which(model$output$feature_set == 1)), c(3,7,8,14,21,22,23,24,27,28))
 
   # train model (with distinct weights)
   set.seed(1)
   model <- setWeights(model, rep(c(1,100,10,20,100,20,50,30,40,90), 3))
-  model <- train(model)
-  expect_equal(unname(which(model$output$feature_set == 1)), c(2,7,8,14,22,23,24,25,27,28))
+  model <- UBayFS::train(model)
+  expect_equal(unname(which(model$output$feature_set[1,] == 1)), c(2,7,8,14,21,22,23,24,27,28))
 
   # train model (with distinct constraints)
   set.seed(1)
@@ -48,6 +48,6 @@ test_that("correct results in train.UBaymodel",{
            b = c(c$b, const_new$b),
            rho = c(c$rho, const_new$rho))
   model <- setConstraints(model, c)
-  model <- train(model)
-  expect_equal(unname(which(model$output$feature_set==1)), c(2,7,12,21,22,23,24,25,27,28))
+  model <- UBayFS::train(model)
+  expect_equal(unname(which(model$output$feature_set==1)), c(2,8,21,22,23,24,25,27,28,30))
 })

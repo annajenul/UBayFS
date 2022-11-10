@@ -6,7 +6,7 @@
 #' @param M the number of elementary models to be trained in the ensemble
 #' @param tt_split the ratio of samples drawn for building an elementary model (train-test-split)
 #' @param nr_features number of features to select in each elementary model
-#' @param method a vector denoting the method(s) used as elementary models; options: `mRMR`, `laplace` (Laplacian score)
+#' @param method a vector denoting the method(s) used as elementary models; options: `mRMR`, `laplace` (Laplacian score) Also self-defined functions are possible methods; they must have the arguments X (data), y (target), n (number of features) and name (name of the function). For more details see examples.
 #' @param prior_model a string denoting the prior model to use; options: `dirichlet`, `wong`, `hankin`; `hankin` is the most general prior model, but also the most time consuming
 #' @param weights the vector of user-defined prior weights for each feature
 #' @param lambda a positive scalar denoting the overall strength of the constraints
@@ -16,6 +16,7 @@
 #' @param popsize size of the initial population of the genetic algorithm for model optimization
 #' @param maxiter maximum number of iterations of the genetic algorithm for model optimization
 #' @param shiny TRUE indicates that the function is called from Shiny dashboard
+#' @param ... additional arguments
 #' @return a `UBaymodel` object containing the following list elements:
 #' \itemize{
 #'   \item `data` - the input dataset
@@ -42,6 +43,24 @@
 #'                      weights = w
 #' )
 #'
+#' # use a function computing a decision tree as input
+#' library("rpart")
+#' decision_tree <- function(X, y, n, name = "tree"){
+#' rf_data = as.data.frame(cbind(y, X))
+#' colnames(rf_data) <- make.names(colnames(rf_data))
+#' tree = rpart::rpart(y~., data = rf_data)
+#' return(list(ranks= which(colnames(X) %in% names(tree$variable.importance)[1:n]),
+#'            name = name))
+#' }
+#'
+#' model <- build.UBaymodel(
+#'                      data = bcw$data,
+#'                      target = bcw$labels,
+#'                      constraints = c,
+#'                      weights = w,
+#'                      method = decision_tree
+#' )
+#'
 #' # include block-constraints
 #' c_block <- buildConstraints(constraint_types = "max_size",
 #'                             constraint_vars = list(2),
@@ -56,11 +75,8 @@
 #'                      weights = w
 #' )
 #' @import Rdimtools
-#' @import glmnet
 #' @import mRMRe
 #' @import shiny
-#' @import caret
-#' @importFrom GSelection feature.selection
 #' @export
 
 build.UBaymodel = function(data,
@@ -77,12 +93,15 @@ build.UBaymodel = function(data,
                            optim_method = "GA",
                            popsize = 50,
                            maxiter = 100,
-                           shiny = FALSE){
+                           shiny = FALSE,
+                           ...){
 
   # check input
   if(!is.matrix(data)){
     data = as.matrix(data)
   }
+  if(is.function(method)){method = list(method)}
+
   if(nrow(data) != length(target)){
     stop("Error: number of labels must match number of data rows")
   }
@@ -95,10 +114,11 @@ build.UBaymodel = function(data,
   else if(tt_split < 0.5 | tt_split > 0.99){
     warning("Warning: tt_split should not be outside [0.5,0.99]")
   }
-  if(!all(method %in% c("mRMR", "mrmr", "Laplacian score", "laplace", "lasso", "LASSO", "fisher", "Fisher", "RFE", "rfe", "hsic", "HSIC",
-                        "dtree", "DTREE"))){
-    stop("Error: unknown method")
+  f_vs_string = sapply(method, is.function)
+  if(!all(method[!f_vs_string] %in% c("mRMR", "mrmr", "Laplacian score", "laplace", "fisher", "Fisher"))){
+      stop("Error: unknown method")
   }
+
   if(!is.numeric(lambda) | lambda <=0){
     stop("Error: lambda must be a scalar greater than 0")
   }
@@ -108,18 +128,8 @@ build.UBaymodel = function(data,
 
   # initialize matrix
   ensemble_matrix = c()
-  family = ifelse(is.factor(target), "binomial", "gaussian")
-  if(any(method %in% c("lasso", "LASSO"))){cv.lasso <- cv.glmnet(as.matrix(data), target, intercept = FALSE, alpha = 1, family = family, nfolds=3)}
-
+  method_names = method[!f_vs_string]
   for(i in 1:M){																				# perform M runs
-
-    # stratified train-test-split
-    train_index = caret::createDataPartition(target,
-                                             p = tt_split,
-                                             list = FALSE)
-    test_index = setdiff(1:length(target),
-                         train_index)
-
     train_index = build_train_set(target, tt_split)
     test_index = setdiff(1:length(target), train_index)
 
@@ -131,15 +141,29 @@ build.UBaymodel = function(data,
 
     # generate elementary FS
     for(f in method){
-      if(f %in% c("laplace", "Laplacian score")){												# type: Laplacian score
+
+      if(is.function(f)){
+        out <- try({
+        mod =  f(X = train_data, y = train_labels, n = nr_features, ...)
+        ranks = mod[["ranks"]]
+        name = mod[["name"]]
+        method_names = c(method_names, name)
+        })
+      }
+
+      else if(f %in% c("laplace", "Laplacian score")){												# type: Laplacian score
+        out <- try({
         ranks = do.lscore(train_data,ndim = nr_features)$featidx									# use do.lscore function (package Rdimtools)
+        })
       }
       else if(f %in% c("fisher", "Fisher")){
+        out <- try({
         if(is.numeric(train_labels)){stop("Fisher score cannot be used for regression!")}
         ranks = do.fscore(X = train_data, label = train_labels, ndim = nr_features)$featidx
-
+        })
       }
       else if(f %in% c("mrmr", "mRMR")){														# type: mRMR
+        out <- try({
         dat = data.frame(train_data, "class" = train_labels)									# change data format to data.frame
         if(is.factor(train_labels)){
         dat$class = factor(dat$class, 															# change label format to ordered factor
@@ -151,64 +175,27 @@ build.UBaymodel = function(data,
         ranks = unlist(rs@filters)[																# extract selected features
           order(unlist(rs@scores),
                 decreasing = TRUE)]
-
-      }
-
-      else if(f %in% c("lasso", "LASSO")){
-        model <- glmnet(train_data, train_labels, intercept = FALSE, alpha = 1, family = family,
-                        lambda = cv.lasso$lambda.min)
-        ranks = which(as.vector(model$beta) != 0)
-      }
-
-      else if(f %in% c("RFE", "rfe")){
-        if(is.factor(train_labels)){
-          control <- rfeControl(functions=rfFuncs, method = "cv", number = 2)
-        }
-        else{
-          control <- rfeControl(functions=lmFuncs, method = "cv", number = 2)
-        }
-        results <- rfe(train_data, train_labels, sizes = nr_features, rfeControl=control)
-        ranks = which(colnames(train_data) %in% results$optVariables)
-      }
-      else if(f %in% c("hsic", "HSIC")){
-        ifelse(is.factor(train_labels), {tl = as.numeric(as.integer(train_labels)-1)}, {tl = train_labels})
-        hsic_try <- try({
-        results = feature.selection(train_data, tl, nr_features)
-        ranks = results$hsic_selected_feature_index
         })
       }
-      else if(f %in% c("dtree", "DTREE")){
-        rf_data = as.data.frame(cbind(train_labels, train_data))
-        #colnames(rf_data) <- make.names(colnames(rf_data))
-        #tree = rpart::rpart(train_labels~., data = rf_data)
-        #
-        if(is.factor(train_labels)){
-          tree = caret::train(as.factor(train_labels) ~ .,
-                data=rf_data,
-                method="rpart")
-        }
-        else{
-          tree = caret::train(train_labels ~ .,
-                              data=rf_data,
-                              method="rpart")
-        }
-        ranks = which(colnames(train_data) %in% names(tree$finalModel$variable.importance)[1:nr_features])
-      }
-
       else{
         stop(paste0("Error: unknown method", f))												# catch unknown methods
       }
 
-      # remove unknown or duplicated features from feature set
-      vec = rep(0, ncol(data))
-      if (!f %in% c("hsic", "HSIC") || is(hsic_try, "try-error")){
-      vec[
-        nconst_cols[unique(ranks)[unique(ranks) <= ncol(train_data)]]
-      ] = 1
+      if (!is(out, "try-error")){
+
+        vec = rep(0, ncol(data))
+        vec[nconst_cols[unique(ranks)[unique(ranks) <= ncol(train_data)]]] <- 1
+        #vec[nconst_cols[ranks]] <- 1
       }
+      else{vec = rep(NA, ncol(data))}
       # generate matrix of selected features
       ensemble_matrix = rbind(ensemble_matrix, vec)
-      rownames(ensemble_matrix)[nrow(ensemble_matrix)] = paste(f, i)
+      if(is.function(f)){
+        rownames(ensemble_matrix)[nrow(ensemble_matrix)] = paste(name, i)
+      }
+      else{
+        rownames(ensemble_matrix)[nrow(ensemble_matrix)] = paste(f, i)
+      }
     }
 
     if(shiny){
@@ -216,10 +203,15 @@ build.UBaymodel = function(data,
     }
   }
 
+  rm_rows = which(apply(ensemble_matrix, 1, function(x){return(any(is.na(x)))}))
+  if(length(rm_rows)>0){
+    ensemble_matrix = ensemble_matrix[-rm_rows,]
+  }
+  if(ceiling(nrow(ensemble_matrix) / length(method)) < ceiling(M/2)){stop("Too many ensembles could not be performed!")}
+
   # structure results
   counts = colSums(ensemble_matrix)
   names(counts) = colnames(data)
-
   # define return object
   obj = list(
     data = data,
@@ -229,7 +221,7 @@ build.UBaymodel = function(data,
     ensemble.params = list(
       input = list( tt_split = tt_split,
                     M = M,
-                    method = method,
+                    method = unique(method_names),
                     nr_features = nr_features),
       output = list(counts = counts,
                     ensemble_matrix = ensemble_matrix)
@@ -366,4 +358,7 @@ build_train_set <- function(y, tt_split){
     return(s)
   }
 }
+
+
+
 

@@ -54,15 +54,12 @@ include_graphics("UBay_UML.jpg")
 - mRMRe
 - Rdimtools
 - DirichletReg
-- glmnet
 - ggplot2
 - gridExtra
 - utils
 - hyper2
-- GSelection
 - methods
 - prettydoc
-- caret
 
 In addition, some functionality of the package (in particular, the interactive Shiny interface) requires the following dependencies:
 
@@ -148,7 +145,7 @@ Since an exact optimization is impossible due to the non-linear function $\kappa
 ## Application of UBayFS
  
 ### Ensemble Training
-The function ``build.UBaymodel()`` initializes the UBayFS model and trains an ensemble of elementary feature selectors. The training dataset and target are initialized with the arguments ``data`` and ``target``. Although the UBayFS concept permits unsupervised, multiclass, or regression setups, the current implementation supports binary target variables only. While ``M`` defines the ensemble size (number of elementary feature selectors), the types of the elementary feature selectors is set via ``method``. Each ensemble model is trained on a random subset comprising ``tt_split``$\cdot 100$ percent of the train data. The help function ``buildConstraints(...)`` provides an easy way to define side constraints for the model. Using the argument ``prior_model`` the user specifies whether the standard Dirichlet distribution or a generalized variant should be used as prior model. Furthermore, the number of features selected in each ensemble can be controlled by the parameter ``nr_features``.
+The function ``build.UBaymodel()`` initializes the UBayFS model and trains an ensemble of elementary feature selectors. The training dataset and target are initialized with the arguments ``data`` and ``target``. Although the UBayFS concept permits unsupervised, multiclass, or regression setups, the current implementation supports binary target variables only. While ``M`` defines the ensemble size (number of elementary feature selectors), the types of the elementary feature selectors is set via ``method``. Three different feature selectors (mRMR, Fisher schore and Laplace score) are implemented as baseline. In general, the ``method`` argument allows for each self-implemented feature selection function with the arguments ``X`` (describes the data), ``y`` (describes the target, ``n`` (describes the number of features that shall be selected), and ``name`` (name of the method). The function must return the indices of the selected features and the input name. An example with classification trees is shown below. The Each ensemble model is trained on a random subset comprising ``tt_split``$\cdot 100$ percent of the train data. The help function ``buildConstraints(...)`` provides an easy way to define side constraints for the model. Using the argument ``prior_model`` the user specifies whether the standard Dirichlet distribution or a generalized variant should be used as prior model. Furthermore, the number of features selected in each ensemble can be controlled by the parameter ``nr_features``.
 
 For the standard UBayFS initialization, all prior feature weights are set to 1, and no feature constraints are included yet. The ``summary()`` function provides an overview of the dataset, the prior weights, and the likelihood --- ensemble counts indicate how often a feature was selected over the ensemble feature selections. 
 ```{r, include = TRUE}
@@ -173,7 +170,43 @@ model = build.UBaymodel(data = bcw$data,
                         )
 summary(model)
 ```
+
 The prior constraints are shown as a linear inequation system together with the penalty term $\rho$. Further, the current prior weight and the ensemble feature counts (likelihood) for each feature are printed. As the model is not trained yet, the final feature selection result is empty.
+
+In addition to ``mRMR``, we add a function ``decision_tree()`` that computes features based on decision tree importances.
+
+```{r, include = TRUE}
+
+library(rpart)
+decision_tree <- function(X, y, n, name = "tree"){
+  rf_data = as.data.frame(cbind(y, X))
+  colnames(rf_data) <- make.names(colnames(rf_data))
+  tree = rpart::rpart(y~., data = rf_data)
+return(list(ranks= which(colnames(X) %in% names(tree$variable.importance)[1:n]),
+            name = name))
+}
+
+model = build.UBaymodel(data = bcw$data,
+                        target = bcw$labels,
+                        M = 100, 
+                        tt_split = 0.75,
+                        nr_features = 10,
+                        method = c("mRMR", decision_tree),
+                        prior_model ="dirichlet",
+                        weights = 0.01,
+                        lambda = 1,
+                        constraints = buildConstraints(constraint_types = c("max_size"), 
+                                                       constraint_vars = list(3), 
+                                                       num_elements = dim(bcw$data)[2], 
+                                                       rho = 1),
+                        block_constraints = NULL,
+                        optim_method = "GA",
+                        popsize = 100,
+                        maxiter = 100,
+                        shiny = FALSE
+                        )
+summary(model)
+```
 
 
 ### User knowledge

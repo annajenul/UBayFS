@@ -24,15 +24,12 @@ affiliations:
 
 The $\mathtt{R}$ package UBayFS implements the user-guided framework for feature selection proposed in @jenul2022ubayfs, which incorporates information from the data and prior knowledge from domain experts. \autoref{fig:UBayFS} demonstrates the framework. Different approaches for integrating prior knowledge in feature selection exist, though there is a lack of general and sophisticated frameworks that deliver stable and reproducible feature selection along with implementations. With its generic setup and the possibilities to specify prior weights as well as side constraints, UBayFS shows the flexibility to be applied in a broad range of application scenarios, which exceed the capabilities of conventional feature selectors while preserving large model generality. Besides side constraints, such as the option to specify a maximum number of features, the user can add must-link constraints (features must be selected together) or cannot-link constraints (features must not be selected together). In addition, constraints can be defined on feature-block level, as well. Thus, UBayFS is also capable of solving more general problems such as block feature selection. A parameter $\rho$ regulates the shape of a penalty term accounting for side constraints, where feature sets that violate constraints lead to a lower target value. State-of-the-art methods do not cover such scenarios. 
 
-The presented $\mathtt{R}$ package UBayFS provides an implementation along with an interactive Shiny dashboard, which makes feature selection available to $\mathtt{R}$-users with different levels of expertise. The implementation allows the user to choose from multiple state-of-the-art feature selectors for building the generic ensemble of feature selectors covering the data-driven component of UBayFS. The current choice includes:
+The presented $\mathtt{R}$ package UBayFS provides an implementation along with an interactive Shiny dashboard, which makes feature selection available to $\mathtt{R}$-users with different levels of expertise. The implementation allows the user to define their own feature selectors via a function interface or to use one out of three state-of-the-art feature selectors for building the generic ensemble of feature selectors covering the data-driven component of UBayFS. The state-of-the-art choices include:
 
 - Laplacian score
 - Fisher score
 - mRMR
-- Lasso
-- decision tree
-- recursive feature elimination
-- HSIC Lasso
+
 
 Prior weights can be specified for single features or whole blocks as weight vectors. Linear side constraints are implemented via a matrix $A$ and a right side $b$ or with a customized function for specific constraint types. Hence, the sophisticated statistical model is summarized in a user-friendly and easy-to-use package.
 

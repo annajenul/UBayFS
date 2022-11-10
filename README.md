@@ -72,8 +72,9 @@ Thus, the function values of $U(\boldsymbol{\delta},\boldsymbol{\theta})$ and $\
 Installation
 ------------
 The development version of the package can be installed with \
-`remotes::install_github("annajenul/UBayFS", build_vignettes = TRUE)`
-In you use a macOS operator system, make sure you have [XQuartz](https://www.xquartz.org/) installed.
+`remotes::install_github("annajenul/UBayFS", build_vignettes = TRUE)`.
+
+If you use a macOS operator system, make sure you have [XQuartz](https://www.xquartz.org/) installed.
 
 Contributing
 ------------

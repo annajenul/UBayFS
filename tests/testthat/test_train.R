@@ -39,7 +39,7 @@ test_that("correct results in train.UBaymodel",{
   set.seed(1)
   model <- setWeights(model, rep(c(1,100,10,20,100,20,50,30,40,90), 3))
   model <- UBayFS::train(model)
-  expect_equal(unname(which(model$output$feature_set[1,] == 1)), c(2,7,8,14,21,22,23,24,27,28))
+  expect_equal(any(apply(model$output$feature_set==1, 1, which) == c(2,7,8,14,21,22,23,24,27,28)), TRUE)
 
   # train model (with distinct constraints)
   set.seed(1)
@@ -49,5 +49,5 @@ test_that("correct results in train.UBaymodel",{
            rho = c(c$rho, const_new$rho))
   model <- setConstraints(model, c)
   model <- UBayFS::train(model)
-  expect_equal(unname(which(model$output$feature_set==1)), c(2,8,21,22,23,24,25,27,28,30))
+  expect_equal(any(apply(model$output$feature_set==1, 1, which) == c(2,8,21,22,23,24,25,27,28,30)), TRUE)
 })

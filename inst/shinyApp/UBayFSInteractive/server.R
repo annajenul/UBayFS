@@ -6,6 +6,10 @@ library(ggpubr)
 library(tcltk)
 library(RColorBrewer)
 library(methods)
+library(GSelection)
+library(rpart)
+library(glmnet)
+library(caret)
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output, session) {
@@ -73,6 +77,46 @@ shinyServer(function(input, output, session) {
         type = 'error',
         btn_labels = "Ok"
       )
+    }
+
+    # feature selection functions
+
+    decision_tree <- function(X, y, n, name = "tree"){
+      rf_data = as.data.frame(cbind(y, X))
+      colnames(rf_data) <- make.names(colnames(rf_data))
+      tree = rpart::rpart(y~., data = rf_data)
+      return(list(ranks= which(colnames(X) %in% names(tree$variable.importance)[1:n]),
+                  name = name))
+    }
+
+    rec_fe <- function(X,y,n, name="rfe"){
+      if(is.factor(y)){
+        control <- rfeControl(functions=rfFuncs, method = "cv", number = 2)
+      }
+      else{
+        control <- rfeControl(functions=lmFuncs, method = "cv", number = 2)
+      }
+      results <- caret::rfe(X, y, sizes = n, rfeControl=control)
+      return(list(ranks = which(colnames(X) %in% results$optVariables),
+                  name = name))
+    }
+
+
+    lasso <- function(X, y, n=NULL, name="lasso"){
+      family = ifelse(is.factor(y), "binomial", "gaussian")
+      cv.lasso <- cv.glmnet(as.matrix(X), y, intercept = FALSE, alpha = 1, family = family, nfolds=3)
+      model <- glmnet(as.matrix(X), y, intercept = FALSE, alpha = 1, family = family,
+                      lambda = cv.lasso$lambda.min)
+      return(list(ranks = which(as.vector(model$beta) != 0),
+                  name = name))
+    }
+
+
+    hsic_lasso <- function(X, y, n, name="hsic"){
+      ifelse(is.factor(y), {tl = as.numeric(as.integer(y)-1)}, {tl = y})
+      results = feature.selection(X, tl, n)
+      return(list(ranks = results$hsic_selected_feature_index,
+                  name = name))
     }
 
     # === INITIAL SETTINGS ===
@@ -204,12 +248,34 @@ shinyServer(function(input, output, session) {
     # === LIKELIHOOD INPUT HANDLING ===
     observeEvent(input$confirmParam, {
       withProgress(min = 0, max = 1, value = 0, message = "building elementary models", {
-        tryCatch({model(UBayFS::build.UBaymodel(model()$data,
+        tryCatch({
+
+          methods = c()
+          for (i in input$method) {
+            if(i %in% c("mRMR", "fisher", "laplace")){
+              methods = c(methods, i)
+            }
+            else if(i == "rec_fe"){
+              methods = c(methods, rec_fe)
+            }
+            else if(i == "hsic_lasso"){
+              methods = c(methods, hsic_lasso)
+            }
+            else if(i == "lasso"){
+              methods = c(methods, lasso)
+            }
+            else if(i == "decision_tree"){
+              methods = c(methods, decision_tree)
+            }
+          }
+
+
+          model(UBayFS::build.UBaymodel(model()$data,
                                      model()$target,
                                      M = input$M,
                                      tt_split = input$tt_split,
                                      constraints = model()$user.params$constraints,
-                                     method = input$method,
+                                     method = methods,
                                      nr_features = input$n_feats,
                                      shiny = TRUE))
           },
@@ -607,10 +673,11 @@ shinyServer(function(input, output, session) {
         pickerInput("method", "select elementary filter(s)",
                   choices = c("mRMR",
                               "laplace",
-                              "lasso",
-                              "rfe",
                               "fisher",
-                              "hsic"),
+                              "hsic_lasso",
+                              "rec_fe",
+                              "lasso",
+                              "decision_tree"),
                   selected = sel_method,
                   multiple = TRUE),
         bsTooltip("method", "Select the feature selection method type(s) to be used for elementary feature selector"),

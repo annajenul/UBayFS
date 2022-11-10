@@ -208,6 +208,44 @@ model = build.UBaymodel(data = bcw$data,
 summary(model)
 ```
 
+Examples for more feature selection methods are:
+
+```{r, include=TRUE}
+
+# recursive feature elimination
+library(caret)
+rec_fe <- function(X,y,n, name="rfe"){
+  if(is.factor(y)){
+        control <- rfeControl(functions=rfFuncs, method = "cv", number = 2)
+      }
+      else{
+        control <- rfeControl(functions=lmFuncs, method = "cv", number = 2)
+      }
+      results <- caret::rfe(X, y, sizes = n, rfeControl=control)
+      return(list(ranks = which(colnames(X) %in% results$optVariables),
+                  name = name))
+}
+
+# Lasso
+library(glmnet)
+lasso <- function(X, y, n=NULL, name="lasso"){
+  family = ifelse(is.factor(y), "binomial", "gaussian")
+  cv.lasso <- cv.glmnet(as.matrix(X), y, intercept = FALSE, alpha = 1, family = family, nfolds=3)
+  model <- glmnet(as.matrix(X), y, intercept = FALSE, alpha = 1, family = family,
+                  lambda = cv.lasso$lambda.min)
+  return(list(ranks = which(as.vector(model$beta) != 0),
+              name = name))
+}
+
+# HSIC Lasso
+library(GSelection)
+hsic_lasso <- function(X, y, n, name="hsic"){
+  ifelse(is.factor(y), {tl = as.numeric(as.integer(y)-1)}, {tl = y})
+  results = feature.selection(X, tl, n)
+  return(list(ranks = results$hsic_selected_feature_index,
+              name = name))
+}
+```
 
 ### User knowledge
 Using the function ``setWeights()`` the user is able to change the feature weights from the standard initialization to desired values. In our example, we assign equal weights to features originating from the same image characteristic. Weights can be on an arbitrary scale. As it is difficult to specify prior weights in real-life applications, we suggest to define them on a normalized scale.
@@ -255,7 +293,7 @@ model = setOptim(model = model,
 
 At this point, we have initialized prior weights, constraints, and the optimization procedure --- we can now train the UBayFS model using the generic function ``train()``, relying on a genetic algorithm. The ``summary()`` function provides an overview of all components of UBayFS. The ``plot()`` function shows the prior feature information as bar charts, with the selected features marked with red borders. In addition, the constraints and the regularization parameter $\rho$ are presented. 
 ```{r, include=TRUE, fig.width=7, fig.height=6}
-model = train(x = model)
+model = UBayFS::train(x = model)
 summary(model)
 plot(model)
 ```

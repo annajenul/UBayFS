@@ -29,16 +29,11 @@ Requirements and dependencies
 - shiny
 - mRMRe
 - Rdimtools
-- caret
 - DirichletReg
-- glmnet
 - ggplot2
-- ggpubr
+- gridExtra
 - utils
 - hyper2
-- rpart
-- GSelection
-- knitr
 - methods
 - prettydoc
 
@@ -56,6 +51,7 @@ In addition, some functionality of the package (in particular, the interactive S
 - testthat (>= 3.0.0)
 - rmarkdown
 - plyr
+- knitr
 
 Implementation details
 ----------------------
@@ -82,7 +78,7 @@ Your contribution to UBayFS is very welcome!
 
 Contribution to the package requires the agreement of the [Contributor Code of Conduct](https://github.com/annajenul/UBayFS/blob/master/CODE_OF_CONDUCT.md) terms.
 
-For the implementantion of a new feature or bug-fixing, we encourage you to send a Pull Request to [the repository](https://github.com/annajenul/UBayFS). Please add a detailed and concise description of the invented feature or the bug. In case of fixing a bug, include comments about your solution. To improve UBayFS even more, feel free to send us issues with bugs, you are not sure about. We are thankful for any kind of constructive criticism and suggestions.
+For the implementation of a new feature or bug-fixing, we encourage you to send a Pull Request to [the repository](https://github.com/annajenul/UBayFS). Please add a detailed and concise description of the invented feature or the bug. In case of fixing a bug, include comments about your solution. To improve UBayFS even more, feel free to send us issues with bugs, you are not sure about. We are thankful for any kind of constructive criticism and suggestions.
 
 Citation
 ------------

@@ -36,6 +36,9 @@ Suggests:
     dplyr,
     plyr,
     knitr,
-    rpart
+    rpart,
+    GSelection,
+    caret,
+    glmnet
 Config/testthat/edition: 3
 VignetteBuilder: knitr

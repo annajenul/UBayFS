@@ -23,7 +23,8 @@ runInteractive = function(){
 
   if(!all(req_packages)){
     missing_packages <- names(req_packages)[!req_packages]
-    inst <- as.character(tcltk::tkmessageBox(message = paste("The shiny application requires the following packages: \n", paste(missing_packages, collapse = ","), "\nDo you want to install these packages and run the GUI?"), type=c("yesno")))
+    inst = "yes"
+    #inst <- as.character(tcltk::tkmessageBox(message = paste("The shiny application requires the following packages: \n", paste(missing_packages, collapse = ","), "\nDo you want to install these packages and run the GUI?"), type=c("yesno")))
     if(inst == "yes"){
       install.packages(missing_packages)
     }

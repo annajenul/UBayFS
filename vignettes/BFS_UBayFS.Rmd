@@ -135,7 +135,7 @@ summary(model)
 
 We observe, that the ``summary()`` prints an additional line for block constraints. All further steps are similar to the UBayFS variant without block constraints. In this example, three features from the third block are selected. Hence, all constraints are fulfilled.
 ```{r, include = TRUE}
-model = train(model)
+model = UBayFS::train(model)
 summary(model)
 plot(model)
 ```

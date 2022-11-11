@@ -175,7 +175,7 @@ The prior constraints are shown as a linear inequation system together with the 
 
 In addition to ``mRMR``, we add a function ``decision_tree()`` that computes features based on decision tree importances.
 
-```{r, include = TRUE}
+```{r, include = TRUE, eval=FALSE}
 
 library(rpart)
 decision_tree <- function(X, y, n, name = "tree"){
@@ -205,12 +205,11 @@ model = build.UBaymodel(data = bcw$data,
                         maxiter = 100,
                         shiny = FALSE
                         )
-summary(model)
 ```
 
 Examples for more feature selection methods are:
 
-```{r, include=TRUE}
+```{r, include=TRUE, eval=FALSE}
 
 # recursive feature elimination
 library(caret)

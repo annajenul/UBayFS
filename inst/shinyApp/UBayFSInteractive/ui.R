@@ -1,7 +1,6 @@
 library(shiny)
 library(shinyWidgets)
 library(shinyjs)
-library(shinythemes)
 library(shinyBS)
 library(DT)
 library(UBayFS)
@@ -9,7 +8,6 @@ library(UBayFS)
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
 
-    #theme = shinytheme("flatly"),
 
     useShinyjs(),
     withMathJax(),

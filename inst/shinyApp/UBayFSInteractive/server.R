@@ -2,8 +2,6 @@ library(shiny)
 library(shinyalert)
 library(DT)
 library(ggplot2)
-library(ggpubr)
-library(tcltk)
 library(RColorBrewer)
 library(methods)
 library(GSelection)
@@ -768,7 +766,7 @@ shinyServer(function(input, output, session) {
       if(!is.null(model()$output$feature_set)){
         df <- data.frame(
           no = 1:sum(model()$output$feature_set),
-          features = names_feats()[model()$output$feature_set == 1])
+          features = names_feats()[model()$output$feature_set[1,] == 1])
         colnames(df) <- c("no", "selected features")
         datatable(
           df,

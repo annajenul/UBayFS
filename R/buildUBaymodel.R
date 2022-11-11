@@ -26,7 +26,7 @@
 #'   \item `ensemble.params` -  information about input and output of ensemble feature selection
 #'   \item `constraint.params` -  parameters representing the constraints
 #'   \item `user.params` - parameters representing the user's prior knowledge
-#'   \item `optim.params` - gptimization parameters
+#'   \item `optim.params` - optimization parameters
 #' }
 #' @examples
 #' # build a UBayFS model using Breast Cancer Wisconsin dataset

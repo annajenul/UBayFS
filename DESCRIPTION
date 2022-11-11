@@ -21,15 +21,14 @@ Imports: GA,
          utils,
          hyper2,
          methods,
-         prettydoc
+         prettydoc,
+         tcltk
 Suggests: 
     shinyWidgets,
     shinyalert,
     DT,
     RColorBrewer,
-    tcltk,
     shinyjs,
-    shinythemes,
     shinyBS,
     testthat (>= 3.0.0),
     rmarkdown,

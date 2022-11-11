@@ -21,8 +21,7 @@ Imports: GA,
          utils,
          hyper2,
          methods,
-         prettydoc,
-         tcltk
+         prettydoc
 Suggests: 
     shinyWidgets,
     shinyalert,

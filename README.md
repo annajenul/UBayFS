@@ -1,4 +1,4 @@
-UBayFS <img src="/inst/shinyApp/UBayFSInteractive/www/logo.png" align ="right" width=200 >
+UBayFS <img src="/inst/shinyApp/UBayFSInteractive/www/logo.png" align ="right" width=100 >
 ======
 
 <!-- badges: start -->

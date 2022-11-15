@@ -1,8 +1,3 @@
 url: https://annajenul.github.io/UBayFS/
 package: tidytemplate
   bootstrap: 5
-  
-  bslib:
-    primary: "#096B72"
-    navbar-background: "#e6f3fc"
-  trailing_slash_redirect: true

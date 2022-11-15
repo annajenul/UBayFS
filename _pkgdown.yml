@@ -4,5 +4,5 @@ package: tidytemplate
   
   bslib:
     primary: "#096B72"
-    navbar-background: "#e6f3fc"
+    navbar-background: "#e7f3fc"
   trailing_slash_redirect: true

@@ -1,8 +1,5 @@
 url: https://annajenul.github.io/UBayFS/
 template:
   bootstrap: 5
-navbar:
-  structure:
-    left:  [search]
-    right: [reference, articles]
+
 

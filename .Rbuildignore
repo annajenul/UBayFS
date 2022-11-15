@@ -7,3 +7,6 @@ vignettes/paper.bib
 vignettes/paper.md
 vignettes/paper.log
 ^\.github$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$

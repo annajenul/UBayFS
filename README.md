@@ -44,14 +44,17 @@ In addition, some functionality of the package (in particular, the interactive S
 - shinyalert
 - DT
 - RColorBrewer
-- tcltk
 - shinyjs
-- shinythemes
 - shinyBS
 - testthat (>= 3.0.0)
 - rmarkdown
+- dplyr
 - plyr
 - knitr
+- rpart
+- GSelection
+- caret
+- glmnet
 
 Implementation details
 ----------------------

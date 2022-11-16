@@ -1,3 +1,4 @@
 url: https://annajenul.github.io/UBayFS/
-package: tidytemplate
+template:
   bootstrap: 5
+

@@ -13,6 +13,7 @@ Example
 
 Two vignettes in markdown format demonstrate the use of UBayFS:
 
+* [documentation](https://annajenul.github.io/UBayFS/)
 * [feature selection](https://github.com/annajenul/UBayFS/tree/master/vignettes/UBayFS.Rmd) 
 * [block feature selection](https://github.com/annajenul/UBayFS/tree/master/vignettes/BFS_UBayFS.Rmd)
 

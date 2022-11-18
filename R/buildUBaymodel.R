@@ -139,12 +139,19 @@ build.UBaymodel = function(data,
     train_data = scale(data[train_index,nconst_cols])											# scale data
     train_labels = target[train_index]															# prepare labels
 
+    if(nr_features == "auto"){
+      n = sample(1:ncol(train_data), 1)
+    }
+    else{n = nr_features}
+
     # generate elementary FS
     for(f in method){
 
+
+
       if(is.function(f)){
         out <- try({
-        mod =  f(X = train_data, y = train_labels, n = nr_features, ...)
+        mod =  f(X = train_data, y = train_labels, n = n, ...)
         ranks = mod[["ranks"]]
         name = mod[["name"]]
         method_names = c(method_names, name)
@@ -153,13 +160,13 @@ build.UBaymodel = function(data,
 
       else if(f %in% c("laplace", "Laplacian score")){												# type: Laplacian score
         out <- try({
-        ranks = do.lscore(train_data,ndim = nr_features)$featidx									# use do.lscore function (package Rdimtools)
+        ranks = do.lscore(train_data,ndim = n)$featidx									# use do.lscore function (package Rdimtools)
         })
       }
       else if(f %in% c("fisher", "Fisher")){
         out <- try({
         if(is.numeric(train_labels)){stop("Fisher score cannot be used for regression!")}
-        ranks = do.fscore(X = train_data, label = train_labels, ndim = nr_features)$featidx
+        ranks = do.fscore(X = train_data, label = train_labels, ndim = n)$featidx
         })
       }
       else if(f %in% c("mrmr", "mRMR")){														# type: mRMR
@@ -170,7 +177,7 @@ build.UBaymodel = function(data,
                            ordered = TRUE)}
         rs = mRMR.classic(data = mRMR.data(dat), 												# use mRMR.classic function (package mRMRe)
                           target_indices = ncol(dat),
-                          feature_count = nr_features)
+                          feature_count = n)
 
         ranks = unlist(rs@filters)[																# extract selected features
           order(unlist(rs@scores),
@@ -222,7 +229,7 @@ build.UBaymodel = function(data,
       input = list( tt_split = tt_split,
                     M = M,
                     method = unique(method_names),
-                    nr_features = nr_features),
+                    nr_features = n),
       output = list(counts = counts,
                     ensemble_matrix = ensemble_matrix)
     )

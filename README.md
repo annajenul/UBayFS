@@ -4,7 +4,7 @@
 <!-- badges: end -->
 
 
-# UBayFS <img src="/vignettes/logo.png" align="right" height:200 />
+# UBayFS <img src="/vignettes/logo.png" align="right" width:150 />
 
 
 

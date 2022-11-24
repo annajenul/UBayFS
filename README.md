@@ -10,20 +10,16 @@
 
 The UBayFS package implements the framework proposed in the article [Jenul et al. (2022)](https://link.springer.com/article/10.1007/s10994-022-06221-9), together with an interactive Shiny dashbord, which makes UBayFS applicable to R-users with different levels of expertise. UBayFS is an ensemble feature selection technique embedded in a Bayesian statistical framework. The method combines data and user knowledge, where the first is extracted via data-driven ensemble feature selection. The user can control the feature selection by assigning prior weights to features and penalizing specific feature combinations. In particular, the user can define a maximal number of selected features and must-link constraints (features must be selected together) or cannot-link constraints (features must not be selected together). Using relaxed constraints, a parameter $\rho$ regulates the penalty shape. Hence, violation of constraints can be valid but leads to a lower target value of the feature set that is derived from the violated constraints. UBayFS can be used for common feature selection and also for block feature selection.
 
-Documentation
--------
+Documentation and Structure
+---------------------------
 
 A [documentation](https://annajenul.github.io/UBayFS/) illustrates how UBayFS can be used for standard feature selection 
-
-* [documentation](https://annajenul.github.io/UBayFS/)
-* [feature selection](https://github.com/annajenul/UBayFS/tree/master/vignettes/UBayFS.Rmd) 
-* [block feature selection](https://github.com/annajenul/UBayFS/tree/master/vignettes/BFS_UBayFS.Rmd)
 
 UBayFS is implemented via a core S3-class 'UBaymodel', along with help functions. An overview of the 'UBaymodel' class and its main generic functions, is shown in the following diagram:
 
 <img src="vignettes/UBay_UML.jpg" width="500"/>
 
-Requirements and dependencies
+Requirements and Dependencies
 -----------------------------
 
 - R (>= 3.5.0)
@@ -59,7 +55,7 @@ In addition, some functionality of the package (in particular, the interactive S
 - caret
 - glmnet
 
-Implementation details
+Implementation Details
 ----------------------
 The original paper defines the following utility function $U(\boldsymbol{\delta},\boldsymbol{\theta})$ for optimization with respect to $\boldsymbol{\delta}\in \lbrace 0,1\rbrace ^N$:
 $$U(\boldsymbol{\delta},\boldsymbol{\theta}) = \boldsymbol{\delta}^T \boldsymbol{\theta}-\lambda \kappa(\boldsymbol{\delta})\rightarrow \underset{\boldsymbol{\delta}\in\lbrace 0,1\rbrace ^N}{\max}, $$

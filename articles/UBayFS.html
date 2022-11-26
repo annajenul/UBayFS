@@ -380,7 +380,7 @@ feature was selected over the ensemble feature selections.</p>
 <span><span class="co">#&gt;   weights: ( 0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01 ) </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   === likelihood === </span></span>
-<span><span class="co">#&gt;   ensemble counts: ( 0,13,74,0,0,0,100,100,0,0,0,0,3,100,0,0,7,0,0,0,100,87,100,100,1,15,100,100,0,0 ) </span></span>
+<span><span class="co">#&gt;   ensemble counts: ( 0,13,69,0,0,0,100,100,0,0,0,0,4,100,0,0,8,0,0,0,100,85,100,100,5,16,100,100,0,0 ) </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   === feature selection results === </span></span>
 <span><span class="co">#&gt;  no output produced yet</span></span></code></pre></div>
@@ -604,12 +604,12 @@ parameter <span class="math inline">\(\rho\)</span> are presented.</p>
 <span><span class="co">#&gt;   weights: ( 0.0222222222222222,0.0333333333333333,0.0444444444444444,0.0355555555555556,0.0333333333333333,0.0222222222222222,0.0266666666666667,0.0377777777777778,0.0466666666666667,0.0311111111111111,0.0222222222222222,0.0333333333333333,0.0444444444444444,0.0355555555555556,0.0333333333333333,0.0222222222222222,0.0266666666666667,0.0377777777777778,0.0466666666666667,0.0311111111111111,0.0222222222222222,0.0333333333333333,0.0444444444444444,0.0355555555555556,0.0333333333333333,0.0222222222222222,0.0266666666666667,0.0377777777777778,0.0466666666666667,0.0311111111111111 ) </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   === likelihood === </span></span>
-<span><span class="co">#&gt;   ensemble counts: ( 0,13,74,0,0,0,100,100,0,0,0,0,3,100,0,0,7,0,0,0,100,87,100,100,1,15,100,100,0,0 ) </span></span>
+<span><span class="co">#&gt;   ensemble counts: ( 0,13,69,0,0,0,100,100,0,0,0,0,4,100,0,0,8,0,0,0,100,85,100,100,5,16,100,100,0,0 ) </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   === feature selection results === </span></span>
 <span><span class="co">#&gt;   ( 2,3,7,8,14,22,23,26,27,28 )</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span></code></pre></div>
-<p><img src="UBayFS_files/figure-html/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;">
+<p><img src="UBayFS_files/figure-html/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;">
 After training the model, we receive a feature selection result. More
 than one optimal feature set with the same MAP score is possible. The
 plot shows the selected features (red framed) and their selection
@@ -623,8 +623,8 @@ additional properties can be evaluated with
 <span><span class="fu"><a href="../reference/evaluateFS.html">evaluateMultiple</a></span><span class="op">(</span>state <span class="op">=</span> <span class="va">model</span><span class="op">$</span><span class="va">output</span><span class="op">$</span><span class="va">feature_set</span>, model <span class="op">=</span> <span class="va">model</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                                    [,1]</span></span>
 <span><span class="co">#&gt; cardinality                       10.00</span></span>
-<span><span class="co">#&gt; log total utility                 -0.24</span></span>
-<span><span class="co">#&gt; log posterior feature utility     -0.24</span></span>
+<span><span class="co">#&gt; log total utility                 -0.25</span></span>
+<span><span class="co">#&gt; log posterior feature utility     -0.25</span></span>
 <span><span class="co">#&gt; log admissibility                  0.00</span></span>
 <span><span class="co">#&gt; log block admissibility            0.00</span></span>
 <span><span class="co">#&gt; number violated constraints        0.00</span></span>

@@ -80,6 +80,16 @@ Stefan Schrunner</h4>
   body {
   text-align: justify;
   padding: 1em}
+  header:after {
+    content: "";
+    position: absolute;
+    top: 55px;
+    right: 40px;
+    width: 120px;
+    height: 120px;
+    background-image:url("logo.png");
+    background-size:120px;
+  }
 </style>
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
@@ -310,7 +320,7 @@ the third block are selected. Hence, all constraints are fulfilled.</p>
 <p>In the plot, block constraints are shown with dashed lines, while
 solid lines represent ordinary (feature-)constraints. As demonstrated,
 blocks 1 and 2 are connected via a must-link constraint (dotted line
-between features of block 1 and block 2)¨.</p>
+between features of block 1 and block 2).</p>
 <p>Properties of the final feature set(s):</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/evaluateFS.html">evaluateMultiple</a></span><span class="op">(</span>state <span class="op">=</span> <span class="va">model</span><span class="op">$</span><span class="va">output</span><span class="op">$</span><span class="va">feature_set</span><span class="op">[</span><span class="fl">1</span>,<span class="op">]</span>, model <span class="op">=</span> <span class="va">model</span><span class="op">)</span></span>

@@ -77,10 +77,19 @@ Stefan Schrunner</h4>
     
     
 <style>
-
   body {
   text-align: justify;
   padding: 1em}
+  header:after {
+    content: "";
+    position: absolute;
+    top: 55px;
+    right: 40px;
+    width: 120px;
+    height: 120px;
+    background-image:url("logo.png");
+    background-size:120px;
+  }
 </style>
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
@@ -371,7 +380,7 @@ feature was selected over the ensemble feature selections.</p>
 <span><span class="co">#&gt;   weights: ( 0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01 ) </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   === likelihood === </span></span>
-<span><span class="co">#&gt;   ensemble counts: ( 0,9,73,0,0,0,100,100,0,0,0,0,4,100,0,0,3,1,0,0,100,89,100,100,2,19,100,100,0,0 ) </span></span>
+<span><span class="co">#&gt;   ensemble counts: ( 0,14,79,0,0,0,100,100,0,0,0,0,3,100,0,0,3,0,0,0,100,86,100,100,3,12,100,100,0,0 ) </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   === feature selection results === </span></span>
 <span><span class="co">#&gt;  no output produced yet</span></span></code></pre></div>
@@ -595,7 +604,7 @@ parameter <span class="math inline">\(\rho\)</span> are presented.</p>
 <span><span class="co">#&gt;   weights: ( 0.0222222222222222,0.0333333333333333,0.0444444444444444,0.0355555555555556,0.0333333333333333,0.0222222222222222,0.0266666666666667,0.0377777777777778,0.0466666666666667,0.0311111111111111,0.0222222222222222,0.0333333333333333,0.0444444444444444,0.0355555555555556,0.0333333333333333,0.0222222222222222,0.0266666666666667,0.0377777777777778,0.0466666666666667,0.0311111111111111,0.0222222222222222,0.0333333333333333,0.0444444444444444,0.0355555555555556,0.0333333333333333,0.0222222222222222,0.0266666666666667,0.0377777777777778,0.0466666666666667,0.0311111111111111 ) </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   === likelihood === </span></span>
-<span><span class="co">#&gt;   ensemble counts: ( 0,9,73,0,0,0,100,100,0,0,0,0,4,100,0,0,3,1,0,0,100,89,100,100,2,19,100,100,0,0 ) </span></span>
+<span><span class="co">#&gt;   ensemble counts: ( 0,14,79,0,0,0,100,100,0,0,0,0,3,100,0,0,3,0,0,0,100,86,100,100,3,12,100,100,0,0 ) </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   === feature selection results === </span></span>
 <span><span class="co">#&gt;   ( 2,3,7,8,14,22,23,26,27,28 )</span></span>
@@ -705,7 +714,7 @@ delivers insight into the single UBayFS steps. Nevertheless, the
 dashboard only applies to smaller datasets, while larger ones should be
 computed in the console.</p>
 </div>
-<div class="section level2 unnumbered">
+<div class="section level2">
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
 <div id="refs" class="references csl-bib-body hanging-indent">

@@ -19,6 +19,16 @@ vignette: >
   body {
   text-align: justify;
   padding: 1em}
+  header:after {
+    content: "";
+    position: absolute;
+    top: 55px;
+    right: 40px;
+    width: 120px;
+    height: 120px;
+    background-image:url("logo.png");
+    background-size:120px;
+  }
 </style>
 
 ```{r set-options, echo=FALSE, cache=FALSE}
@@ -36,10 +46,10 @@ knitr::opts_chunk$set(fig.width = 8)
 knitr::opts_chunk$set(fig.align = 'center')
 ```
 
-## Introduction
+# Introduction
 Block feature selection is essential in different fields of application, including treatment outcome prediction in healthcare (for diseases such as cancer). Commonly, data is available from multiple sources, including clinical, genetic, and image data, where measurements from a common source are aggregated into a feature block. In many cases, however, not all data sources are relevant for machine learning models: Suppose we suspected that image data would not contain additional information to the other feature blocks. In that case, it might be easier, in terms of data acquisition and availability, to favor models that do not depend on all data sources at once. In order to detect that a single feature block does not provide any additional information, block feature selection can be deployed. UBayFS is able to cover this scenario by specifying constraints on a block level.
 
-## UBayFS example
+# UBayFS example
 At first we load the package and the Breast Cancer Wisconsin (BCW) example dataset, which is described in the main vignette.
 ```{r, include = TRUE, cache = TRUE}
 library(UBayFS)
@@ -48,7 +58,7 @@ data(bcw)
 
 For block feature selection, it is necessary to define each feature's block affiliation, which is provided either (a) via a block list, or (b) via a block matrix. 
 
-### Version (a): block list
+## Version (a): block list
 The first example demonstrates how a list of block indices can provide the block structure of the dataset. We define three blocks for the BCW dataset, where the first block contains features with indices 1 to 10, block two features with indices 11 to 20, and block three features with indices 21 to 30.
 ```{r, include = TRUE}
 block_list = list()
@@ -71,7 +81,7 @@ block_constraints = buildConstraints(constraint_types = c("max_size"),
 block_constraints
 ```
 
-### Version (b): block matrix
+## Version (b): block matrix
 Assuming the same block structure as for the block list, we demonstrate how to specify the block structure in UBayFS via a block matrix. The block matrix is a binary assignment matrix consisting of rows representing the feature blocks and columns representing the features in the dataset. Note that, in general, a feature may be assigned to an arbitrary number of blocks (i.e., the row and column sums are not restricted), but in practice, a partition of the feature set is sufficient in most cases.
 
 ```{r, include = TRUE}
@@ -95,7 +105,7 @@ block_constraints = buildConstraints(constraint_types = c("max_size", "must_link
 block_constraints
 ```
 
-### Block-wise prior weights
+## Block-wise prior weights
 
 In addition to block-wise constraints, also prior weights may be specified on block level rather than on feature level. Thus, we define a help function to build the vector of prior block weights. Features from the same block get assigned the same prior weight. In this example, feature weights in block 1 are set to 0.5, feature weights in block 2 are set to 1, and feature weights in block 3 are set to 2.
 ```{r, include = TRUE}
@@ -105,7 +115,7 @@ build_block_weights = function(blocks, weights){
 prior_weights = build_block_weights(blocks = rep(c(1, 2, 3), each = 10), weights = c(0.5, 1, 2))
 ```
 
-### Evaluation of block feature selection results
+## Evaluation of block feature selection results
 
 After specifying the block constraints, we initialize the UBayFS model. In addition to the block constraints, we require that at most three features are selected in total (max-size constraint).
 
@@ -140,13 +150,13 @@ summary(model)
 plot(model)
 ```
 
-In the plot, block constraints are shown with dashed lines, while solid lines represent ordinary (feature-)constraints. As demonstrated, blocks 1 and 2 are connected via a must-link constraint (dotted line between features of block 1 and block 2)¨.
+In the plot, block constraints are shown with dashed lines, while solid lines represent ordinary (feature-)constraints. As demonstrated, blocks 1 and 2 are connected via a must-link constraint (dotted line between features of block 1 and block 2).
 
 Properties of the final feature set(s):
 ```{r, include = TRUE}
 evaluateMultiple(state = model$output$feature_set[1,], model = model)
 ```
 
-## Conclusion
+# Conclusion
 
 The specification of block constraints in the UBayFS model follows the same syntax as ordinary feature set constraints. Thus, block constraints can be easily integrated and combined with feature-wise constraints. Further, the framework allows setting arbitrary linear constraints for blocks, as well as for single features.

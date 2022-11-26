@@ -1,43 +1,52 @@
-Package: UBayFS
 Type: Package
-Title: A User-Guided Bayesian Framework for Ensemble Feature Selection (UBayFS)
+Package: UBayFS
+Title: A User-Guided Bayesian Framework for Ensemble Feature Selection
+    (UBayFS)
 Version: 1.0
-Author: Anna Jenul, Stefan Schrunner
-Maintainer: Anna Jenul <anna.jenul@nmbu.no>
-Description: Implements the user-guided Bayesian framework for ensemble feature selection (UBayFS) presented in the according research paper.
+Authors@R: c(
+    person("Anna", "Jenul", , "anna.jenul@nmbu.no", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-6919-3483")),
+    person("Stefan", "Schrunner", , "stefan.schrunner@nmbu.no", role = "aut",
+           comment = c(ORCID = "0000-0003-1327-4855"))
+  )
+Description: Implements the user-guided Bayesian framework for ensemble
+    feature selection (UBayFS) : Jenul et al., (2022) <doi:10.1007/s10994-022-06221-9>.
 License: GPL-3
+URL: https://annajenul.github.io/UBayFS/
+Depends: 
+    R (>= 3.5.0)
+Imports: 
+    DirichletReg,
+    GA,
+    ggplot2,
+    gridExtra,
+    hyper2,
+    matrixStats,
+    methods,
+    mRMRe,
+    prettydoc,
+    Rdimtools,
+    shiny,
+    utils
+Suggests: 
+    caret,
+    dplyr,
+    DT,
+    glmnet,
+    GSelection,
+    knitr,
+    plyr,
+    RColorBrewer,
+    rmarkdown,
+    rpart,
+    shinyalert,
+    shinyBS,
+    shinyjs,
+    shinyWidgets,
+    testthat (>= 3.0.0)
+VignetteBuilder: 
+    knitr
+Config/testthat/edition: 3
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.1
-Depends: R (>= 3.5.0)
-Imports: GA,
-         matrixStats,
-         shiny,
-         mRMRe,
-         Rdimtools,
-         DirichletReg,
-         ggplot2,
-         gridExtra,
-         utils,
-         hyper2,
-         methods,
-         prettydoc
-Suggests: 
-    shinyWidgets,
-    shinyalert,
-    DT,
-    RColorBrewer,
-    shinyjs,
-    shinyBS,
-    testthat (>= 3.0.0),
-    rmarkdown,
-    dplyr,
-    plyr,
-    knitr,
-    rpart,
-    GSelection,
-    caret,
-    glmnet
-Config/testthat/edition: 3
-VignetteBuilder: knitr
-URL: https://annajenul.github.io/UBayFS/

@@ -15,12 +15,20 @@ vignette: >
 ---
 
 <style>
-
   body {
   text-align: justify;
   padding: 1em}
+  header:after {
+    content: "";
+    position: absolute;
+    top: 55px;
+    right: 40px;
+    width: 120px;
+    height: 120px;
+    background-image:url("logo.png");
+    background-size:120px;
+  }
 </style>
-
 
 ```{r, include = FALSE}
 library(knitr)
@@ -34,7 +42,7 @@ knitr::opts_chunk$set(fig.align = 'center')
 ```
 
 
-## Introduction
+# Introduction
 The UBayFS package implements the framework proposed in [@jenul2022ubayfs], together with an interactive Shiny dashboard, which makes UBayFS applicable to R-users with different levels of expertise. UBayFS is an ensemble feature selection technique embedded in a Bayesian statistical framework. The method combines data and user knowledge, where the first is extracted via data-driven ensemble feature selection. The user can control the feature selection by assigning prior weights to features and penalizing specific feature combinations. In particular, the user can define a maximum number of selected features and must-link constraints (features must be selected together) or cannot-link constraints (features must not be selected together). A parameter $\rho$ regulates the shape of a penalty term accounting for side constraints, where feature sets that violate constraints lead to a lower target value. 
 
 In this vignette, we use the Breast Cancer Wisconsin dataset [@wolberg:wisconsin] for demonstration. Specifically, the dataset consists of 569 samples and 30 features and can be downloaded as a demo dataset by calling ``data(bcw)``. The dataset describes a classification problem, where the aim is to distinguish between malignant and benign cancer based on image data. Features are derived from 10 image characteristics, where each characteristic is represented by three features (summary statistics) in the dataset. For instance, the characteristic *radius* is represented by features *radius mean*, *radius standard deviation*, and *radius worst*.
@@ -46,7 +54,7 @@ UBayFS is implemented via a core S3-class ``UBaymodel``, along with help functio
 include_graphics("UBay_UML.jpg")
 ``` 
 
-### Requirements and dependencies
+## Requirements and dependencies
 - R (>= 3.5.0)
 - GA
 - matrixStats
@@ -83,19 +91,19 @@ library(UBayFS)
 data(bcw)
 ```
 
-## Background
+# Background
 This section summarizes the core parts of UBayFS, where a central part is Bayes' Theorem for two random variables $\boldsymbol{\theta}$ and $\boldsymbol{y}$:
 $$p(\boldsymbol{\theta}|\boldsymbol{y})\propto p(\boldsymbol{y}|\boldsymbol{\theta})\cdot p(\boldsymbol{\theta}),$$ where $\boldsymbol{\theta}$ represents an importance parameter of single features and $\boldsymbol{y}$ collects evidence about $\boldsymbol{\theta}$ from an ensemble of elementary feature selectors. In the following, the concept will be outlined. 
 
-### Ensemble feature selection as likelihood
+## Ensemble feature selection as likelihood
 The first step in UBayFS is to build $M$ ensembles of elementary feature selectors. Each elementary feature selector $m=1,\dots,M$ selects features, denoted by a binary membership vector $\boldsymbol{\delta}^{(m)} \in \{0,1\}^N$, based on a randomly selected training dataset, where $N$ denotes the total number of features in the dataset. In the binary membership vector $\boldsymbol{\delta}^{(m)}$, a component $\delta_i^{(m)}=1$ indicates that feature $i\in\{1,\dots,N\}$ is selected, and $\delta_i^{(m)}=0$ otherwise. Statistically, we interpret the result from each elementary feature selector as a realization from a multinomial distribution with parameters $\boldsymbol{\theta}$ and $l$, where $\boldsymbol{\theta}\in[0,1]^N$ defines the success probabilities of sampling each feature in an individual feature selection and $l$ corresponds to the number of features selected in $\boldsymbol{\delta}^{(m)}$. Therefore, the joint probability density of the observed data $\boldsymbol{y} = \sum\limits_{m=1}^{M}\boldsymbol{\delta}^{(m)}\in\{0,\dots,M\}^N$ --- the likelihood function --- has the form 
 $$ p(\boldsymbol{y}|\boldsymbol{\theta}) = \prod\limits_{m=1}^{M} f_{\text{mult}}(\boldsymbol{\delta}^{(m)};\boldsymbol{\theta},l),$$
 where $f_{\text{mult}}$ is the probability density function of the multinomial distribution.
 
-### Expert knowledge as prior
+## Expert knowledge as prior
 UBayFS includes two types of expert knowledge: prior feature weights and feature set constraints. 
 
-#### Prior feature weights
+### Prior feature weights
 
 To introduce expert knowledge about the importance of features, the user may define a vector $\boldsymbol{\alpha} = (\alpha_1,\dots,\alpha_N)$, $\alpha_i>0$ for all $i=1,\dots,N$, assigning a weight to each feature. High weights indicate that a feature is important. By default, if all features are equally important or no prior weighting is used, $\boldsymbol{\alpha}$ is set to the 1-vector of length $N$. With the weighting in place, we assume the a-priori feature importance parameter $\boldsymbol{\theta}$ follows a Dirichlet distribution [@R:DirichletReg]
 $$p(\boldsymbol{\theta}) = f_{\text{Dir}}(\boldsymbol{\theta};\boldsymbol{\alpha}),$$
@@ -109,7 +117,7 @@ with
 $$\boldsymbol{\alpha}^\circ = \left( \alpha_1 + \sum\limits_{m=1}^M \delta_1^{(m)}, \dots, \alpha_N + \sum\limits_{m=1}^M \delta_N^{(m)}  \right)$$
 representing the posterior parameter vector $\boldsymbol{\alpha}^\circ$.
 
-#### Feature set constraints
+### Feature set constraints
 In addition to the prior weighting of features, the UBayFS user can also add different types of constraints to the feature selection:
 
 - *max-size constraint*: Maximum number of features that shall be selected.
@@ -142,9 +150,9 @@ $$
     
 Since an exact optimization is impossible due to the non-linear function $\kappa$, we use a genetic algorithm to find an appropriate feature set. In detail, the genetic algorithm is initialized via a Greedy algorithm and computes combinations of the given feature sets with regard to a fitness function in each iteration.
 
-## Application of UBayFS
+# Application of UBayFS
  
-### Ensemble Training
+## Ensemble Training
 The function ``build.UBaymodel()`` initializes the UBayFS model and trains an ensemble of elementary feature selectors. The training dataset and target are initialized with the arguments ``data`` and ``target``. Although the UBayFS concept permits unsupervised, multiclass, or regression setups, the current implementation supports binary target variables only. While ``M`` defines the ensemble size (number of elementary feature selectors), the types of the elementary feature selectors is set via ``method``. Three different feature selectors (mRMR, Fisher schore and Laplace score) are implemented as baseline. In general, the ``method`` argument allows for each self-implemented feature selection function with the arguments ``X`` (describes the data), ``y`` (describes the target, ``n`` (describes the number of features that shall be selected), and ``name`` (name of the method). The function must return the indices of the selected features and the input name. An example with classification trees is shown below. The Each ensemble model is trained on a random subset comprising ``tt_split``$\cdot 100$ percent of the train data. The help function ``buildConstraints(...)`` provides an easy way to define side constraints for the model. Using the argument ``prior_model`` the user specifies whether the standard Dirichlet distribution or a generalized variant should be used as prior model. Furthermore, the number of features selected in each ensemble can be controlled by the parameter ``nr_features``.
 
 For the standard UBayFS initialization, all prior feature weights are set to 1, and no feature constraints are included yet. The ``summary()`` function provides an overview of the dataset, the prior weights, and the likelihood --- ensemble counts indicate how often a feature was selected over the ensemble feature selections. 
@@ -246,7 +254,7 @@ hsic_lasso <- function(X, y, n, name="hsic"){
 }
 ```
 
-### User knowledge
+## User knowledge
 Using the function ``setWeights()`` the user is able to change the feature weights from the standard initialization to desired values. In our example, we assign equal weights to features originating from the same image characteristic. Weights can be on an arbitrary scale. As it is difficult to specify prior weights in real-life applications, we suggest to define them on a normalized scale.
 ```{r, include=TRUE}
 weights = rep(c(10,15,20,16,15,10,12,17,21,14), 3)
@@ -280,7 +288,7 @@ model = setConstraints(model = model, constraints = constraints)
 model = setBlockConstraints(model = model, constraints = NULL)
 ```
 
-### Optimization and evaluation
+## Optimization and evaluation
 A genetic algorithm, described by [@givens:compstat] and implemented in [@R:GA], searches for the optimal feature set in the UBayFS framework. Using ``setOptim()`` we initialize the genetic algorithm. Furthermore, ``popsize`` indicates the number of candidate feature sets created in each iteration, and ``maxiter`` is the number of iterations. 
 
 ```{r, include=TRUE}
@@ -317,7 +325,7 @@ The output contains the following information:
 * **avg feature correlation**: average correlation between features in dataset
 
 
-## Shiny dashboard
+# Shiny dashboard
 ``UBayFS`` provides an interactive ``R Shiny`` dashboard as GUI. With its intuitive user interface, the user can load data, set likelihood parameters, and even control the admissibility regularization strength of each constraint. With the command ``runInteractive()``, the Shiny dashboard opens, given that the required depedencies are available (see above). Histograms and plots help to get an overview of the user's settings. The interactive dashboard offers ``save`` and ``load`` buttons to save or load UBayFS models as RData files. Due to computational limitations, it is not recommended to use the HTML interface for larger datasets ($> 100$ features or $>1000$ samples).
 
 ```{r,eval=FALSE}
@@ -336,10 +344,10 @@ The dashboard includes multiple tabs:
  - **constraints**: In this task, the user sets different constraints (at least a max-size constraint). The penalty $\rho$ can be varied here as well.
  - **feature selection**: In the dashboard's last step, an optimization procedure determines the final feature set. A plot of the final result is produced - also, the model can be saved as an Rdata file and loaded to the dashboard again.
  
-## Conclusion
+# Conclusion
 With the methodology in place, UBayFS is applicable to a large range of feature selection problems with multiple sources of information. The likelihood parameters, steering the number of elementary models, mainly affect the stability and runtime of the result --- the latter linearly increases with the number of models. Especially the Shiny dashboard delivers insight into the single UBayFS steps. Nevertheless, the dashboard only applies to smaller datasets, while larger ones should be computed in the console. 
 
 
-## References
+# References
 
 

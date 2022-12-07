@@ -125,6 +125,11 @@
 <p>The development version of the package can be installed with:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>remotes<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">"annajenul/UBayFS"</span>, <span class="at">build_manual =</span> <span class="cn">TRUE</span>, <span class="at">build_vignettes =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <p>If you use a macOS operator system, make sure you have <a href="https://www.xquartz.org/" class="external-link">XQuartz</a> installed.</p>
+<p>To build the vignettes, Pandoc is required. It may happen that Pandoc is missing on your computer, or that the version is too old. Then the installation will return the error</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="st">```</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="at">Pandoc is required to build R Markdown vignettes but not available. Please make sure it is installed.</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="st">```</span></span></code></pre></div>
+<p>An installation guide for Pandoc on different operation systems is provided <a href="https://pandoc.org/installing.html" class="external-link">here</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="contributing">Contributing<a class="anchor" aria-label="anchor" href="#contributing"></a>

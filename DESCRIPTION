@@ -7,7 +7,10 @@ Authors@R: c(
     person("Anna", "Jenul", , "anna.jenul@nmbu.no", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-6919-3483")),
     person("Stefan", "Schrunner", , "stefan.schrunner@nmbu.no", role = "aut",
-           comment = c(ORCID = "0000-0003-1327-4855"))
+           comment = c(ORCID = "0000-0003-1327-4855")),
+    person("Kristian Hovde", "Liland", role = "rev"),
+    person("Oliver", "Tomic", role = "ctb"),
+    person("Jürgen", "Pilz", role = "ctb")
   )
 Description: Implements the user-guided Bayesian framework for ensemble
     feature selection (UBayFS) : Jenul et al., (2022) <doi:10.1007/s10994-022-06221-9>.

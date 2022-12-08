@@ -56,7 +56,7 @@ In this vignette, we use the Breast Cancer Wisconsin dataset [@wolberg:wisconsin
 UBayFS is implemented via a core S3-class ``UBaymodel``, along with help functions. An overview of the 'UBaymodel' class and its main generic functions is shown in the following diagram:
 
 ```{r, out.width="70%", out.height="70%", fig.align="center", echo = FALSE}
-include_graphics("UBay_UML.jpg")
+include_graphics("UBay_UML.png")
 ``` 
 
 ## Requirements and dependencies

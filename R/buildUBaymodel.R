@@ -221,7 +221,7 @@ build.UBaymodel = function(data,
   names(counts) = colnames(data)
   # define return object
   obj = list(
-    data = data,
+    data = as.data.frame(data),
     target = target,
     lambda = lambda,
     prior_model = prior_model,
@@ -255,7 +255,31 @@ build.UBaymodel = function(data,
 #' @export
 
 is.UBaymodel <- function(x){
-  return(class(x) == "UBaymodel")
+  # check object content
+  if(!is.data.frame(x$data)){
+    return(FALSE)
+  }
+  if(nrow(as.data.frame(x$target)) == 1){
+    return(FALSE)
+  }
+  if(!is.numeric(x$lambda)){
+    return(FALSE)
+  }
+  if(!is.character(x$prior_model)){
+    return(FALSE)
+  }
+  if(!is.list(x$ensemble.params)){
+    return(FALSE)
+  }
+  if(!is.list(x$constraint.params)){
+    return(FALSE)
+  }
+  if(!is.list(x$optim.params)){
+    return(FALSE)
+  }
+  else{
+    return(class(x) == "UBaymodel")
+  }
 }
 
 

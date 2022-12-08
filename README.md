@@ -17,7 +17,9 @@ A [documentation](https://annajenul.github.io/UBayFS/) illustrates how UBayFS ca
 
 UBayFS is implemented via a core S3-class 'UBaymodel', along with help functions. An overview of the 'UBaymodel' class and its main generic functions, is shown in the following diagram:
 
-<img src="vignettes/UBay_UML.png" width="500"/>
+<p align="center">
+	<img src="vignettes/UBay_UML.png" width="500"/>
+</p>
 
 Requirements and Dependencies
 -----------------------------

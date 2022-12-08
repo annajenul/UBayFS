@@ -32,7 +32,7 @@ build.UBaymodel(
 
 \item{tt_split}{the ratio of samples drawn for building an elementary model (train-test-split)}
 
-\item{nr_features}{number of features to select in each elementary model}
+\item{nr_features}{number of features to select in each elementary model; if "auto" a randomized number of features is used in each elementary model}
 
 \item{method}{a vector denoting the method(s) used as elementary models; options: `mRMR`, `laplace` (Laplacian score) Also self-defined functions are possible methods; they must have the arguments X (data), y (target), n (number of features) and name (name of the function). For more details see examples.}
 

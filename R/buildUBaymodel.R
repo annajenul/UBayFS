@@ -5,7 +5,7 @@
 #' @param target a vector (factor) of input labels
 #' @param M the number of elementary models to be trained in the ensemble
 #' @param tt_split the ratio of samples drawn for building an elementary model (train-test-split)
-#' @param nr_features number of features to select in each elementary model
+#' @param nr_features number of features to select in each elementary model; if "auto" a randomized number of features is used in each elementary model
 #' @param method a vector denoting the method(s) used as elementary models; options: `mRMR`, `laplace` (Laplacian score) Also self-defined functions are possible methods; they must have the arguments X (data), y (target), n (number of features) and name (name of the function). For more details see examples.
 #' @param prior_model a string denoting the prior model to use; options: `dirichlet`, `wong`, `hankin`; `hankin` is the most general prior model, but also the most time consuming
 #' @param weights the vector of user-defined prior weights for each feature

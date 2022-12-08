@@ -1,6 +1,7 @@
 #' UBayFS feature selection
 #' @description Genetic algorithm to train UBayFS feature selection model.
 #' @param x a `UBaymodel` created by \link{build.UBaymodel}
+#' @param verbose if TRUE: GA optimization output is printed to the console
 #' @return a `UBaymodel` with an additional list element output containing the optimized solution.
 #' @importFrom GA ga
 #' @importFrom DirichletReg ddirichlet
@@ -8,14 +9,14 @@
 #' @importFrom methods is
 #' @export train
 
-train <- function(x){
+train <- function(x, verbose=FALSE){
   UseMethod("train")
 }
 
 #' @method train UBaymodel
 #' @export
 
-train.UBaymodel = function(x){
+train.UBaymodel = function(x, verbose=FALSE){
 
   if(!is(x, "UBaymodel")){
     stop("Wrong class of model")
@@ -35,13 +36,14 @@ train.UBaymodel = function(x){
   theta = posteriorExpectation(x)
 
   if(x$optim.params$method == "GA"){
-    print("Running Genetic Algorithm")
+    message("Running Genetic Algorithm")
     tGA <- train_GA(theta,
                          x$lambda,
                          x$constraint.params$constraints,
                          x$constraint.params$block_constraints,
                          x$optim.params,
-                         colnames(x$data))
+                         colnames(x$data),
+                         verbose)
 
     feature_set = tGA[[1]]
     x_start = tGA[[2]]
@@ -99,7 +101,7 @@ getNegLoss <- function(state, model, log = TRUE){
 }
 
 
-train_GA <- function(theta, lambda, constraints, block_constraints, optim_params, feat_names){
+train_GA <- function(theta, lambda, constraints, block_constraints, optim_params, feat_names, verbose){
 
 
   target_fct <- function(state){return(neg_loss(state, theta, lambda, constraints, block_constraints))}
@@ -118,7 +120,8 @@ train_GA <- function(theta, lambda, constraints, block_constraints, optim_params
              nBits = length(theta),
              maxiter = optim_params$maxiter,
              popSize = optim_params$popsize,
-             suggestions = x_start
+             suggestions = x_start,
+             monitor = verbose
   )
   x_optim = optim@solution									# extract solution
   if(is.vector(x_optim)){

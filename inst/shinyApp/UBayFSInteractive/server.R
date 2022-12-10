@@ -145,6 +145,9 @@ shinyServer(function(input, output, session) {
 
           dat <- read.csv(input$upload_data$datapath, header = header, row.names = rownames)
 
+          if(any(is.na(dat))){
+            shinyalert("Caution: dataset must not contain missing values!", type= "warning")
+          }
           if(nrow(dat) > 1000 | ncol(dat) > 100){
             showNotification("Caution: dataset might be too large to compute in the dashboard.", type= "warning")
           }
@@ -183,6 +186,9 @@ shinyServer(function(input, output, session) {
             rownames = NULL
           }
           lab <- unlist(read.csv(input$upload_labels$datapath, header = header, row.names = rownames))
+          if(any(is.na(lab))){
+            shinyalert("Caution: target must not contain missing values!", type= "warning")
+          }
           if(!is.null(model()$data)){
             names(lab) <- rownames(model()$data)
           }

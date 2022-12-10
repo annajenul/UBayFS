@@ -18,7 +18,8 @@ runInteractive = function(){
                    RColorBrewer = "RColorBrewer" %in% installed_packages,
                    shinyWidgets = "shinyWidgets" %in% installed_packages,
                    shinyjs = "shinyjs" %in% installed_packages,
-                   shinyBS = "shinyBS" %in% installed_packages
+                   shinyBS = "shinyBS" %in% installed_packages,
+                   randomForest = "randomForest" %in% installed_packages
                    )
 
   if(!all(req_packages)){

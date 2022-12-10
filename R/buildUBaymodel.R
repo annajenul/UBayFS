@@ -100,6 +100,10 @@ build.UBaymodel = function(data,
   if(!is.matrix(data)){
     data = as.matrix(data)
   }
+  if(any(is.na(data)) | any(is.na(target))){
+    stop("Error: NA values not supported")
+  }
+
   if(is.function(method)){method = list(method)}
 
   if(nrow(data) != length(target)){

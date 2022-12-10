@@ -4,7 +4,7 @@ pkgdown_sha: ~
 articles:
   BFS_UBayFS: BFS_UBayFS.html
   UBayFS: UBayFS.html
-last_built: 2022-12-08T09:24Z
+last_built: 2022-12-10T09:28Z
 urls:
   reference: https://annajenul.github.io/UBayFS/reference
   article: https://annajenul.github.io/UBayFS/articles

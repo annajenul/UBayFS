@@ -1,5 +1,6 @@
 #' Admissibility for constraint group
-#' @description computes admissibility for a group of constraints (with a common block)
+#' @describeIn admissibility computes admissibility for a group of constraints (with a common block).
+#' @param constraints group of constraints with common block matrix
 #' @importFrom matrixStats logSumExp
 group_admissibility = function(state, constraints, log = TRUE){
 

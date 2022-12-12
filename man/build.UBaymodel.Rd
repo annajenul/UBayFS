@@ -111,10 +111,7 @@ c_block <- buildConstraints(constraint_types = "max_size",
                             num_elements = length(bcw$blocks),
                             rho = 10,
                             block_list = bcw$blocks)
-model <- build.UBaymodel(
-                     data = bcw$data,
-                     target = bcw$labels,
-                     constraints = list(c, c_block),
-                     weights = w
-)
+
+model <- setConstraints(model, c_block)
+
 }

@@ -20,6 +20,12 @@ evaluateFS <- function(state, model, method = "spearman", log = FALSE){
   loss <- getNegLoss(state, model, log = FALSE) - model$lambda # substract lambda due to transformation of utility
   if(log){loss = log(loss)}
 
+  # calculate number of violated constraints
+  num_viol_const <- 0
+  for(const in model$constraint.params){
+    num_viol_const <- num_viol_const + sum((const$A %*% ((const$block_matrix %*% state) > 0)) > const$b)
+  }
+
   # calculate output metrics
   vec <- c(
     sum(state),
@@ -28,11 +34,11 @@ evaluateFS <- function(state, model, method = "spearman", log = FALSE){
     round(admissibility(state,
                         constraint_list = model$constraint.params,
                         log = log), 2),
+    num_viol_const,
     ifelse(is.matrix(c), round((sum(c) - sum(diag(c))) / (sum(state) * (sum(state) - 1)),2), NA))
-    # add number of violated constraints
-  colnames <- c("cardinality", "total utility", "posterior feature utility", "admissibility", "avg feature correlation")
+  colnames <- c("cardinality", "total utility", "posterior feature utility", "admissibility", "number of violated constraints", "avg feature correlation")
   if(log){
-    colnames[2:5] <- paste("log", colnames[2:5])
+    colnames[2:4] <- paste("log", colnames[2:4])
   }
   names(vec) <- colnames
 

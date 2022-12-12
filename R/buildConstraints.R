@@ -122,8 +122,6 @@ buildConstraints = function(constraint_types, constraint_vars, num_elements, rho
   )
 }
 
-
-
 #' Build decorrelation constraints
 #' @description Build a cannot link constraint between highly correlated features. The user defines the correlation threshold.
 #' @param data the dataset in the `UBaymodel` object
@@ -223,34 +221,33 @@ setConstraints = function(model, constraints, append = FALSE){
     if(nrow(constraints$block_matrix) != ncol(constraints$A)){
       stop("Error: inconsistent constraints provided")
     }
-  }
 
-  # check whether a constraint with same block_matrix exists
-  existing_constraint = 0
-  if(length(model$constraint.params) > 0){
-    for (i in 1:length(model$constraint.params)) {
-      if(identical(model$constraint.params[[i]]$block_matrix, constraints$block_matrix)){
-        existing_constraint = i
+    # check whether a constraint with same block_matrix exists
+    existing_constraint = 0
+    if(length(model$constraint.params) > 0){
+      for (i in 1:length(model$constraint.params)) {
+        if(identical(model$constraint.params[[i]]$block_matrix, constraints$block_matrix)){
+          existing_constraint = i
+        }
+      }
+    }
+
+    # add new constraint or append to old one with same block_matrix
+    if(existing_constraint > 0 && append == TRUE){
+      const <- model$constraint.params[[existing_constraint]]
+      constraints <- list(A = rbind(const$A, constraints$A),
+                          b = c(const$b, constraints$b),
+                          rho = c(const$rho, constraints$rho),
+                          block_matrix = constraints$block_matrix)
+      model$constraint.params[[existing_constraint]] <- constraints
+    }
+    else{
+      model$constraint.params = append(model$constraint.params, list(constraints))
+      if(existing_constraint > 0){
+        model$constraint.params[[existing_constraint]] <- NULL
       }
     }
   }
-
-  # add new constraint or append to old one with same block_matrix
-  if(existing_constraint > 0 && append == TRUE){
-    const <- model$constraint.params[[existing_constraint]]
-    constraints <- list(A = rbind(const$A, constraints$A),
-                       b = c(const$b, constraints$b),
-                       rho = c(const$rho, constraints$rho),
-                       block_matrix = constraints$block_matrix)
-    model$constraint.params[[existing_constraint]] <- constraints
-  }
-  else{
-    model$constraint.params = append(model$constraint.params, list(constraints))
-    if(existing_constraint > 0){
-      model$constraint.params[[existing_constraint]] <- NULL
-    }
-  }
-  print(existing_constraint)
 
   return(model)
 }

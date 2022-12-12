@@ -179,18 +179,26 @@ plot.UBaymodel <- function(x,...){
 
   # constraint plot
   if(length(x$constraint.params) > 0){
-    A_c = x$constraint.params$constraints$A
-    A = A_c[which(!duplicated(as.data.frame(abs(A_c)))),,drop=FALSE]
-    rho = x$constraint.params$constraints$rho[which(!duplicated(as.data.frame(abs(A_c))))]
-    num_feat_const = ifelse(is.matrix(A), nrow(A), 1)
+    q <- ggplot()
+    A <- matrix(nrow = 0, ncol = ncol(x$data))
+    rho <- c()
+    feat_const_inds <- c()
+    for(l in 1:length(x$constraint.params)){
+      if(identical(x$constraint.params[[l]]$block_matrix, diag(nrow = ncol(x$data)))){
+        # if constraint group is not block constraint
+        A_c = x$constraint.params[[l]]$A
+        A = rbind(A, A_c[which(!duplicated(as.data.frame(abs(A_c)))),,drop=FALSE])
+        rho = c(rho, x$constraint.params[[l]]$rho[which(!duplicated(as.data.frame(abs(A_c))))])
+        feat_const_inds <- ((nrow(A) - nrow(A_c) + 1) : nrow(A))
+      }
+      else{
+        A_b = x$constraint.params[[l]]$A %*% x$constraint.params[[l]]$block_matrix
+        A = rbind(A, A_b[which(!duplicated(as.data.frame(abs(A_b)))),, drop=FALSE])
+        rho = c(rho, x$constraint.params[[l]]$rho[which(!duplicated(as.data.frame(abs(A_b))))])
+      }
+    }
 
-    # if(!is.null(x$constraint.params$block_constraints)){
-    #   A_b = x$constraint.params$block_constraints$A %*% x$constraint.params$block_constraints$block_matrix
-    #   A = rbind(A, A_b[which(!duplicated(as.data.frame(abs(A_b)))),, drop=FALSE])
-    #   rho = c(rho, x$constraint.params$block_constraints$rho[which(!duplicated(as.data.frame(abs(A_b))))])
-    # }
-    # df1 <- data.frame(feature = c(), constraint = c(), type = c(), level = c())
-
+    df1 <- data.frame(feature = c(), constraint = c(), type = c(), level = c())
     for(i in 1:nrow(A)){
       df1 <- rbind(df1, data.frame(feature = factor(names_feats[which(A[i,] != 0)], levels = names_feats),
                                    constraint = i,
@@ -198,7 +206,7 @@ plot.UBaymodel <- function(x,...){
                                                  ifelse(any(A[i,] < 0), "ML",
                                                         ifelse(all(A[i,] %in% c(0,1)), "CL", "other"))),
                                    rho = rho[i],
-                                   level = ifelse(i <= num_feat_const, "feature", "block")
+                                   level = ifelse(i %in% feat_const_inds, "feature", "block")
       ))
     }
     df1$rho = factor(df1$rho, levels = sort(unique(rho)))

@@ -1,5 +1,5 @@
-#' Run an interactive shiny app for demonstration
-#' @description Start a shiny application in the browser.
+#' Run an interactive Shiny app for demonstration
+#' @description Starts an interactive R Shiny application in the browser.
 #' @import shiny
 #' @importFrom utils install.packages
 #' @importFrom utils installed.packages
@@ -25,7 +25,6 @@ runInteractive = function(){
   if(!all(req_packages)){
     missing_packages <- names(req_packages)[!req_packages]
     inst = "yes"
-    #inst <- as.character(tcltk::tkmessageBox(message = paste("The shiny application requires the following packages: \n", paste(missing_packages, collapse = ","), "\nDo you want to install these packages and run the GUI?"), type=c("yesno")))
     inst <- select.list(title = paste0("The shiny application requires the following packages: \n", paste(missing_packages, collapse = ","), "\nDo you want to install these packages and run the GUI?"),
                         choices = c("yes", "no"))
     if(inst == "yes"){

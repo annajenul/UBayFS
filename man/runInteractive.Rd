@@ -2,10 +2,10 @@
 % Please edit documentation in R/runInteractive.R
 \name{runInteractive}
 \alias{runInteractive}
-\title{Run an interactive shiny app for demonstration}
+\title{Run an interactive Shiny app for demonstration}
 \usage{
 runInteractive()
 }
 \description{
-Start a shiny application in the browser.
+Starts an interactive R Shiny application in the browser.
 }

@@ -121,6 +121,8 @@ After specifying the block constraints, we initialize the UBayFS model. In addit
 
 ```{r, include = TRUE}
 set.seed(1) # for reproducibility
+
+# define model without block constraints (only feature-wise max-size constraint)
 model = build.UBaymodel(data = bcw$data,
                         target = bcw$labels,
                         M = 100, 
@@ -134,12 +136,14 @@ model = build.UBaymodel(data = bcw$data,
                                                        constraint_vars = list(3), 
                                                        num_elements = ncol(bcw$data), 
                                                        rho = 1),
-                        block_constraints = block_constraints,
                         optim_method = "GA",
                         popsize = 100,
                         maxiter = 100,
                         shiny = FALSE
                         )
+
+# add block constraints
+model <- setConstraints(model, constraints = block_constraints)
 summary(model)
 ```
 

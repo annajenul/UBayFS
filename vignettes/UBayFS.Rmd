@@ -175,7 +175,6 @@ model = build.UBaymodel(data = bcw$data,
                                                        constraint_vars = list(3), 
                                                        num_elements = dim(bcw$data)[2], 
                                                        rho = 1),
-                        block_constraints = NULL,
                         optim_method = "GA",
                         popsize = 100,
                         maxiter = 100,
@@ -212,7 +211,6 @@ model = build.UBaymodel(data = bcw$data,
                                                        constraint_vars = list(3), 
                                                        num_elements = dim(bcw$data)[2], 
                                                        rho = 1),
-                        block_constraints = NULL,
                         optim_method = "GA",
                         popsize = 100,
                         maxiter = 100,
@@ -290,7 +288,6 @@ constraints = buildConstraints(constraint_types = c("max_size",
 print(constraints)
 
 model = setConstraints(model = model, constraints = constraints)
-model = setBlockConstraints(model = model, constraints = NULL)
 ```
 
 ## Optimization and evaluation

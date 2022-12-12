@@ -14,7 +14,6 @@ build.UBaymodel(
   prior_model = "dirichlet",
   weights = 1,
   constraints = NULL,
-  block_constraints = NULL,
   lambda = 1,
   optim_method = "GA",
   popsize = 50,
@@ -41,8 +40,6 @@ build.UBaymodel(
 \item{weights}{the vector of user-defined prior weights for each feature}
 
 \item{constraints}{a list containing a relaxed system `Ax<=b` of user constraints, given as matrix `A`, vector `b` and vector or scalar `rho` (relaxation parameter). At least one max-size constraint must be contained. For details, see \link{buildConstraints}.}
-
-\item{block_constraints}{a list containing a relaxed system `Ax<=b` of user constraints on feature blocks, given as matrix `A`, vector `b` and vector or scalar `rho` (relaxation parameter). For details, see \link{buildConstraints}.}
 
 \item{lambda}{a positive scalar denoting the overall strength of the constraints}
 
@@ -117,8 +114,7 @@ c_block <- buildConstraints(constraint_types = "max_size",
 model <- build.UBaymodel(
                      data = bcw$data,
                      target = bcw$labels,
-                     constraints = c,
-                     block_constraints = c_block,
+                     constraints = list(c, c_block),
                      weights = w
 )
 }

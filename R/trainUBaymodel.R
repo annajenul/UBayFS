@@ -28,7 +28,6 @@ train.UBaymodel = function(x, verbose=FALSE){
   # detect max-size constraint
   feat_const <- which(sapply(x$constraint.params, function(y){return(identical(y$block_matrix, diag(nrow = ncol(x$data))))}))
   ms = x$constraint.params[[feat_const]]$b[which(apply(x$constraint.params[[feat_const]]$A == 1, 1, all))]
-# ms = x$constraint.params[which(apply(x$constraint.params$constraints$A == 1, 1, all))]
   if((!is.numeric(ms)) || (length(ms) == 0)){
     stop("No max-size constraint among constraints")
   }

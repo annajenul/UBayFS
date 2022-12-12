@@ -21,14 +21,18 @@ train.UBaymodel = function(x, verbose=FALSE){
   if(!is(x, "UBaymodel")){
     stop("Wrong class of model")
   }
-  if(is.null(x$constraint.params$constraints)){
+  if(is.null(x$constraint.params)){
     stop("At least a max-size constraint must be defined")
   }
-  ms = x$constraint.params$constraints$b[which(apply(x$constraint.params$constraints$A == 1, 1, all))]
+
+  # detect max-size constraint
+  feat_const <- which(sapply(x$constraint.params, function(y){return(identical(y$block_matrix, diag(nrow = ncol(x$data))))}))
+  ms = x$constraint.params[[feat_const]]$b[which(apply(x$constraint.params[[feat_const]]$A == 1, 1, all))]
+# ms = x$constraint.params[which(apply(x$constraint.params$constraints$A == 1, 1, all))]
   if((!is.numeric(ms)) || (length(ms) == 0)){
     stop("No max-size constraint among constraints")
   }
-  else if (ms > ncol(x$constraint.params$constraints$A)){
+  else if (ms > ncol(x$data)){
     stop("No max-size constraint among constraints")
   }
 
@@ -39,8 +43,7 @@ train.UBaymodel = function(x, verbose=FALSE){
     message("Running Genetic Algorithm")
     tGA <- train_GA(theta,
                          x$lambda,
-                         x$constraint.params$constraints,
-                         x$constraint.params$block_constraints,
+                         x$constraint.params,
                          x$optim.params,
                          colnames(x$data),
                          verbose)
@@ -77,14 +80,11 @@ train.UBaymodel = function(x, verbose=FALSE){
   return(x)
 }
 
-neg_loss <- function(state, theta, lambda, constraints, block_constraints){
+neg_loss <- function(state, theta, lambda, constraints){
   return(logSumExp(c(
           theta[state == 1],
-          log(lambda) + admissibility(state = state, # log( lambda * admissibility * block_admissibility )
-                                      constraints = constraints,
-                                      log = TRUE)
-                      + block_admissibility(state = state,
-                                      constraints = block_constraints,
+          log(lambda) + admissibility(state = state, # log( lambda * admissibility)
+                                      constraint_list = constraints,
                                       log = TRUE)
           )))}
 getNegLoss <- function(state, model, log = TRUE){
@@ -92,8 +92,7 @@ getNegLoss <- function(state, model, log = TRUE){
     state = state,
     theta = posteriorExpectation(model),
     lambda = model$lambda,
-    constraints = model$constraint.params$constraints,
-    block_constraints = model$constraint.params$block_constraints)
+    constraints = model$constraint.params)
   if(!log){
     res <- exp(res)
   }
@@ -101,18 +100,18 @@ getNegLoss <- function(state, model, log = TRUE){
 }
 
 
-train_GA <- function(theta, lambda, constraints, block_constraints, optim_params, feat_names, verbose){
+train_GA <- function(theta, lambda, constraints, optim_params, feat_names, verbose){
 
 
-  target_fct <- function(state){return(neg_loss(state, theta, lambda, constraints, block_constraints))}
+  target_fct <- function(state){return(neg_loss(state, theta, lambda, constraints))}
 
   # Greedy algorithm to select starting vectors
   x_start = sampleInitial(post_scores = exp(theta),
                           constraints = constraints,
-                          block_constraints = block_constraints,
                           size = optim_params$popsize)
 
 
+  print("SAMPLING FINISHED")
   optim = ga(type = "binary",								# use GA for optimization
              fitness = target_fct,
              lower = 0,
@@ -139,42 +138,33 @@ train_GA <- function(theta, lambda, constraints, block_constraints, optim_params
 #' @description Sample initial solutions using a probabilistic version of Greedy algorithm.
 #' @param post_scores a vector of posterior scores (prior scores + likelihood) for each feature
 #' @param constraints a list containing feature-wise constraints
-#' @param block_constraints a list containing block-wise constraints
 #' @param size initial number of samples to be created. The output sample size can be lower, since duplicates are removed.
 #' @return A matrix containing initial feature sets as rows
 
-sampleInitial <- function(post_scores, constraints, block_constraints, size){
+sampleInitial <- function(post_scores, constraints, size){
 
   n = length(post_scores) # number of features
-  num_feat_constraints = ifelse(is.null(constraints$A), 0, nrow(constraints$A))
-  num_constraints = num_feat_constraints +
-    ifelse(is.null(block_constraints$A), 0, nrow(block_constraints$A))
-  rho = c(constraints$rho, block_constraints$rho)
+  num_constraints_per_block = sapply(constraints, function(x){return(length(x$rho))})
+  cum_num_constraints_per_block = c(0, cumsum(num_constraints_per_block))
+  rho = unlist(sapply(constraints, function(x){return(x$rho)}))
   rho = 1 / (1 + rho)
 
-  full_admissibility <- function(state, constraints, block_constraints, constraint_dropout, log = TRUE){
+  full_admissibility <- function(state, constraints, constraint_dropout, log = TRUE){
     active_constraints <- which(constraint_dropout == 1)
-    active_feat_constraints <- active_constraints[active_constraints <= num_feat_constraints]
-    active_block_constraints <- active_constraints[active_constraints > num_feat_constraints] - num_feat_constraints
 
     res = ifelse(log, 0, 1)
-    if(!is.null(constraints) & (length(active_feat_constraints) > 0)){
-
-      a = admissibility(state,
-                        list( A = constraints$A[active_feat_constraints,, drop = FALSE],
-                              b = constraints$b[active_feat_constraints],
-                              rho = rep(Inf, length(active_feat_constraints))),
-                        log = log)
-      res = ifelse(log, res + a, res * a)
-    }
-    if(!is.null(block_constraints) & length(active_block_constraints) > 0){
-      a = block_admissibility(state,
-                              list( A = block_constraints$A[active_block_constraints,, drop = FALSE],
-                                    b = block_constraints$b[active_block_constraints],
-                                    rho = rep(Inf, length(active_block_constraints)),
-                                    block_matrix = block_constraints$block_matrix),
-                              log = log)
-      res = ifelse(log, res + a, res * a)
+    for(i in 1:length(constraints)){
+      active_constraints_in_block = active_constraints[active_constraints %in% ((cum_num_constraints_per_block[i] + 1) : cum_num_constraints_per_block[i+1])] -
+        cum_num_constraints_per_block[i]
+      if(length(active_constraints_in_block) > 0){
+        a = group_admissibility(state,
+                          list( A = constraints[[i]]$A[active_constraints_in_block,, drop = FALSE],
+                                b = constraints[[i]]$b[active_constraints_in_block],
+                                rho = rep(Inf, length(active_constraints_in_block)),
+                                block_matrix = constraints[[i]]$block_matrix),
+                          log = log)
+        res = ifelse(log, res + a, res * a)
+      }
     }
     return(res)
   }
@@ -190,7 +180,6 @@ sampleInitial <- function(post_scores, constraints, block_constraints, size){
     )
   )
 
-
   x_start = t(apply(feature_orders, 1, function(order){
     constraint_dropout <- apply(cbind(rho, 1-rho),
                                 1,
@@ -198,7 +187,6 @@ sampleInitial <- function(post_scores, constraints, block_constraints, size){
                                 x = c(0,1),
                                 size = 1,
                                 replace = TRUE
-                                # prob = c(constraint_dropout_rate, 1-constraint_dropout_rate)
     )
     i = 1														# iterate over features in descending order
     x = rep(0, n)
@@ -207,7 +195,6 @@ sampleInitial <- function(post_scores, constraints, block_constraints, size){
       x_new[order[i]] = 1						# try to add feature
       if(full_admissibility(x_new,
                             constraints,
-                            block_constraints,
                             constraint_dropout,
                             log = FALSE) == 1){# verify if constraints are still satisfied
         x = x_new										# if yes, accept feature
@@ -218,15 +205,15 @@ sampleInitial <- function(post_scores, constraints, block_constraints, size){
   }))
 
   #always add feature set with best scores
-  ms <- constraints$b[which(apply(constraints$A == 1, 1, all))]
-  if((is.numeric(ms)) && (length(ms) != 0)){
+  feat_const <- which(sapply(constraints, function(y){return(identical(y$block_matrix, diag(nrow = n)))}))
+  ms = constraints[[feat_const]]$b[which(apply(constraints[[feat_const]]$A == 1, 1, all))]
+  if(is.numeric(ms) && (length(ms) == 1)){
     ms_sel <- order(post_scores, decreasing = TRUE)[1:ms]
     x_start <- rbind(x_start, 1:n %in% ms_sel)
   }
   else{
     stop("ERROR: no max-size constraint")
   }
-
 
   return(x_start)
 }

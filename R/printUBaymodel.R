@@ -73,41 +73,39 @@ summary.UBaymodel <- function(object,...){
   cat(" UBayFS model summary \n",
       " data: ", paste0(dim(object$data), collapse = "x"), '\n',
       " labels: ", paste0(levels(object$target), ": ", tabulate(object$target), collapse = " "), "\n\n",
-      " === prior constraints === \n",
-      if(!is.null(object$constraint.params$constraints$A)){
-        paste0(
-          sapply(1:nrow(object$constraint.params$constraints$A), function(i){
+      " === constraints === \n")
+
+  if(length(object$constraint.params) > 0){
+    group_num <- 0
+    for(const in object$constraint.params){
+      block_constraint = ifelse(identical(const$block_matrix, diag(nrow = ncol(const$block_matrix))), FALSE, TRUE)
+
+      group_num <- group_num + 1
+      cat(" ", rep("-",10), " group ", group_num," ", paste0(rep("-", 10)), "\n")
+      if(block_constraint){
+        cat(" block constraints with ", nrow(const$block_matrix), "blocks\n")
+      }
+
+      if(!is.null(const$A)){
+        cat(paste0(
+          sapply(1:nrow(const$A), function(i){
             paste0(
+              ifelse(block_constraint, " block", ""),
               " constraint ",
               i,
               ": (",
-              paste0(object$constraint.params$constraints$A[i,], collapse = ","),
+              paste0(const$A[i,], collapse = ","),
               ") x <= ",
-              object$constraint.params$constraints$b[i],
+              const$b[i],
               "; rho = ",
-              object$constraint.params$constraints$rho[i]
+              const$rho[i]
             )
           }),
-          collapse = "\n")
-      },
-      "\n",
-      if(!is.null(object$constraint.params$block_constraints$A)){
-        paste0(
-          sapply(1:nrow(object$constraint.params$block_constraints$A), function(i){
-            paste0(
-              " block constraint ",
-              i,
-              ": (",
-              paste0(object$constraint.params$block_constraints$A[i,], collapse = ","),
-              ") x <= ",
-              object$constraint.params$block_constraints$b[i],
-              "; rho = ",
-              object$constraint.params$block_constraints$rho[i]
-            )
-          }),
-          collapse = "\n")
-      }else{"\n"},
-      " \n",
+          collapse = "\n"), "\n")
+      }
+    }
+  }
+      cat("\n",
       " === prior weights === \n",
       " weights: (", paste0(object$user.params$weights, collapse = ","),") \n\n",
       " === likelihood === \n",
@@ -180,18 +178,18 @@ plot.UBaymodel <- function(x,...){
           legend.position = "bottom")
 
   # constraint plot
-  if(!is.null(x$constraint.params$constraints$A)){
+  if(length(x$constraint.params) > 0){
     A_c = x$constraint.params$constraints$A
     A = A_c[which(!duplicated(as.data.frame(abs(A_c)))),,drop=FALSE]
     rho = x$constraint.params$constraints$rho[which(!duplicated(as.data.frame(abs(A_c))))]
     num_feat_const = ifelse(is.matrix(A), nrow(A), 1)
 
-    if(!is.null(x$constraint.params$block_constraints)){
-      A_b = x$constraint.params$block_constraints$A %*% x$constraint.params$block_constraints$block_matrix
-      A = rbind(A, A_b[which(!duplicated(as.data.frame(abs(A_b)))),, drop=FALSE])
-      rho = c(rho, x$constraint.params$block_constraints$rho[which(!duplicated(as.data.frame(abs(A_b))))])
-    }
-    df1 <- data.frame(feature = c(), constraint = c(), type = c(), level = c())
+    # if(!is.null(x$constraint.params$block_constraints)){
+    #   A_b = x$constraint.params$block_constraints$A %*% x$constraint.params$block_constraints$block_matrix
+    #   A = rbind(A, A_b[which(!duplicated(as.data.frame(abs(A_b)))),, drop=FALSE])
+    #   rho = c(rho, x$constraint.params$block_constraints$rho[which(!duplicated(as.data.frame(abs(A_b))))])
+    # }
+    # df1 <- data.frame(feature = c(), constraint = c(), type = c(), level = c())
 
     for(i in 1:nrow(A)){
       df1 <- rbind(df1, data.frame(feature = factor(names_feats[which(A[i,] != 0)], levels = names_feats),

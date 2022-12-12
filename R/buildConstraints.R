@@ -189,7 +189,6 @@ checkConstraints <- function(x){
   }
 
   return(TRUE)
-
 }
 
 
@@ -214,41 +213,10 @@ setConstraints = function(model, constraints, append = FALSE){
   }
 
   if(!is.null(constraints)){
-    if(ncol(model$data) != ncol(constraints$A)){
-      stop("Error: inconsistent constraints provided")
+    # set block matrix for ordinary constraints
+    if(is.null(constraints$block_matrix)){
+      constraints$block_matrix = diag(nrow = ncol(model$data), ncol = ncol(model$data))
     }
-  }
-
-  if(append){
-    const = model$constraint.params$constraints
-    constraints = list(A = rbind(const$A, constraints$A),
-                       b = c(const$b, constraints$b),
-                       rho = c(const$rho, constraints$rho),
-                       block_matrix = const$block_matrix)
-  }
-  model$constraint.params$constraints = constraints
-
-  return(model)
-}
-
-
-#' Set block constraints in a `UBaymodel` object.
-#' @description Set the block constraints in a `UBaymodel` object.
-#' @describeIn setConstraints  sets the block constraints in a `UBaymodel` object
-#' @importFrom methods is
-#' @export
-
-setBlockConstraints = function(model, constraints, append = FALSE){
-
-  if(!is(model, "UBaymodel")){
-    stop("Error: wrong class of model")
-  }
-
-  if(!checkConstraints(constraints)){
-    stop("Error: inconsistent constraints provided")
-  }
-
-  if(!is.null(constraints)){
     if(ncol(model$data) != ncol(constraints$block_matrix)){
       stop("Error: inconsistent constraints provided")
     }
@@ -257,18 +225,32 @@ setBlockConstraints = function(model, constraints, append = FALSE){
     }
   }
 
-  if(!is.null(model$constraint.params$block_constraints$block_matrix) && model$constraint.params$block_constraints$block_matrix != constraints$block_matrix){
-    stop("Error: block matrix must match previously defined blocks")
+  # check whether a constraint with same block_matrix exists
+  existing_constraint = 0
+  if(length(model$constraint.params) > 0){
+    for (i in 1:length(model$constraint.params)) {
+      if(identical(model$constraint.params[[i]]$block_matrix, constraints$block_matrix)){
+        existing_constraint = i
+      }
+    }
   }
 
-  if(append){
-    const = model$constraint.params$block_constraints
-    constraints = list(A = rbind(const$A, constraints$A),
+  # add new constraint or append to old one with same block_matrix
+  if(existing_constraint > 0 && append == TRUE){
+    const <- model$constraint.params[[existing_constraint]]
+    constraints <- list(A = rbind(const$A, constraints$A),
                        b = c(const$b, constraints$b),
                        rho = c(const$rho, constraints$rho),
                        block_matrix = constraints$block_matrix)
+    model$constraint.params[[existing_constraint]] <- constraints
   }
-  model$constraint.params$block_constraints = constraints
+  else{
+    model$constraint.params = append(model$constraint.params, list(constraints))
+    if(existing_constraint > 0){
+      model$constraint.params[[existing_constraint]] <- NULL
+    }
+  }
+  print(existing_constraint)
 
   return(model)
 }

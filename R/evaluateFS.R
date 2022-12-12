@@ -26,18 +26,11 @@ evaluateFS <- function(state, model, method = "spearman", log = FALSE){
     round(loss, 2),
     ifelse(log, round(log_post, 2), round(exp(log_post), 2)),
     round(admissibility(state,
-                        constraints = model$constraint.params$constraints,
+                        constraint_list = model$constraint.params,
                         log = log), 2),
-    round(block_admissibility(state,
-                        constraints = model$constraint.params$block_constraints,
-                        log = log), 2),
-    ifelse(is.null(model$constraint.params$constraints$A), NA,
-           sum(model$constraint.params$constraints$A %*% state - model$constraint.params$constraints$b > 0)),
-    ifelse(is.null(model$constraint.params$block_constraints$A), NA,
-          sum(model$constraint.params$block_constraints$A %*% (model$constraint.params$block_constraints$block_matrix %*% state > 0) - model$constraint.params$block_constraints$b > 0)),
     ifelse(is.matrix(c), round((sum(c) - sum(diag(c))) / (sum(state) * (sum(state) - 1)),2), NA))
-
-  colnames <- c("cardinality", "total utility", "posterior feature utility", "admissibility", "block admissibility", "number violated constraints", "number violated block-constraints", "avg feature correlation")
+    # add number of violated constraints
+  colnames <- c("cardinality", "total utility", "posterior feature utility", "admissibility", "avg feature correlation")
   if(log){
     colnames[2:5] <- paste("log", colnames[2:5])
   }

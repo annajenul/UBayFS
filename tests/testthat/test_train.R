@@ -10,7 +10,6 @@ test_that("correct results in train.UBaymodel",{
     data = bcw$data,
     target = bcw$labels,
     constraints = c,
-    block_constraint = NULL,
     weights = w,
     M = 100,
     tt_split = 0.75,

@@ -236,12 +236,13 @@ build.UBaymodel = function(data,
                     nr_features = n),
       output = list(counts = counts,
                     ensemble_matrix = ensemble_matrix)
-    )
+    ),
+    constraint.params = list()
   )
   class(obj) = "UBaymodel"
 
   obj = setConstraints(obj, constraints)
-  obj = setBlockConstraints(obj, block_constraints)
+  #obj = setBlockConstraints(obj, block_constraints)
   obj = setWeights(obj, weights)
   obj = setOptim(obj,
             method = optim_method,

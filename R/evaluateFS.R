@@ -29,13 +29,13 @@ evaluateFS <- function(state, model, method = "spearman", log = FALSE){
   # calculate output metrics
   vec <- c(
     sum(state),
-    round(loss, 2),
-    ifelse(log, round(log_post, 2), round(exp(log_post), 2)),
+    round(loss, 3),
+    ifelse(log, round(log_post, 3), round(exp(log_post), 3)),
     round(admissibility(state,
                         constraint_list = model$constraint.params,
-                        log = log), 2),
+                        log = log), 3),
     num_viol_const,
-    ifelse(is.matrix(c), round((sum(c) - sum(diag(c))) / (sum(state) * (sum(state) - 1)),2), NA))
+    ifelse(is.matrix(c), round((sum(c) - sum(diag(c))) / (sum(state) * (sum(state) - 1)),3), NA))
   colnames <- c("cardinality", "total utility", "posterior feature utility", "admissibility", "number of violated constraints", "avg feature correlation")
   if(log){
     colnames[2:4] <- paste("log", colnames[2:4])

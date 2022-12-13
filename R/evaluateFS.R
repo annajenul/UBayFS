@@ -23,14 +23,14 @@ evaluateFS <- function(state, model, method = "spearman", log = FALSE){
   # calculate output metrics
   vec <- c(
     sum(state),
-    round(loss, 2),
-    ifelse(log, round(log_post, 2), round(exp(log_post), 2)),
+    round(loss, 3),
+    ifelse(log, round(log_post, 3), round(exp(log_post), 3)),
     round(admissibility(state,
                         constraints = model$constraint.params$constraints,
-                        log = log), 2),
+                        log = log), 3),
     round(block_admissibility(state,
                         constraints = model$constraint.params$block_constraints,
-                        log = log), 2),
+                        log = log), 3),
     ifelse(is.null(model$constraint.params$constraints$A), NA,
            sum(model$constraint.params$constraints$A %*% state - model$constraint.params$constraints$b > 0)),
     ifelse(is.null(model$constraint.params$block_constraints$A), NA,

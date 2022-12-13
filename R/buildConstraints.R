@@ -112,14 +112,13 @@ buildConstraints = function(constraint_types, constraint_vars, num_elements, rho
     }
   }
 
-  const <- list(A = A,
-                b = b,
-                rho = rho_vec,
-                block_matrix = block_matrix)
+  return(buildCustomConstraints(
+    A = A,
+    b = b,
+    rho = rho_vec,
+    block_matrix = block_matrix))
 
-  return(
-    const
-  )
+  return(const)
 }
 
 
@@ -154,42 +153,75 @@ buildDecorrConstraints = function(data, level = 0.5, method = "spearman"){
   rho_corr <- rho_corr[pos_corr]
   rho_corr <- rho_corr / (1-rho_corr)# logit function # TODO: transform for level != 0.5!
 
-  const <- list(A = A_corr,
-                b = b_corr,
-                rho = rho_corr,
-                block_matrix = NULL)
+  return(buildCustomConstraints(
+    A = A_corr,
+    b = b_corr,
+    rho = rho_corr,
+    block_matrix = diag(nrow = ncol(data))))
 
-  return(
-    const
-  )
+}
+
+#' Build a customized constraint for UBayFS
+#' @description Builds a constraint using a left side `A`, a right side `b`, a relaxation parameter `rho`, and a block matrix `block_matrix`.
+#' @param A matrix containing the left side of the linear inequality system
+#' @param b vector containing the right side of the linear inequality system
+#' @param rho vector containing the relaxation parameters for each constraint
+#' @param block_matrix a matrix indicating the membership of features in feature blocks
+#' @return A `UBayconstraint` object
+#' @export
+
+buildCustomConstraints <- function(A, b, rho, block_matrix){
+  const <- list(A = A,
+                b = b,
+                rho = rho,
+                block_matrix = block_matrix)
+
+  class(const) <- "UBayconstraint"
+
+  if(is(const, "UBayconstraint")){
+    return(const)
+  }
+  else{
+    stop("Could not produce constraint - check specifications")
+  }
 }
 
 
 #' Checks whether a list object implements proper UBayFS user constraints
-#' @param x a `UBaymodel` object
+#' @param x a `UBayconstraint` object
 #' @return boolean value
-checkConstraints <- function(x){
+#' @export
+is.UBayconstraint <- function(x){
 
   if(is.null(x)){
     return(TRUE)
   }
-
-  if(!is.list(x)){
+  else if(class(x) != "UBayconstraint"){
+    return(FALSE)
+  }
+  else if(!is.list(x)){
     return(FALSE)
   }
 
   A = x$A
   b = x$b
   rho = x$rho
+  block_matrix = x$block_matrix
 
-  if(!is.null(A) | !is.null(b) | !is.null(rho)){
-    if(nrow(A) != length(b) | length(b) != length(rho)){
-      return(FALSE)
-    }
+  if(is.null(A) | is.null(b) | is.null(rho) | is.null(block_matrix)){
+    return(FALSE)
+  }
+  else if(any(rho <= 0)){
+    return(FALSE)
+  }
+  else if(nrow(A) != length(b) | length(b) != length(rho)){
+    return(FALSE)
+  }
+  else if(ncol(A) != ncol(block_matrix) | nrow(block_matrix) != length(b)){
+    return(FALSE)
   }
 
   return(TRUE)
-
 }
 
 
@@ -209,13 +241,15 @@ setConstraints = function(model, constraints, append = FALSE){
     stop("Error: wrong class of model")
   }
 
-  if(!checkConstraints(constraints)){
-    stop("Error: inconsistent constraints provided")
+  if(!is(constraints, "UBayconstraint")){
+    stop("Error: inconsistent constraints provided1")
   }
 
   if(!is.null(constraints)){
     if(ncol(model$data) != ncol(constraints$A)){
-      stop("Error: inconsistent constraints provided")
+      print(ncol(model$data))
+      print(ncol(constraints$A))
+      stop("Error: inconsistent constraints provided - AAA")
     }
   }
 
@@ -244,7 +278,7 @@ setBlockConstraints = function(model, constraints, append = FALSE){
     stop("Error: wrong class of model")
   }
 
-  if(!checkConstraints(constraints)){
+  if(!is(constraints, "UBayconstraint")){
     stop("Error: inconsistent constraints provided")
   }
 

@@ -219,7 +219,10 @@ plot.UBaymodel <- function(x,...){
             axis.line.x = element_blank(),
             legend.position = "top")
 
-    grid.arrange(q, p, nrow = 2,  heights = c(1,2))
+    q <- ggplotGrob(q)
+    p <- ggplotGrob(p)
+    grid::grid.newpage()
+    grid::grid.draw(rbind(q, p))
   }
   else{
     p

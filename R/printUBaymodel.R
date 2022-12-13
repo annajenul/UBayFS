@@ -120,12 +120,7 @@ summary.UBaymodel <- function(object,...){
       ),
       " \n"
   )
-
-
 }
-
-
-
 
 
 #' Plot a UBayFS model

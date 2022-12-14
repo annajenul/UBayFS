@@ -7,7 +7,7 @@
 #' @param rho a positive parameter denoting the level of relaxation; `Inf` denotes a hard constraint, i.e. no relaxation
 #' @param block_list the list of feature indices for each block; only required, if block-wise constraints are built and `block_matrix` is `NULL`
 #' @param block_matrix the matrix containing affiliations of features to each block; only required, if block-wise constraints are built and `block_list` is `NULL`
-#' @return a list containing a matrix `A` and a vector `b` representing the inequality system `Ax<=b`, and a vector `rho`
+#' @return a `UBayconstraint` containing a matrix `A` and a vector `b` representing the inequality system `Ax<=b`, and a vector `rho`
 #' @examples
 #' # given a dataset with 10 features, we create a max-size constraint limiting
 #' # the set to 5 features and a cannot-link constraint between features 1 and 2
@@ -223,6 +223,8 @@ is.UBayconstraint <- function(x){
 
   return(TRUE)
 }
+
+
 
 
 #' Set constraints in UBaymodel object

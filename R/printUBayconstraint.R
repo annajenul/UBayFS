@@ -8,10 +8,13 @@ print.UBayconstraint <- function(x,...){
   if(!is(x, "UBayconstraint")){
     stop("Wrong class of x")
   }
-
+  cat(" A\n")
   print(x$A)
+  cat(" b\n")
   print(x$b)
+  cat(" rho\n")
   print(x$rho)
+  cat(" block_matrix\n")
   print(x$block_matrix)
 }
 

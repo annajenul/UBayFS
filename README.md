@@ -80,9 +80,9 @@ If you use a macOS operator system, make sure you have [XQuartz](https://www.xqu
 
 To build the vignettes, Pandoc is required. It may happen that Pandoc is missing on your computer, or that the version is too old. Then the installation will return the error
     
-    ```
+    
     Pandoc is required to build R Markdown vignettes but not available. Please make sure it is installed.
-    ```
+    
 An installation guide for Pandoc on different operation systems is provided [here](https://pandoc.org/installing.html).
 
 Contributing

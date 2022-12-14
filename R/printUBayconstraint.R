@@ -1,5 +1,6 @@
 #' Prints the `UBayconstraint` object
 #' @param x a `UBayconstraint` object
+#' @param ... additional print parameters
 #' @importFrom methods is
 #' @export
 print.UBayconstraint <- function(x,...){
@@ -24,10 +25,17 @@ summary.UBayconstraint <- function(object,...){
     stop("Wrong class of object")
   }
 
-  cat(
-    paste0(
+  block_constraint = ifelse(identical(object$block_matrix, diag(nrow = ncol(object$block_matrix))), FALSE, TRUE)
+
+  if(block_constraint){
+    cat(" block constraints with ", nrow(object$block_matrix), "blocks\n")
+  }
+
+  if(!is.null(object$A)){
+    cat(paste0(
       sapply(1:nrow(object$A), function(i){
         paste0(
+          ifelse(block_constraint, " block", ""),
           " constraint ",
           i,
           ": (",
@@ -38,5 +46,6 @@ summary.UBayconstraint <- function(object,...){
           object$rho[i]
         )
       }),
-      collapse = "\n"))
+      collapse = "\n"), "\n")
+  }
 }

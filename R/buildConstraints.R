@@ -118,7 +118,6 @@ buildConstraints = function(constraint_types, constraint_vars, num_elements, rho
     rho = rho_vec,
     block_matrix = block_matrix))
 
-  return(const)
 }
 
 #' Build decorrelation constraints
@@ -168,7 +167,12 @@ buildDecorrConstraints = function(data, level = 0.5, method = "spearman"){
 #' @return A `UBayconstraint` object
 #' @export
 
-build.UBayconstraint <- function(A, b, rho, block_matrix){
+build.UBayconstraint <- function(A, b, rho, block_matrix = NULL){
+
+  if(is.null(block_matrix)){
+    block_matrix <- diag(nrow = ncol(A))
+  }
+
   const <- list(A = A,
                 b = b,
                 rho = rho,
@@ -244,52 +248,8 @@ setConstraints = function(model, constraints, append = FALSE){
   if(!is(constraints, "UBayconstraint") && !is.null(constraints)){
     stop("Error: inconsistent constraints provided1")
   }
-
   if(!is.null(constraints)){
-<<<<<<< HEAD
     # set block matrix for ordinary constraints
-    if(is.null(constraints$block_matrix)){
-      constraints$block_matrix = diag(nrow = ncol(model$data), ncol = ncol(model$data))
-    }
-=======
-    if(ncol(model$data) != ncol(constraints$A)){
-      print(ncol(model$data))
-      print(ncol(constraints$A))
-      stop("Error: inconsistent constraints provided - AAA")
-    }
-  }
-
-  if(append){
-    const = model$constraint.params$constraints
-    constraints = list(A = rbind(const$A, constraints$A),
-                       b = c(const$b, constraints$b),
-                       rho = c(const$rho, constraints$rho),
-                       block_matrix = const$block_matrix)
-  }
-  model$constraint.params$constraints = constraints
-
-  return(model)
-}
-
-
-#' Set block constraints in a `UBaymodel` object.
-#' @description Set the block constraints in a `UBaymodel` object.
-#' @describeIn setConstraints  sets the block constraints in a `UBaymodel` object
-#' @importFrom methods is
-#' @export
-
-setBlockConstraints = function(model, constraints, append = FALSE){
-
-  if(!is(model, "UBaymodel")){
-    stop("Error: wrong class of model")
-  }
-
-  if(!is(constraints, "UBayconstraint") && !is.null(constraints)){
-    stop("Error: inconsistent constraints provided")
-  }
-
-  if(!is.null(constraints)){
->>>>>>> constraint_class
     if(ncol(model$data) != ncol(constraints$block_matrix)){
       stop("Error: inconsistent constraints provided")
     }
@@ -309,7 +269,7 @@ setBlockConstraints = function(model, constraints, append = FALSE){
 
     # add new constraint or append to old one with same block_matrix
     if(existing_constraint > 0 && append == TRUE){
-      const <- model$constraint.params[[existing_constraint]]
+    const <- model$constraint.params[[existing_constraint]]
       constraints <- list(A = rbind(const$A, constraints$A),
                           b = c(const$b, constraints$b),
                           rho = c(const$rho, constraints$rho),

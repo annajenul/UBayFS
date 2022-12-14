@@ -269,7 +269,13 @@ model = setWeights(model = model,
                    weights = weights)
 ```
 
-Feature constraints can be defined using the function ``buildConstraints()``. The input ``constraint_types`` consists of a vector, where all constraint types are defined. Then, with ``constraint_vars``, the user specifies details about the constraint: for max-size, the number of features to select is provided, while for must-link and cannot-link, the set of feature indices to be linked must be provided. Each list entry corresponds to one constraint in ``constraint_types``. In addition, ``num_features`` denotes the total number of features in the dataset (or the total number of blocks if the constraint is block-wise) and ``rho`` corresponds to the relaxation parameter of the admissibility function. For block constraints, information about the block structure is included either with ``block_list``or ``block_matrix``.
+In addition to prior weights, feature set constraints may be specified. Internally, constraints are implemented via an S3-class ``UBayconstraint``, depicted in the following diagram:
+
+```{r, out.width="70%", out.height="70%", fig.align="center", echo = FALSE}
+include_graphics("UBay_UML2.png")
+``` 
+
+Rather than calling the constructor method directly, the help function ``buildConstraints()`` may be used to facilitate the definition of a set of constraints: the input ``constraint_types`` consists of a vector, where all constraint types are defined. Then, with ``constraint_vars``, the user specifies details about the constraint: for max-size, the number of features to select is provided, while for must-link and cannot-link, the set of feature indices to be linked must be provided. Each list entry corresponds to one constraint in ``constraint_types``. In addition, ``num_features`` denotes the total number of features in the dataset (or the total number of blocks if the constraint is block-wise) and ``rho`` corresponds to the relaxation parameter of the admissibility function. For block constraints, information about the block structure is included either with ``block_list``or ``block_matrix`` - if both arguments are ``NULL``, feature-wise constraints are generated.
 
 Applying ``print(constraints)`` demonstrates that, the matrix ``A`` has ten rows to represent four constraints. While *max-size* and *cannot-link* can be expressed in one equation each, *must-link* is a pairwise constraint. In specific, the *must-link* constraint between $n$ features produces $\frac{n!}{(n-2)!}$ elementary constraints. Hence, six equations represent the *must-link* constraint. The function ``setConstraints()`` integrates the constraints into the UBayFS model. 
 ```{r, include=TRUE}

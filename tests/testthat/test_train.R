@@ -43,7 +43,7 @@ test_that("correct results in train.UBaymodel",{
   # train model (with distinct constraints)
   set.seed(1)
   const_new <- buildConstraints("cannot_link", constraint_vars = list(c(7,8,14)), 30, Inf)
-  c <- list(A = rbind(c$A, const_new$A),
+  c <- build.UBayconstraint(A = rbind(c$A, const_new$A),
            b = c(c$b, const_new$b),
            rho = c(c$rho, const_new$rho))
   model <- setConstraints(model, c)

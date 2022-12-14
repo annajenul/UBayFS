@@ -18,7 +18,9 @@ print.UBaymodel <- function(x,...){
   print("user.params")
   print(x$user.params)
   print("constraint.params")
-  print(x$constraint.params)
+  for(const in x$constraint.params){
+    print(const)
+  }
   print("ensemble.params")
   print(x$ensemble.params)
   print("optim.params")
@@ -78,31 +80,9 @@ summary.UBaymodel <- function(object,...){
   if(length(object$constraint.params) > 0){
     group_num <- 0
     for(const in object$constraint.params){
-      block_constraint = ifelse(identical(const$block_matrix, diag(nrow = ncol(const$block_matrix))), FALSE, TRUE)
-
       group_num <- group_num + 1
       cat(" ", rep("-",10), " group ", group_num," ", paste0(rep("-", 10)), "\n")
-      if(block_constraint){
-        cat(" block constraints with ", nrow(const$block_matrix), "blocks\n")
-      }
-
-      if(!is.null(const$A)){
-        cat(paste0(
-          sapply(1:nrow(const$A), function(i){
-            paste0(
-              ifelse(block_constraint, " block", ""),
-              " constraint ",
-              i,
-              ": (",
-              paste0(const$A[i,], collapse = ","),
-              ") x <= ",
-              const$b[i],
-              "; rho = ",
-              const$rho[i]
-            )
-          }),
-          collapse = "\n"), "\n")
-      }
+      summary(const)
     }
   }
       cat("\n",

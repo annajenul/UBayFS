@@ -12,6 +12,8 @@
 \arguments{
 \item{x}{a `UBayconstraint` object}
 
+\item{...}{additional print parameters}
+
 \item{object}{a `UBayconstraint` object}
 }
 \description{

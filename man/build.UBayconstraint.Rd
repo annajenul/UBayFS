@@ -4,7 +4,7 @@
 \alias{build.UBayconstraint}
 \title{Build a customized constraint for UBayFS}
 \usage{
-build.UBayconstraint(A, b, rho, block_matrix)
+build.UBayconstraint(A, b, rho, block_matrix = NULL)
 }
 \arguments{
 \item{A}{matrix containing the left side of the linear inequality system}

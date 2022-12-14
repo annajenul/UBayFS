@@ -32,26 +32,11 @@ evaluateFS <- function(state, model, method = "spearman", log = FALSE){
     round(loss, 3),
     ifelse(log, round(log_post, 3), round(exp(log_post), 3)),
     round(admissibility(state,
-<<<<<<< HEAD
-                        constraints = model$constraint.params$constraints,
-                        log = log), 3),
-    round(block_admissibility(state,
-                        constraints = model$constraint.params$block_constraints,
-                        log = log), 3),
-    ifelse(is.null(model$constraint.params$constraints$A), NA,
-           sum(model$constraint.params$constraints$A %*% state - model$constraint.params$constraints$b > 0)),
-    ifelse(is.null(model$constraint.params$block_constraints$A), NA,
-          sum(model$constraint.params$block_constraints$A %*% (model$constraint.params$block_constraints$block_matrix %*% state > 0) - model$constraint.params$block_constraints$b > 0)),
-    ifelse(is.matrix(c), round((sum(c) - sum(diag(c))) / (sum(state) * (sum(state) - 1)),2), NA))
-
-  colnames <- c("cardinality", "total utility", "posterior feature utility", "admissibility", "block admissibility", "number violated constraints", "number violated block-constraints", "avg feature correlation")
-=======
                         constraint_list = model$constraint.params,
                         log = log), 3),
     num_viol_const,
     ifelse(is.matrix(c), round((sum(c) - sum(diag(c))) / (sum(state) * (sum(state) - 1)),3), NA))
   colnames <- c("cardinality", "total utility", "posterior feature utility", "admissibility", "number of violated constraints", "avg feature correlation")
->>>>>>> multiple_block_constraints
   if(log){
     colnames[2:4] <- paste("log", colnames[2:4])
   }

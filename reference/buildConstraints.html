@@ -91,7 +91,7 @@
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>a list containing a matrix `A` and a vector `b` representing the inequality system `Ax&lt;=b`, and a vector `rho`</p>
+<p>a `UBayconstraint` containing a matrix `A` and a vector `b` representing the inequality system `Ax&lt;=b`, and a vector `rho`</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -106,20 +106,22 @@
 <span class="r-in"><span>                 constraint_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                 num_elements <span class="op">=</span> <span class="fl">10</span>,</span></span>
 <span class="r-in"><span>                 rho <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $A</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1,]    1    1    1    1    1    1    1    1    1     1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [2,]    1    1    0    0    0    0    0    0    0     0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $b</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 5 1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $rho</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $block_matrix</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,]    1    0    0    0    0    0    0    0    0     0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,]    0    1    0    0    0    0    0    0    0     0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,]    0    0    1    0    0    0    0    0    0     0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,]    0    0    0    1    0    0    0    0    0     0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,]    0    0    0    0    1    0    0    0    0     0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,]    0    0    0    0    0    1    0    0    0     0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,]    0    0    0    0    0    0    1    0    0     0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,]    0    0    0    0    0    0    0    1    0     0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,]    0    0    0    0    0    0    0    0    1     0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10,]    0    0    0    0    0    0    0    0    0     1</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

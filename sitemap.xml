@@ -31,6 +31,9 @@
     <loc>https://annajenul.github.io/UBayFS/reference/bcw.html</loc>
   </url>
   <url>
+    <loc>https://annajenul.github.io/UBayFS/reference/build.UBayconstraint.html</loc>
+  </url>
+  <url>
     <loc>https://annajenul.github.io/UBayFS/reference/build.UBaymodel.html</loc>
   </url>
   <url>
@@ -43,19 +46,22 @@
     <loc>https://annajenul.github.io/UBayFS/reference/build_train_set.html</loc>
   </url>
   <url>
-    <loc>https://annajenul.github.io/UBayFS/reference/checkConstraints.html</loc>
-  </url>
-  <url>
     <loc>https://annajenul.github.io/UBayFS/reference/evaluateFS.html</loc>
   </url>
   <url>
     <loc>https://annajenul.github.io/UBayFS/reference/index.html</loc>
   </url>
   <url>
+    <loc>https://annajenul.github.io/UBayFS/reference/is.UBayconstraint.html</loc>
+  </url>
+  <url>
     <loc>https://annajenul.github.io/UBayFS/reference/is.UBaymodel.html</loc>
   </url>
   <url>
     <loc>https://annajenul.github.io/UBayFS/reference/posteriorExpectation.html</loc>
+  </url>
+  <url>
+    <loc>https://annajenul.github.io/UBayFS/reference/print.UBayconstraint.html</loc>
   </url>
   <url>
     <loc>https://annajenul.github.io/UBayFS/reference/print.UBaymodel.html</loc>

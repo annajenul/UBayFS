@@ -377,7 +377,7 @@ feature was selected over the ensemble feature selections.</p>
 <span><span class="co">#&gt;   weights: ( 0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01 ) </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   === likelihood === </span></span>
-<span><span class="co">#&gt;   ensemble counts: ( 0,14,79,0,0,0,100,100,0,0,0,0,3,100,0,0,5,0,0,0,100,85,100,100,3,11,100,100,0,0 ) </span></span>
+<span><span class="co">#&gt;   ensemble counts: ( 0,5,74,0,0,0,100,100,0,0,0,0,11,100,0,0,4,0,0,0,100,94,100,100,0,12,100,100,0,0 ) </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   === feature selection results === </span></span>
 <span><span class="co">#&gt;  no output produced yet</span></span></code></pre></div>
@@ -477,19 +477,26 @@ applications, we suggest to define them on a normalized scale.</p>
 <span></span>
 <span><span class="va">model</span> <span class="op">=</span> <span class="fu"><a href="../reference/setWeights.html">setWeights</a></span><span class="op">(</span>model <span class="op">=</span> <span class="va">model</span>, </span>
 <span>                   weights <span class="op">=</span> <span class="va">weights</span><span class="op">)</span></span></code></pre></div>
-<p>Feature constraints can be defined using the function
-<code><a href="../reference/buildConstraints.html">buildConstraints()</a></code>. The input <code>constraint_types</code>
-consists of a vector, where all constraint types are defined. Then, with
-<code>constraint_vars</code>, the user specifies details about the
-constraint: for max-size, the number of features to select is provided,
-while for must-link and cannot-link, the set of feature indices to be
-linked must be provided. Each list entry corresponds to one constraint
-in <code>constraint_types</code>. In addition, <code>num_features</code>
-denotes the total number of features in the dataset (or the total number
-of blocks if the constraint is block-wise) and <code>rho</code>
-corresponds to the relaxation parameter of the admissibility function.
-For block constraints, information about the block structure is included
-either with <code>block_list</code>or <code>block_matrix</code>.</p>
+<p>In addition to prior weights, feature set constraints may be
+specified. Internally, constraints are implemented via an S3-class
+<code>UBayconstraint</code>, depicted in the following diagram:</p>
+<p><img src="UBay_UML2.png" width="70%" height="70%" style="display: block; margin: auto;"></p>
+<p>Rather than calling the constructor method directly, the help
+function <code><a href="../reference/buildConstraints.html">buildConstraints()</a></code> may be used to facilitate the
+definition of a set of constraints: the input
+<code>constraint_types</code> consists of a vector, where all constraint
+types are defined. Then, with <code>constraint_vars</code>, the user
+specifies details about the constraint: for max-size, the number of
+features to select is provided, while for must-link and cannot-link, the
+set of feature indices to be linked must be provided. Each list entry
+corresponds to one constraint in <code>constraint_types</code>. In
+addition, <code>num_features</code> denotes the total number of features
+in the dataset (or the total number of blocks if the constraint is
+block-wise) and <code>rho</code> corresponds to the relaxation parameter
+of the admissibility function. For block constraints, information about
+the block structure is included either with <code>block_list</code>or
+<code>block_matrix</code> - if both arguments are <code>NULL</code>,
+feature-wise constraints are generated.</p>
 <p>Applying <code>print(constraints)</code> demonstrates that, the
 matrix <code>A</code> has ten rows to represent four constraints. While
 <em>max-size</em> and <em>cannot-link</em> can be expressed in one
@@ -512,7 +519,6 @@ the UBayFS model.</p>
 <span>                                        <span class="fl">1</span>, <span class="co"># rho for first cannot-link</span></span>
 <span>                                        <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="co"># rho for second cannot-link</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">constraints</span><span class="op">)</span></span>
-<span><span class="co">#&gt; $A</span></span>
 <span><span class="co">#&gt;       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]</span></span>
 <span><span class="co">#&gt;  [1,]    1    1    1    1    1    1    1    1    1     1     1     1     1</span></span>
 <span><span class="co">#&gt;  [2,]   -1    0    0    0    0    0    0    0    0     0     1     0     0</span></span>
@@ -543,15 +549,101 @@ the UBayFS model.</p>
 <span><span class="co">#&gt;  [7,]     0     0     0     0     0</span></span>
 <span><span class="co">#&gt;  [8,]     0     0     0     0     0</span></span>
 <span><span class="co">#&gt;  [9,]     0     0     0     0     0</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $b</span></span>
 <span><span class="co">#&gt; [1] 10  0  0  0  0  0  0  1  1</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $rho</span></span>
 <span><span class="co">#&gt; [1] Inf 0.1 0.1 0.1 0.1 0.1 0.1 1.0 1.0</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $block_matrix</span></span>
-<span><span class="co">#&gt; NULL</span></span>
+<span><span class="co">#&gt;       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]</span></span>
+<span><span class="co">#&gt;  [1,]    1    0    0    0    0    0    0    0    0     0     0     0     0</span></span>
+<span><span class="co">#&gt;  [2,]    0    1    0    0    0    0    0    0    0     0     0     0     0</span></span>
+<span><span class="co">#&gt;  [3,]    0    0    1    0    0    0    0    0    0     0     0     0     0</span></span>
+<span><span class="co">#&gt;  [4,]    0    0    0    1    0    0    0    0    0     0     0     0     0</span></span>
+<span><span class="co">#&gt;  [5,]    0    0    0    0    1    0    0    0    0     0     0     0     0</span></span>
+<span><span class="co">#&gt;  [6,]    0    0    0    0    0    1    0    0    0     0     0     0     0</span></span>
+<span><span class="co">#&gt;  [7,]    0    0    0    0    0    0    1    0    0     0     0     0     0</span></span>
+<span><span class="co">#&gt;  [8,]    0    0    0    0    0    0    0    1    0     0     0     0     0</span></span>
+<span><span class="co">#&gt;  [9,]    0    0    0    0    0    0    0    0    1     0     0     0     0</span></span>
+<span><span class="co">#&gt; [10,]    0    0    0    0    0    0    0    0    0     1     0     0     0</span></span>
+<span><span class="co">#&gt; [11,]    0    0    0    0    0    0    0    0    0     0     1     0     0</span></span>
+<span><span class="co">#&gt; [12,]    0    0    0    0    0    0    0    0    0     0     0     1     0</span></span>
+<span><span class="co">#&gt; [13,]    0    0    0    0    0    0    0    0    0     0     0     0     1</span></span>
+<span><span class="co">#&gt; [14,]    0    0    0    0    0    0    0    0    0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [15,]    0    0    0    0    0    0    0    0    0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [16,]    0    0    0    0    0    0    0    0    0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [17,]    0    0    0    0    0    0    0    0    0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [18,]    0    0    0    0    0    0    0    0    0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [19,]    0    0    0    0    0    0    0    0    0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [20,]    0    0    0    0    0    0    0    0    0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [21,]    0    0    0    0    0    0    0    0    0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [22,]    0    0    0    0    0    0    0    0    0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [23,]    0    0    0    0    0    0    0    0    0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [24,]    0    0    0    0    0    0    0    0    0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [25,]    0    0    0    0    0    0    0    0    0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [26,]    0    0    0    0    0    0    0    0    0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [27,]    0    0    0    0    0    0    0    0    0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [28,]    0    0    0    0    0    0    0    0    0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [29,]    0    0    0    0    0    0    0    0    0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [30,]    0    0    0    0    0    0    0    0    0     0     0     0     0</span></span>
+<span><span class="co">#&gt;       [,14] [,15] [,16] [,17] [,18] [,19] [,20] [,21] [,22] [,23] [,24] [,25]</span></span>
+<span><span class="co">#&gt;  [1,]     0     0     0     0     0     0     0     0     0     0     0     0</span></span>
+<span><span class="co">#&gt;  [2,]     0     0     0     0     0     0     0     0     0     0     0     0</span></span>
+<span><span class="co">#&gt;  [3,]     0     0     0     0     0     0     0     0     0     0     0     0</span></span>
+<span><span class="co">#&gt;  [4,]     0     0     0     0     0     0     0     0     0     0     0     0</span></span>
+<span><span class="co">#&gt;  [5,]     0     0     0     0     0     0     0     0     0     0     0     0</span></span>
+<span><span class="co">#&gt;  [6,]     0     0     0     0     0     0     0     0     0     0     0     0</span></span>
+<span><span class="co">#&gt;  [7,]     0     0     0     0     0     0     0     0     0     0     0     0</span></span>
+<span><span class="co">#&gt;  [8,]     0     0     0     0     0     0     0     0     0     0     0     0</span></span>
+<span><span class="co">#&gt;  [9,]     0     0     0     0     0     0     0     0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [10,]     0     0     0     0     0     0     0     0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [11,]     0     0     0     0     0     0     0     0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [12,]     0     0     0     0     0     0     0     0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [13,]     0     0     0     0     0     0     0     0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [14,]     1     0     0     0     0     0     0     0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [15,]     0     1     0     0     0     0     0     0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [16,]     0     0     1     0     0     0     0     0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [17,]     0     0     0     1     0     0     0     0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [18,]     0     0     0     0     1     0     0     0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [19,]     0     0     0     0     0     1     0     0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [20,]     0     0     0     0     0     0     1     0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [21,]     0     0     0     0     0     0     0     1     0     0     0     0</span></span>
+<span><span class="co">#&gt; [22,]     0     0     0     0     0     0     0     0     1     0     0     0</span></span>
+<span><span class="co">#&gt; [23,]     0     0     0     0     0     0     0     0     0     1     0     0</span></span>
+<span><span class="co">#&gt; [24,]     0     0     0     0     0     0     0     0     0     0     1     0</span></span>
+<span><span class="co">#&gt; [25,]     0     0     0     0     0     0     0     0     0     0     0     1</span></span>
+<span><span class="co">#&gt; [26,]     0     0     0     0     0     0     0     0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [27,]     0     0     0     0     0     0     0     0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [28,]     0     0     0     0     0     0     0     0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [29,]     0     0     0     0     0     0     0     0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [30,]     0     0     0     0     0     0     0     0     0     0     0     0</span></span>
+<span><span class="co">#&gt;       [,26] [,27] [,28] [,29] [,30]</span></span>
+<span><span class="co">#&gt;  [1,]     0     0     0     0     0</span></span>
+<span><span class="co">#&gt;  [2,]     0     0     0     0     0</span></span>
+<span><span class="co">#&gt;  [3,]     0     0     0     0     0</span></span>
+<span><span class="co">#&gt;  [4,]     0     0     0     0     0</span></span>
+<span><span class="co">#&gt;  [5,]     0     0     0     0     0</span></span>
+<span><span class="co">#&gt;  [6,]     0     0     0     0     0</span></span>
+<span><span class="co">#&gt;  [7,]     0     0     0     0     0</span></span>
+<span><span class="co">#&gt;  [8,]     0     0     0     0     0</span></span>
+<span><span class="co">#&gt;  [9,]     0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [10,]     0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [11,]     0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [12,]     0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [13,]     0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [14,]     0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [15,]     0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [16,]     0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [17,]     0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [18,]     0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [19,]     0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [20,]     0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [21,]     0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [22,]     0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [23,]     0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [24,]     0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [25,]     0     0     0     0     0</span></span>
+<span><span class="co">#&gt; [26,]     1     0     0     0     0</span></span>
+<span><span class="co">#&gt; [27,]     0     1     0     0     0</span></span>
+<span><span class="co">#&gt; [28,]     0     0     1     0     0</span></span>
+<span><span class="co">#&gt; [29,]     0     0     0     1     0</span></span>
+<span><span class="co">#&gt; [30,]     0     0     0     0     1</span></span>
 <span></span>
 <span><span class="va">model</span> <span class="op">=</span> <span class="fu"><a href="../reference/setConstraints.html">setConstraints</a></span><span class="op">(</span>model <span class="op">=</span> <span class="va">model</span>, constraints <span class="op">=</span> <span class="va">constraints</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -602,12 +694,12 @@ parameter <span class="math inline">\(\rho\)</span> are presented.</p>
 <span><span class="co">#&gt;   weights: ( 0.0222222222222222,0.0333333333333333,0.0444444444444444,0.0355555555555556,0.0333333333333333,0.0222222222222222,0.0266666666666667,0.0377777777777778,0.0466666666666667,0.0311111111111111,0.0222222222222222,0.0333333333333333,0.0444444444444444,0.0355555555555556,0.0333333333333333,0.0222222222222222,0.0266666666666667,0.0377777777777778,0.0466666666666667,0.0311111111111111,0.0222222222222222,0.0333333333333333,0.0444444444444444,0.0355555555555556,0.0333333333333333,0.0222222222222222,0.0266666666666667,0.0377777777777778,0.0466666666666667,0.0311111111111111 ) </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   === likelihood === </span></span>
-<span><span class="co">#&gt;   ensemble counts: ( 0,14,79,0,0,0,100,100,0,0,0,0,3,100,0,0,5,0,0,0,100,85,100,100,3,11,100,100,0,0 ) </span></span>
+<span><span class="co">#&gt;   ensemble counts: ( 0,5,74,0,0,0,100,100,0,0,0,0,11,100,0,0,4,0,0,0,100,94,100,100,0,12,100,100,0,0 ) </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   === feature selection results === </span></span>
-<span><span class="co">#&gt;   ( 2,3,7,8,14,22,23,26,27,28 )</span></span>
+<span><span class="co">#&gt;   ( 3,7,8,13,14,22,23,26,27,28 )</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span></code></pre></div>
-<p><img src="UBayFS_files/figure-html/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;">
+<p><img src="UBayFS_files/figure-html/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;">
 After training the model, we receive a feature selection result. More
 than one optimal feature set with the same MAP score is possible. The
 plot shows the selected features (red framed) and their selection
@@ -621,11 +713,11 @@ additional properties can be evaluated with
 <span><span class="fu"><a href="../reference/evaluateFS.html">evaluateMultiple</a></span><span class="op">(</span>state <span class="op">=</span> <span class="va">model</span><span class="op">$</span><span class="va">output</span><span class="op">$</span><span class="va">feature_set</span>, model <span class="op">=</span> <span class="va">model</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                                  [,1]</span></span>
 <span><span class="co">#&gt; cardinality                    10.000</span></span>
-<span><span class="co">#&gt; log total utility              -0.238</span></span>
-<span><span class="co">#&gt; log posterior feature utility  -0.238</span></span>
+<span><span class="co">#&gt; log total utility              -0.235</span></span>
+<span><span class="co">#&gt; log posterior feature utility  -0.235</span></span>
 <span><span class="co">#&gt; log admissibility               0.000</span></span>
 <span><span class="co">#&gt; number of violated constraints  0.000</span></span>
-<span><span class="co">#&gt; avg feature correlation         0.614</span></span></code></pre></div>
+<span><span class="co">#&gt; avg feature correlation         0.651</span></span></code></pre></div>
 <p>The output contains the following information:</p>
 <ul>
 <li>

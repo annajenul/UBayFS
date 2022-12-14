@@ -363,7 +363,6 @@ shinyServer(function(input, output, session) {
     })
 
     observeEvent(input$run_UBay, {
-      print(summary(model()))
       if(!is.null(model()$constraint.params$constraints)){
         ms = model()$constraint.params$constraints$b[which(apply(model()$constraint.params$constraints$A == 1, 1, all))]
         if((!is.numeric(ms)) || (length(ms) == 0) || is.null(ms)){

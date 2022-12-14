@@ -9,7 +9,7 @@ build.UBaymodel(
   target,
   M = 100,
   tt_split = 0.75,
-  nr_features = 10,
+  nr_features = "auto",
   method = "mRMR",
   prior_model = "dirichlet",
   weights = 1,

@@ -7,7 +7,7 @@
 #' @param rho a positive parameter denoting the level of relaxation; `Inf` denotes a hard constraint, i.e. no relaxation
 #' @param block_list the list of feature indices for each block; only required, if block-wise constraints are built and `block_matrix` is `NULL`
 #' @param block_matrix the matrix containing affiliations of features to each block; only required, if block-wise constraints are built and `block_list` is `NULL`
-#' @return a list containing a matrix `A` and a vector `b` representing the inequality system `Ax<=b`, and a vector `rho`
+#' @return a `UBayconstraint` containing a matrix `A` and a vector `b` representing the inequality system `Ax<=b`, and a vector `rho`
 #' @examples
 #' # given a dataset with 10 features, we create a max-size constraint limiting
 #' # the set to 5 features and a cannot-link constraint between features 1 and 2
@@ -112,14 +112,13 @@ buildConstraints = function(constraint_types, constraint_vars, num_elements, rho
     }
   }
 
-  const <- list(A = A,
-                b = b,
-                rho = rho_vec,
-                block_matrix = block_matrix)
+  return(build.UBayconstraint(
+    A = A,
+    b = b,
+    rho = rho_vec,
+    block_matrix = block_matrix))
 
-  return(
-    const
-  )
+  return(const)
 }
 
 #' Build decorrelation constraints
@@ -152,48 +151,84 @@ buildDecorrConstraints = function(data, level = 0.5, method = "spearman"){
   rho_corr <- rho_corr[pos_corr]
   rho_corr <- rho_corr / (1-rho_corr)# logit function # TODO: transform for level != 0.5!
 
-  const <- list(A = A_corr,
-                b = b_corr,
-                rho = rho_corr,
-                block_matrix = NULL)
+  return(build.UBayconstraint(
+    A = A_corr,
+    b = b_corr,
+    rho = rho_corr,
+    block_matrix = diag(nrow = ncol(data))))
 
-  return(
-    const
-  )
+}
+
+#' Build a customized constraint for UBayFS
+#' @description Builds a constraint using a left side `A`, a right side `b`, a relaxation parameter `rho`, and a block matrix `block_matrix`.
+#' @param A matrix containing the left side of the linear inequality system
+#' @param b vector containing the right side of the linear inequality system
+#' @param rho vector containing the relaxation parameters for each constraint
+#' @param block_matrix a matrix indicating the membership of features in feature blocks
+#' @return A `UBayconstraint` object
+#' @export
+
+build.UBayconstraint <- function(A, b, rho, block_matrix){
+  const <- list(A = A,
+                b = b,
+                rho = rho,
+                block_matrix = block_matrix)
+
+  class(const) <- "UBayconstraint"
+
+  if(is(const, "UBayconstraint")){
+    return(const)
+  }
+  else{
+    stop("Could not produce constraint - check specifications")
+  }
 }
 
 
 #' Checks whether a list object implements proper UBayFS user constraints
-#' @param x a `UBaymodel` object
+#' @param x a `UBayconstraint` object
 #' @return boolean value
-checkConstraints <- function(x){
+#' @export
+is.UBayconstraint <- function(x){
 
   if(is.null(x)){
     return(TRUE)
   }
-
-  if(!is.list(x)){
+  else if(class(x) != "UBayconstraint"){
+    return(FALSE)
+  }
+  else if(!is.list(x)){
     return(FALSE)
   }
 
   A = x$A
   b = x$b
   rho = x$rho
+  block_matrix = x$block_matrix
 
-  if(!is.null(A) | !is.null(b) | !is.null(rho)){
-    if(nrow(A) != length(b) | length(b) != length(rho)){
-      return(FALSE)
-    }
+  if(is.null(A) | is.null(b) | is.null(rho) | is.null(block_matrix)){
+    return(FALSE)
+  }
+  else if(any(rho <= 0)){
+    return(FALSE)
+  }
+  else if(nrow(A) != length(b) | length(b) != length(rho)){
+    return(FALSE)
+  }
+  else if(ncol(A) != ncol(block_matrix) | nrow(block_matrix) != length(b)){
+    return(FALSE)
   }
 
   return(TRUE)
 }
 
 
+
+
 #' Set constraints in UBaymodel object
 #' @description Set the constraints in a `UBaymodel` object.
 #' @param model a `UBaymodel` object created using \link{build.UBaymodel}
-#' @param constraints a list containing a relaxed system `Ax<=b` of user constraints, given as matrix `A`, vector `b` and vector or scalar `rho` (relaxation parameters); see buildConstraints function
+#' @param constraints a `UBayconstraint` object created using \link{build.UBayconstraint}
 #' @param append if `TRUE`, constraints are appended to the existing constraint system
 #' @return a `UBaymodel` object with updated constraint parameters
 #' @seealso build.UBaymodel
@@ -206,15 +241,55 @@ setConstraints = function(model, constraints, append = FALSE){
     stop("Error: wrong class of model")
   }
 
-  if(!checkConstraints(constraints)){
-    stop("Error: inconsistent constraints provided")
+  if(!is(constraints, "UBayconstraint") && !is.null(constraints)){
+    stop("Error: inconsistent constraints provided1")
   }
 
   if(!is.null(constraints)){
+<<<<<<< HEAD
     # set block matrix for ordinary constraints
     if(is.null(constraints$block_matrix)){
       constraints$block_matrix = diag(nrow = ncol(model$data), ncol = ncol(model$data))
     }
+=======
+    if(ncol(model$data) != ncol(constraints$A)){
+      print(ncol(model$data))
+      print(ncol(constraints$A))
+      stop("Error: inconsistent constraints provided - AAA")
+    }
+  }
+
+  if(append){
+    const = model$constraint.params$constraints
+    constraints = list(A = rbind(const$A, constraints$A),
+                       b = c(const$b, constraints$b),
+                       rho = c(const$rho, constraints$rho),
+                       block_matrix = const$block_matrix)
+  }
+  model$constraint.params$constraints = constraints
+
+  return(model)
+}
+
+
+#' Set block constraints in a `UBaymodel` object.
+#' @description Set the block constraints in a `UBaymodel` object.
+#' @describeIn setConstraints  sets the block constraints in a `UBaymodel` object
+#' @importFrom methods is
+#' @export
+
+setBlockConstraints = function(model, constraints, append = FALSE){
+
+  if(!is(model, "UBaymodel")){
+    stop("Error: wrong class of model")
+  }
+
+  if(!is(constraints, "UBayconstraint") && !is.null(constraints)){
+    stop("Error: inconsistent constraints provided")
+  }
+
+  if(!is.null(constraints)){
+>>>>>>> constraint_class
     if(ncol(model$data) != ncol(constraints$block_matrix)){
       stop("Error: inconsistent constraints provided")
     }

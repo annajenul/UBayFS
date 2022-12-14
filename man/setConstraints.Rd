@@ -9,7 +9,7 @@ setConstraints(model, constraints, append = FALSE)
 \arguments{
 \item{model}{a `UBaymodel` object created using \link{build.UBaymodel}}
 
-\item{constraints}{a list containing a relaxed system `Ax<=b` of user constraints, given as matrix `A`, vector `b` and vector or scalar `rho` (relaxation parameters); see buildConstraints function}
+\item{constraints}{a `UBayconstraint` object created using \link{build.UBayconstraint}}
 
 \item{append}{if `TRUE`, constraints are appended to the existing constraint system}
 }

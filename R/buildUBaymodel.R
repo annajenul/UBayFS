@@ -11,7 +11,6 @@
 #' @param weights the vector of user-defined prior weights for each feature
 #' @param lambda a positive scalar denoting the overall strength of the constraints
 #' @param constraints a list containing a relaxed system `Ax<=b` of user constraints, given as matrix `A`, vector `b` and vector or scalar `rho` (relaxation parameter). At least one max-size constraint must be contained. For details, see \link{buildConstraints}.
-#' @param block_constraints a list containing a relaxed system `Ax<=b` of user constraints on feature blocks, given as matrix `A`, vector `b` and vector or scalar `rho` (relaxation parameter). For details, see \link{buildConstraints}.
 #' @param optim_method the method to evaluate the posterior distribution. Currently, only the option `GA` (genetic algorithm) is supported.
 #' @param popsize size of the initial population of the genetic algorithm for model optimization
 #' @param maxiter maximum number of iterations of the genetic algorithm for model optimization
@@ -67,13 +66,9 @@
 #'                             num_elements = length(bcw$blocks),
 #'                             rho = 10,
 #'                             block_list = bcw$blocks)
-#' model <- build.UBaymodel(
-#'                      data = bcw$data,
-#'                      target = bcw$labels,
-#'                      constraints = c,
-#'                      block_constraints = c_block,
-#'                      weights = w
-#' )
+#'
+#' model <- setConstraints(model, c_block)
+#'
 #' @import Rdimtools
 #' @import mRMRe
 #' @import shiny
@@ -83,12 +78,11 @@ build.UBaymodel = function(data,
                            target,
                            M = 100,
                            tt_split = 0.75,
-                           nr_features = 10,
+                           nr_features = "auto",
                            method = "mRMR",
                            prior_model = "dirichlet",
                            weights = 1,
                            constraints = NULL,
-                           block_constraints = NULL,
                            lambda = 1,
                            optim_method = "GA",
                            popsize = 50,
@@ -241,7 +235,6 @@ build.UBaymodel = function(data,
   class(obj) = "UBaymodel"
 
   obj = setConstraints(obj, constraints)
-  obj = setBlockConstraints(obj, block_constraints)
   obj = setWeights(obj, weights)
   obj = setOptim(obj,
             method = optim_method,

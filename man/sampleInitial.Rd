@@ -4,14 +4,12 @@
 \alias{sampleInitial}
 \title{Initial feature set sampling using probabilistic Greedy algorithm}
 \usage{
-sampleInitial(post_scores, constraints, block_constraints, size)
+sampleInitial(post_scores, constraints, size)
 }
 \arguments{
 \item{post_scores}{a vector of posterior scores (prior scores + likelihood) for each feature}
 
 \item{constraints}{a list containing feature-wise constraints}
-
-\item{block_constraints}{a list containing block-wise constraints}
 
 \item{size}{initial number of samples to be created. The output sample size can be lower, since duplicates are removed.}
 }

@@ -77,6 +77,7 @@ test_that("ensemble is trained correctly",{
   model <- build.UBaymodel(
     data = bcw$data,
     target = bcw$labels,
+    nr_features = 10,
     constraints = c
   )
   expect_equal(unname(model$ensemble.params$output$counts),
@@ -98,6 +99,7 @@ test_that("ensemble is trained correctly",{
     data = bcw$data,
     target = bcw$labels,
     M = 10,
+    nr_features = 10,
     constraints = c,
     method = "fisher",
   )

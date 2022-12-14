@@ -128,8 +128,8 @@ In addition to the prior weighting of features, the UBayFS user can also add dif
 - *max-size constraint*: Maximum number of features that shall be selected.
 - *must-link constraint*: For a pair of features, either both or none is selected (defined as pairwise constraints, one for each pair of features).
 - *cannot-link constraint*: Used if a pair of features must not be selected jointly.
-- *block-wise constraints*: Define constraints between feature blocks (instead of individual features).
 
+All constraints can be defined *block-wise* between feature blocks (instead of individual features).
 Constraints are represented as a linear system of linear inequalities $\boldsymbol{A}\boldsymbol{\delta}-\boldsymbol{b}\leq \boldsymbol{0}$, where $\boldsymbol{A}\in\mathbb{R}^{K\times N}$ and $\boldsymbol{b}\in\mathbb{R}^K$. $K$ denotes the total number of constraints. For constraint $k \in 1,..,K$, a feature set $\boldsymbol{\delta}$ is admissible only if $\left(\boldsymbol{a}^{(k)}\right)^T\boldsymbol{\delta} - b^{(k)} \leq 0$, leading to the inadmissibility function (penalty term)
 
 \begin{align}
@@ -158,7 +158,7 @@ Since an exact optimization is impossible due to the non-linear function $\kappa
 # Application of UBayFS
  
 ## Ensemble Training
-The function ``build.UBaymodel()`` initializes the UBayFS model and trains an ensemble of elementary feature selectors. The training dataset and target are initialized with the arguments ``data`` and ``target``. Although the UBayFS concept permits unsupervised, multiclass, or regression setups, the current implementation supports binary target variables only. While ``M`` defines the ensemble size (number of elementary feature selectors), the types of the elementary feature selectors is set via ``method``. Three different feature selectors (mRMR, Fisher schore and Laplace score) are implemented as baseline. In general, the ``method`` argument allows for each self-implemented feature selection function with the arguments ``X`` (describes the data), ``y`` (describes the target, ``n`` (describes the number of features that shall be selected), and ``name`` (name of the method). The function must return the indices of the selected features and the input name. An example with classification trees is shown below. The Each ensemble model is trained on a random subset comprising ``tt_split``$\cdot 100$ percent of the train data. The help function ``buildConstraints(...)`` provides an easy way to define side constraints for the model. Using the argument ``prior_model`` the user specifies whether the standard Dirichlet distribution or a generalized variant should be used as prior model. Furthermore, the number of features selected in each ensemble can be controlled by the parameter ``nr_features``.
+The function ``build.UBaymodel()`` initializes the UBayFS model and trains an ensemble of elementary feature selectors. The training dataset and target are initialized with the arguments ``data`` and ``target``. Although the UBayFS concept permits unsupervised, multiclass, or regression setups, the current implementation supports binary target variables only. While ``M`` defines the ensemble size (number of elementary feature selectors), the types of the elementary feature selectors is set via ``method``. Three different feature selectors (mRMR, Fisher schore and Laplace score) are implemented as baseline. In general, the ``method`` argument allows for each self-implemented feature selection function with the arguments ``X`` (describes the data), ``y`` (describes the target), ``n`` (describes the number of features that shall be selected), and ``name`` (name of the method). The function must return the indices of the selected features and the input name. An example with classification trees is shown below. Each ensemble model is trained on a random subset comprising ``tt_split``$\cdot 100$ percent of the train data. The help function ``buildConstraints()`` provides an easy way to define side constraints for the model. Using the argument ``prior_model`` the user specifies whether the standard Dirichlet distribution or a generalized variant should be used as prior model. Furthermore, the number of features selected in each ensemble can be controlled by the parameter ``nr_features``.
 
 For the standard UBayFS initialization, all prior feature weights are set to 1, and no feature constraints are included yet. The ``summary()`` function provides an overview of the dataset, the prior weights, and the likelihood --- ensemble counts indicate how often a feature was selected over the ensemble feature selections. 
 ```{r, include = TRUE}
@@ -175,7 +175,6 @@ model = build.UBaymodel(data = bcw$data,
                                                        constraint_vars = list(3), 
                                                        num_elements = dim(bcw$data)[2], 
                                                        rho = 1),
-                        block_constraints = NULL,
                         optim_method = "GA",
                         popsize = 100,
                         maxiter = 100,
@@ -212,7 +211,6 @@ model = build.UBaymodel(data = bcw$data,
                                                        constraint_vars = list(3), 
                                                        num_elements = dim(bcw$data)[2], 
                                                        rho = 1),
-                        block_constraints = NULL,
                         optim_method = "GA",
                         popsize = 100,
                         maxiter = 100,
@@ -271,7 +269,7 @@ model = setWeights(model = model,
                    weights = weights)
 ```
 
-Feature constraints can be defined using the function ``buildConstraints()``. The input ``constraint_types`` consists of a vector, where all constraint types are defined. Then, with ``constraint_vars``, the user specifies details about the constraint: for max-size, the number of features to select is provided, while for must-link and cannot-link, the set of feature indices to be linked must be provided. Each list entry corresponds to one constraint in ``constraint_types``. In addition, ``num_features`` denotes the total number of features in the dataset and ``rho`` corresponds to the relaxation parameter of the admissibility function.  
+Feature constraints can be defined using the function ``buildConstraints()``. The input ``constraint_types`` consists of a vector, where all constraint types are defined. Then, with ``constraint_vars``, the user specifies details about the constraint: for max-size, the number of features to select is provided, while for must-link and cannot-link, the set of feature indices to be linked must be provided. Each list entry corresponds to one constraint in ``constraint_types``. In addition, ``num_features`` denotes the total number of features in the dataset (or the total number of blocks if the constraint is block-wise) and ``rho`` corresponds to the relaxation parameter of the admissibility function. For block constraints, information about the block structure is included either with ``block_list``or ``block_matrix``.
 
 Applying ``print(constraints)`` demonstrates that, the matrix ``A`` has ten rows to represent four constraints. While *max-size* and *cannot-link* can be expressed in one equation each, *must-link* is a pairwise constraint. In specific, the *must-link* constraint between $n$ features produces $\frac{n!}{(n-2)!}$ elementary constraints. Hence, six equations represent the *must-link* constraint. The function ``setConstraints()`` integrates the constraints into the UBayFS model. 
 ```{r, include=TRUE}
@@ -290,7 +288,6 @@ constraints = buildConstraints(constraint_types = c("max_size",
 print(constraints)
 
 model = setConstraints(model = model, constraints = constraints)
-model = setBlockConstraints(model = model, constraints = NULL)
 ```
 
 ## Optimization and evaluation
@@ -324,9 +321,7 @@ The output contains the following information:
 * **log total utility**: value of the target function for optimization
 * **log posterior feature utility**: cumulated importances of selected features before substracting a penalization term
 * **log admissibility**: if 0, all constraints are fulfilled, otherwise at least one constraint is violated
-* **log block admissibility**: same as *log admissibility* but for block constraints
 * **number violated constraints**: number of violated constraints
-* **number violated block-constraints**: number of violated block constraints; NA if no block structure given
 * **avg feature correlation**: average correlation between features in dataset
 
 
@@ -346,7 +341,7 @@ The dashboard includes multiple tabs:
  - **data**: Load the dataset and specify whether row names, column names or a block structure is present. A demo dataset is ready to be loaded and used for a first touch on the package.
  - **likelihood**: Select elementary feature selectors for ensemble feature selection, the number of models $M$, the number of features in each model, and the ratio of the train-test split. Further, the dashboard allows the user to mix different elementary feature selectors, although this option is not recommended due to limited stability [@seijo:ensembleSurvey].
  - **weights**: The prior feature weights are set by the user. For block feature selection, it is possible to set weights for blocks; otherwise, for a single feature.
- - **constraints**: In this task, the user sets different constraints (at least a max-size constraint). The penalty $\rho$ can be varied here as well.
+ - **constraints / block constraints**: In this task, the user sets different constraints (at least a max-size constraint). The penalty $\rho$ can be varied here as well.
  - **feature selection**: In the dashboard's last step, an optimization procedure determines the final feature set. A plot of the final result is produced - also, the model can be saved as an Rdata file and loaded to the dashboard again.
  
 # Conclusion

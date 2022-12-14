@@ -1,12 +1,13 @@
-#' Admissibility function (kappa)
-#' @description Evaluate the value of the admissibility function `kappa`.
-#' @param state a binary membership vector describing a feature set
-#' @param constraints a list containing a matrix `A` and a vector `b` representing the inequality system `Ax<=b` and a vector `rho`
-#' @param log whether the admissibility should be returned on log scale
-#' @return an admissibility value
+#' Admissibility for constraint group
+#' @describeIn admissibility computes admissibility for a group of constraints (with a common block).
+#' @param constraints group of constraints with common block matrix
 #' @importFrom matrixStats logSumExp
-#' @export
-admissibility = function(state, constraints, log = TRUE){
+group_admissibility = function(state, constraints, log = TRUE){
+
+  # parse input
+  block_matrix = constraints$block_matrix
+
+  state = (block_matrix %*% state) > 0
 
   # parse input
   A = constraints$A
@@ -33,7 +34,6 @@ admissibility = function(state, constraints, log = TRUE){
     const_fulfilled <- b[!ind_inf] - A[!ind_inf,] %*% state >= 0
     z = (b[!ind_inf] - A[!ind_inf,] %*% state) * rho[!ind_inf]			# compute exponential term (nom) for each constraint (in log-scale)
     lprob1 = log(2) + z - apply(cbind(z,0), 1, logSumExp) # 2 * log(nom) - log(1 + nom)
-    #lprob1 = sum(lprob1)							# product over all constraints
     lprob1 = sum(lprob1[!const_fulfilled])
   }
   else{
@@ -57,27 +57,25 @@ admissibility = function(state, constraints, log = TRUE){
   }
 }
 
-# Block admissibility function (kappa)
-#' @describeIn admissibility  Evaluates the value of the admissibility function `kappa` for block constraints.
-#' @importFrom matrixStats logSumExp
+#' Admissibility function (kappa) for one or multiple groups of constraints and block constraints
+#' @description Evaluate the value of the admissibility function `kappa`.
+#' @param state a binary membership vector describing a feature set
+#' @param constraint_list a list of constraint groups, each containing a matrix `A` and a vector `b` representing the inequality system `Ax<=b`, a vector `rho`, and a matrix `block_matrix`
+#' @param log whether the admissibility should be returned on log scale
+#' @return an admissibility value
 #' @export
-#'
-block_admissibility = function(state, constraints, log = TRUE){
-
-  # parse input
-  block_matrix = constraints$block_matrix
-
-  if(!is.null(block_matrix)){
-    state_block = (block_matrix %*% state) > 0
+admissibility = function(state, constraint_list, log = TRUE){
+  adm <- ifelse(log, 0, 1)
+  for(i in constraint_list){
+    if(log){
+      adm <- adm + group_admissibility(state, i, log = TRUE)
+    }
+    else{
+      adm <- adm * group_admissibility(state, i, log = FALSE)
+    }
   }
-  else{
-    state_block = state
-  }
-  return(admissibility(state_block, constraints, log))
-
+  return(adm)
 }
-
-
 
 
 #' Posterior expectation of features

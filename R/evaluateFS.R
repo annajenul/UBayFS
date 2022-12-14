@@ -20,26 +20,25 @@ evaluateFS <- function(state, model, method = "spearman", log = FALSE){
   loss <- getNegLoss(state, model, log = FALSE) - model$lambda # substract lambda due to transformation of utility
   if(log){loss = log(loss)}
 
+  # calculate number of violated constraints
+  num_viol_const <- 0
+  for(const in model$constraint.params){
+    num_viol_const <- num_viol_const + sum((const$A %*% ((const$block_matrix %*% state) > 0)) > const$b)
+  }
+
   # calculate output metrics
   vec <- c(
     sum(state),
-    round(loss, 2),
-    ifelse(log, round(log_post, 2), round(exp(log_post), 2)),
+    round(loss, 3),
+    ifelse(log, round(log_post, 3), round(exp(log_post), 3)),
     round(admissibility(state,
-                        constraints = model$constraint.params$constraints,
-                        log = log), 2),
-    round(block_admissibility(state,
-                        constraints = model$constraint.params$block_constraints,
-                        log = log), 2),
-    ifelse(is.null(model$constraint.params$constraints$A), NA,
-           sum(model$constraint.params$constraints$A %*% state - model$constraint.params$constraints$b > 0)),
-    ifelse(is.null(model$constraint.params$block_constraints$A), NA,
-          sum(model$constraint.params$block_constraints$A %*% (model$constraint.params$block_constraints$block_matrix %*% state > 0) - model$constraint.params$block_constraints$b > 0)),
-    ifelse(is.matrix(c), round((sum(c) - sum(diag(c))) / (sum(state) * (sum(state) - 1)),2), NA))
-
-  colnames <- c("cardinality", "total utility", "posterior feature utility", "admissibility", "block admissibility", "number violated constraints", "number violated block-constraints", "avg feature correlation")
+                        constraint_list = model$constraint.params,
+                        log = log), 3),
+    num_viol_const,
+    ifelse(is.matrix(c), round((sum(c) - sum(diag(c))) / (sum(state) * (sum(state) - 1)),3), NA))
+  colnames <- c("cardinality", "total utility", "posterior feature utility", "admissibility", "number of violated constraints", "avg feature correlation")
   if(log){
-    colnames[2:5] <- paste("log", colnames[2:5])
+    colnames[2:4] <- paste("log", colnames[2:4])
   }
   names(vec) <- colnames
 

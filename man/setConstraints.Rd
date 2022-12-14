@@ -2,12 +2,9 @@
 % Please edit documentation in R/buildConstraints.R
 \name{setConstraints}
 \alias{setConstraints}
-\alias{setBlockConstraints}
 \title{Set constraints in UBaymodel object}
 \usage{
 setConstraints(model, constraints, append = FALSE)
-
-setBlockConstraints(model, constraints, append = FALSE)
 }
 \arguments{
 \item{model}{a `UBaymodel` object created using \link{build.UBaymodel}}
@@ -21,14 +18,7 @@ a `UBaymodel` object with updated constraint parameters
 }
 \description{
 Set the constraints in a `UBaymodel` object.
-
-Set the block constraints in a `UBaymodel` object.
 }
-\section{Functions}{
-\itemize{
-\item \code{setBlockConstraints()}: sets the block constraints in a `UBaymodel` object
-
-}}
 \seealso{
 build.UBaymodel
 }

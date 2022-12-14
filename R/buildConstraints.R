@@ -112,7 +112,7 @@ buildConstraints = function(constraint_types, constraint_vars, num_elements, rho
     }
   }
 
-  return(buildCustomConstraints(
+  return(build.UBayconstraint(
     A = A,
     b = b,
     rho = rho_vec,
@@ -153,7 +153,7 @@ buildDecorrConstraints = function(data, level = 0.5, method = "spearman"){
   rho_corr <- rho_corr[pos_corr]
   rho_corr <- rho_corr / (1-rho_corr)# logit function # TODO: transform for level != 0.5!
 
-  return(buildCustomConstraints(
+  return(build.UBayconstraint(
     A = A_corr,
     b = b_corr,
     rho = rho_corr,
@@ -170,7 +170,7 @@ buildDecorrConstraints = function(data, level = 0.5, method = "spearman"){
 #' @return A `UBayconstraint` object
 #' @export
 
-buildCustomConstraints <- function(A, b, rho, block_matrix){
+build.UBayconstraint <- function(A, b, rho, block_matrix){
   const <- list(A = A,
                 b = b,
                 rho = rho,
@@ -228,7 +228,7 @@ is.UBayconstraint <- function(x){
 #' Set constraints in UBaymodel object
 #' @description Set the constraints in a `UBaymodel` object.
 #' @param model a `UBaymodel` object created using \link{build.UBaymodel}
-#' @param constraints a list containing a relaxed system `Ax<=b` of user constraints, given as matrix `A`, vector `b` and vector or scalar `rho` (relaxation parameters); see buildConstraints function
+#' @param constraints a `UBayconstraint` object created using \link{build.UBayconstraint}
 #' @param append if `TRUE`, constraints are appended to the existing constraint system
 #' @return a `UBaymodel` object with updated constraint parameters
 #' @seealso build.UBaymodel
@@ -241,7 +241,7 @@ setConstraints = function(model, constraints, append = FALSE){
     stop("Error: wrong class of model")
   }
 
-  if(!is(constraints, "UBayconstraint")){
+  if(!is(constraints, "UBayconstraint") && !is.null(constraints)){
     stop("Error: inconsistent constraints provided1")
   }
 
@@ -278,7 +278,7 @@ setBlockConstraints = function(model, constraints, append = FALSE){
     stop("Error: wrong class of model")
   }
 
-  if(!is(constraints, "UBayconstraint")){
+  if(!is(constraints, "UBayconstraint") && !is.null(constraints)){
     stop("Error: inconsistent constraints provided")
   }
 

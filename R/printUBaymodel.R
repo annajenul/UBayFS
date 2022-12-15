@@ -1,5 +1,5 @@
 #' Print a UBayFS model
-#' @description Print details of a UBayFS model.
+#' @description Print details of a `UBaymodel`
 #' @param x a `UBaymodel` object created using \link{build.UBaymodel}
 #' @param ... additional print parameters
 #' @importFrom utils str
@@ -59,8 +59,8 @@ printResults <- function(model){
 }
 
 
-#' Summarizes a UBayFS model
-#' @describeIn print.UBaymodel A summary of a UBayFS model
+#' Summarizes a `UBaymodel`
+#' @describeIn print.UBaymodel A summary of a `UBaymodel`
 #' @param object a `UBaymodel` object created using \link{build.UBaymodel}
 #' @importFrom methods is
 #' @export
@@ -104,7 +104,7 @@ summary.UBaymodel <- function(object,...){
 
 
 #' Plot a UBayFS model
-#' @describeIn print.UBaymodel A barplot of an UBayFS model containing prior weights, ensemble counts and the selected features.
+#' @describeIn print.UBaymodel A barplot of a `UBaymodel` containing prior weights, ensemble counts and the selected features.
 #' @import ggplot2
 #' @import gridExtra
 #' @importFrom methods is

@@ -164,7 +164,7 @@ buildDecorrConstraints = function(data, level = 0.5, method = "spearman"){
 #' @param b vector containing the right side of the linear inequality system
 #' @param rho vector containing the relaxation parameters for each constraint
 #' @param block_matrix a matrix indicating the membership of features in feature blocks
-#' @return A `UBayconstraint` object
+#' @return a `UBayconstraint` object
 #' @export
 
 build.UBayconstraint <- function(A, b, rho, block_matrix = NULL){

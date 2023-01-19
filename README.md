@@ -60,12 +60,12 @@ In addition, some functionality of the package (in particular, the interactive S
 Implementation Details
 ----------------------
 The original paper defines the following utility function $U(\boldsymbol{\delta},\boldsymbol{\theta})$ for optimization with respect to $\boldsymbol{\delta}\in \lbrace 0,1\rbrace ^N$:
-$$U(\boldsymbol{\delta},\boldsymbol{\theta}) = \underset{\boldsymbol{\delta}\in\lbrace 0,1\rbrace ^N}{\max}\left(\boldsymbol{\delta}^T \boldsymbol{\theta}-\lambda \kappa(\boldsymbol{\delta})\right), $$
+$$U(\boldsymbol{\delta},\boldsymbol{\theta}) = \boldsymbol{\delta}^T \boldsymbol{\theta}-\lambda \kappa(\boldsymbol{\delta}), $$
 for fixed $\lambda>0$.
 
 
 For practical reasons, the implementation in the UBayFS package uses a modified utility function $\tilde{U}(\boldsymbol{\delta},\boldsymbol{\theta})$ which adds an admissibility term $1-\kappa(\boldsymbol{\delta})$ rather than subtracting an inadmissibility term $\kappa(\boldsymbol{\delta})$
-$$\tilde{U}(\boldsymbol{\delta},\boldsymbol{\theta}) = \underset{\boldsymbol{\delta}\in\lbrace 0,1\rbrace ^N}{\max} \left(\boldsymbol{\delta}^T \boldsymbol{\theta}+\lambda (1-\kappa(\boldsymbol{\delta}))\right) = \underset{\boldsymbol{\delta}\in\lbrace 0,1\rbrace ^N}{\max} \left(\boldsymbol{\delta}^T \boldsymbol{\theta}-\lambda \kappa(\boldsymbol{\delta}) +\lambda\right).$$
+$$\tilde{U}(\boldsymbol{\delta},\boldsymbol{\theta}) = \boldsymbol{\delta}^T \boldsymbol{\theta}+\lambda (1-\kappa(\boldsymbol{\delta})) = \boldsymbol{\delta}^T \boldsymbol{\theta}-\lambda \kappa(\boldsymbol{\delta}) +\lambda.$$
 
 Thus, the function values of $U(\boldsymbol{\delta},\boldsymbol{\theta})$ and $\tilde{U}(\boldsymbol{\delta},\boldsymbol{\theta})$ deviate by a constant $\lambda$; however, the optimal feature set $$\boldsymbol{\delta}^{\star} = \underset{\boldsymbol{\delta}\in\lbrace 0,1\rbrace ^N}{\text{arg max}}~ U(\boldsymbol{\delta},\boldsymbol{\theta}) = \underset{\boldsymbol{\delta}\in\lbrace 0,1\rbrace ^N}{\text{arg max}}~ \tilde{U}(\boldsymbol{\delta},\boldsymbol{\theta})$$ remains unaffected.
 

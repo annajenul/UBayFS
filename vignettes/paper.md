@@ -48,9 +48,9 @@ In the framework of UBayFS,  $p(\boldsymbol{y}|\boldsymbol{\theta})$ represents 
 
 In UBayFS, a relaxed inadmissibility function $\kappa_{k,\rho}(\boldsymbol{\delta})$ is used as a penalization for the violation of a given side constraint $k=1,...,K$. The joint inadmissibility function $\kappa$ pursues the idea that $\kappa = 1$ (maximum penalization) if at least one $\kappa_{k,\rho}=1$, while $\kappa=0$ (no penalization) if all $\kappa_{k,\rho}=0$. A more detailed description is provided in the original paper [@jenul2022ubayfs].
 
-To obtain an optimal feature set $\boldsymbol{\delta}^\star$, we use a target function $U(\boldsymbol{\delta}, \boldsymbol{\theta})$ which represents a posterior expected utility of feature sets $\boldsymbol{\delta}$ given the posterior feature importance parameter $\boldsymbol{\theta}$, regularized by the inadmissibility function $\kappa(.)$.
+To obtain an optimal feature set $\boldsymbol{\delta}^\star$, we use a target function $U(\boldsymbol{\delta}, \boldsymbol{\theta})$ which represents a posterior expected utility of feature sets $\boldsymbol{\delta}$ given the posterior feature importance parameter $\boldsymbol{\theta}$, regularized by the inadmissibility function $\kappa(.)$
 
-$$\mathbb{E}_{\boldsymbol{\theta}|\boldsymbol{y}}[U(\boldsymbol{\delta}, \boldsymbol{\theta}(\boldsymbol{y}))] = \boldsymbol{\delta}^T \mathbb{E}_{\boldsymbol{\theta}|\boldsymbol{y}}[\boldsymbol{\theta}(\boldsymbol{y} )]-\lambda\kappa(\boldsymbol{\delta})\longrightarrow \underset{\boldsymbol{\delta}\in\{0,1\}^N}{\text{max}}
+$$\delta^\star = \underset{\boldsymbol{\delta}\in\{0,1\}^N}{\text{max}} ~\mathbb{E}_{\boldsymbol{\theta}|\boldsymbol{y}}[U(\boldsymbol{\delta}, \boldsymbol{\theta}(\boldsymbol{y}))] = \underset{\boldsymbol{\delta}\in\{0,1\}^N}{\text{max}}~ \boldsymbol{\delta}^T \mathbb{E}_{\boldsymbol{\theta}|\boldsymbol{y}}[\boldsymbol{\theta}(\boldsymbol{y} )]-\lambda\kappa(\boldsymbol{\delta}).
 $$
 
 The optimization is implemented via a genetic algorithm along with a greedy algorithm for initialization, suggested by @jenul2022ubayfs to find a proper start vector for the optimization.

@@ -50,7 +50,7 @@ In UBayFS, a relaxed inadmissibility function $\kappa_{k,\rho}(\boldsymbol{\delt
 
 To obtain an optimal feature set $\boldsymbol{\delta}^\star$, we use a target function $U(\boldsymbol{\delta}, \boldsymbol{\theta})$ which represents a posterior expected utility of feature sets $\boldsymbol{\delta}$ given the posterior feature importance parameter $\boldsymbol{\theta}$, regularized by the inadmissibility function $\kappa(.)$
 
-$$\delta^\star = \underset{\boldsymbol{\delta}\in\{0,1\}^N}{\text{max}} \left(\mathbb{E}_{\boldsymbol{\theta}|\boldsymbol{y}}[U(\boldsymbol{\delta}, \boldsymbol{\theta}(\boldsymbol{y}))] \right) = \underset{\boldsymbol{\delta}\in\{0,1\}^N}{\text{max}}\left(\boldsymbol{\delta}^T \mathbb{E}_{\boldsymbol{\theta}|\boldsymbol{y}}[\boldsymbol{\theta}(\boldsymbol{y} )]-\lambda\kappa(\boldsymbol{\delta})\right).
+$$\boldsymbol{\delta}^\star = \underset{\boldsymbol{\delta}\in\{0,1\}^N}{\text{max}} \left(\mathbb{E}_{\boldsymbol{\theta}|\boldsymbol{y}}[U(\boldsymbol{\delta}, \boldsymbol{\theta}(\boldsymbol{y}))] \right) = \underset{\boldsymbol{\delta}\in\{0,1\}^N}{\text{max}}\left(\boldsymbol{\delta}^T \mathbb{E}_{\boldsymbol{\theta}|\boldsymbol{y}}[\boldsymbol{\theta}(\boldsymbol{y} )]-\lambda\kappa(\boldsymbol{\delta})\right).
 $$
 
 The optimization is implemented via a genetic algorithm along with a greedy algorithm for initialization, suggested by @jenul2022ubayfs to find a proper start vector for the optimization.

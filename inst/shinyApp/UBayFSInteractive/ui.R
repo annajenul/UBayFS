@@ -142,13 +142,13 @@ shinyUI(fluidPage(
                                  ),
                                  conditionalPanel(
                                      condition = "input.showInput == true",
-                                     hidden(
+
                                      column(3,
                                             id = "blocktable_container",
                                             uiOutput("blocktable"),
                                             style='border: 1px solid black; border-radius: 30px; padding: 10px; margin: 10px;
                                             height: 400px; overflow-y: scroll; overflow-x: hidden'
-                                     )),
+                                     ),
                                      tabPanel("set_weights",
                                               actionButton("setweights", "set weights")
                                  )),

@@ -21,8 +21,9 @@ shinyServer(function(input, output, session) {
       newb <- params$b
       newrho <- params$rho
 
+
       model(UBayFS::setConstraints(model(),
-                                   list(A = newA, b = newb, rho = as.numeric(newrho), block_matrix = block_matrix()),
+                                   build.UBayconstraint(A = newA, b = newb, rho = as.numeric(newrho), block_matrix = block_matrix()),
                                    append = TRUE))
 
       proxy = dataTableProxy('blocks')
@@ -35,7 +36,7 @@ shinyServer(function(input, output, session) {
       colnames(newA) <- names_feats()
 
       model(UBayFS::setConstraints(model(),
-                                   list(A = newA, b = newb, rho = as.numeric(newrho)),
+                                   build.UBayconstraint(A = newA, b = newb, rho = as.numeric(newrho)),
                                    append = TRUE))
       proxy = dataTableProxy('features')
       selectRows(proxy, c())
@@ -363,7 +364,6 @@ shinyServer(function(input, output, session) {
   })
 
   observeEvent(input$run_UBay, {
-    print(summary(model()))
     if(!is.null(model()$constraint.params)){
       feat_const <- which(sapply(model()$constraint.params, function(y){return(identical(y$block_matrix, diag(nrow = ncol(model()$data))))}))
       ms = model()$constraint.params[[feat_const]]$b[which(apply(model()$constraint.params[[feat_const]]$A == 1, 1, all))]
@@ -374,22 +374,7 @@ shinyServer(function(input, output, session) {
       else if (ms > ncol(model()$data)){
         shinyalert("No max-size constraint among constraints! Add one.", type="error")
       }
-<<<<<<< HEAD
-    })
-
-    observeEvent(input$run_UBay, {
-      if(!is.null(model()$constraint.params$constraints)){
-        ms = model()$constraint.params$constraints$b[which(apply(model()$constraint.params$constraints$A == 1, 1, all))]
-        if((!is.numeric(ms)) || (length(ms) == 0) || is.null(ms)){
-          shinyalert("No max-size constraint among constraints! Add one.", type="error")
-        }
-        else if (ms > ncol(model()$constraint.params$constraints$A)){
-          shinyalert("No max-size constraint among constraints! Add one.", type="error")
-        }
-        else{
-=======
       else{
->>>>>>> 173b7e7c741fee00deaeb6d4cdc6621147634b80
         withProgress(min = 0, max = 1, value = 0, message = "optimizing posterior function", {
           tryCatch({
             model(UBayFS::train(model()))
@@ -441,7 +426,7 @@ shinyServer(function(input, output, session) {
   observe({
     if(data_complete() & length(input$method) > 0){
       enable("confirmParam")
-      show("blocktable_container")
+      #show("blocktable_container")
     }
     else{
       disable("confirmParam")

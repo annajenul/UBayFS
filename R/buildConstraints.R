@@ -198,7 +198,7 @@ is.UBayconstraint <- function(x){
   if(is.null(x)){
     return(TRUE)
   }
-  else if(class(x) != "UBayconstraint"){
+  else if(is(x, "UBayconstraint")){
     return(FALSE)
   }
   else if(!is.list(x)){

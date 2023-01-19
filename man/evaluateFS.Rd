@@ -12,7 +12,7 @@ evaluateMultiple(state, model, method = "spearman", log = TRUE)
 \arguments{
 \item{state}{a binary membership vector describing a feature set}
 
-\item{model}{a UBaymodel object created using \link{build.UBaymodel}}
+\item{model}{a `UBaymodel` object created using \link{build.UBaymodel}}
 
 \item{method}{type of correlation (`pearson`,`kendall`, or `spearman`)}
 

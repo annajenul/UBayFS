@@ -25,14 +25,14 @@ printResults(model)
 \item{object}{a `UBaymodel` object created using \link{build.UBaymodel}}
 }
 \description{
-Print details of a UBayFS model.
+Print details of a `UBaymodel`
 }
 \section{Functions}{
 \itemize{
 \item \code{printResults()}: Display and summarize the results of UBayFS after feature selection.
 
-\item \code{summary(UBaymodel)}: A summary of a UBayFS model
+\item \code{summary(UBaymodel)}: A summary of a `UBaymodel`
 
-\item \code{plot(UBaymodel)}: A barplot of an UBayFS model containing prior weights, ensemble counts and the selected features.
+\item \code{plot(UBaymodel)}: A barplot of a `UBaymodel` containing prior weights, ensemble counts and the selected features.
 
 }}

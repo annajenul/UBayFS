@@ -16,7 +16,7 @@ build.UBayconstraint(A, b, rho, block_matrix = NULL)
 \item{block_matrix}{a matrix indicating the membership of features in feature blocks}
 }
 \value{
-A `UBayconstraint` object
+a `UBayconstraint` object
 }
 \description{
 Builds a constraint using a left side `A`, a right side `b`, a relaxation parameter `rho`, and a block matrix `block_matrix`.

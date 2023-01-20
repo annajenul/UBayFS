@@ -25,7 +25,7 @@ build.UBaymodel(
 \arguments{
 \item{data}{a matrix of input data}
 
-\item{target}{a vector (factor) of input labels}
+\item{target}{a vector of input labels; for binary problems a factor variable should be used}
 
 \item{M}{the number of elementary models to be trained in the ensemble}
 

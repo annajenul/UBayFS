@@ -2,7 +2,7 @@
 #' @description Build a data structure for UBayFS and train an ensemble of elementary feature selectors.
 #' @details The function aggregates input parameters for UBayFS - including data, parameters defining ensemble and user knowledge and parameters specifying the optimization procedure - and trains the ensemble model.
 #' @param data a matrix of input data
-#' @param target a vector (factor) of input labels
+#' @param target a vector of input labels; for binary problems a factor variable should be used
 #' @param M the number of elementary models to be trained in the ensemble
 #' @param tt_split the ratio of samples drawn for building an elementary model (train-test-split)
 #' @param nr_features number of features to select in each elementary model; if "auto" a randomized number of features is used in each elementary model
@@ -122,6 +122,13 @@ build.UBaymodel = function(data,
   }
   if(!(prior_model %in% c("dirichlet", "wong", "hankin"))){
     stop("Error: unknown prior_model")
+  }
+  # binary targets must be of type factor
+  if(is.numeric(target)){
+    if(length(unique(target)) == 2){
+      target = as.factor(target)
+      message("binary target converted from numeric to factor")
+    }
   }
 
   # initialize matrix

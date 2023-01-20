@@ -193,7 +193,11 @@ shinyServer(function(input, output, session) {
         if(!is.null(model()$data)){
           names(lab) <- rownames(model()$data)
         }
-        ifelse(is.factor(lab), {lab = lab}, {lab = as.factor(lab)})
+        if(is.numeric(lab)){
+          if(length(unique(lab)) == 2){
+            lab = as.factor(lab)
+          }
+        }
         model(append(model(), list(target = lab)))
       },
       error = function(cond){
@@ -940,5 +944,9 @@ shinyServer(function(input, output, session) {
   observe({
     if (input$stop_app)
       stopApp()
+  })
+  observe({
+    if (input$refresh_app)
+      session$reload()
   })
 })

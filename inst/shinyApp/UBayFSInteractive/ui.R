@@ -58,6 +58,7 @@ shinyUI(fluidPage(
                        actionButton("load_model", "load model", style = "width: 150px"),
                        downloadButton("save_model", "save model", style = "width: 150px"),
                        actionButton("stop_app", "stop app", style = "width: 150px"),
+                       actionButton("refresh_app", "refresh app", style = "width: 150px"),
                        margin = "10px",
                        width = "200px"
                    ),

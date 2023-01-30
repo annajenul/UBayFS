@@ -95,4 +95,44 @@ For the implementation of a new feature or bug-fixing, we encourage you to send 
 
 Citation
 ------------
-Jenul, A., Schrunner, S., Pilz, J. et al. A user-guided Bayesian framework for ensemble feature selection in life science applications (UBayFS). Mach Learn (2022). https://doi.org/10.1007/s10994-022-06221-9
+If you use UBayFS in a report or scientific publication, we would appreciate citations to the following papers:
+
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.04848/status.svg)](https://doi.org/10.21105/joss.04848)
+
+
+Jenul, A. and Schrunner, S., (2023). UBayFS: An R Package for User Guided Feature Selection. Journal of Open Source Software, 8(81), 4848, https://doi.org/10.21105/joss.04848
+
+Bibtex entry:
+
+	@article{Jenul2023,
+	  doi = {10.21105/joss.04848},
+	  url = {https://doi.org/10.21105/joss.04848},
+	  year = {2023},
+	  month = jan,
+	  publisher = {The Open Journal},
+	  volume = {8},
+	  number = {81},
+	  pages = {4848},
+	  author = {Anna Jenul and Stefan Schrunner},
+	  title = {{UBayFS}: An R Package for User Guided Feature
+			Selection},
+	  journal = {Journal of Open Source Software}
+	}
+
+Jenul, A., Schrunner, S. et al. A user-guided Bayesian framework for ensemble feature selection in life science applications (UBayFS). Mach Learn (2022). https://doi.org/10.1007/s10994-022-06221-9
+
+Bibtex entry:
+
+	@article{Jenul2022,
+	  doi = {10.1007/s10994-022-06221-9},
+	  url = {https://doi.org/10.1007/s10994-022-06221-9},
+	  year = {2022},
+	  month = aug,
+	  publisher = {Springer Science and Business Media {LLC}},
+	  volume = {111},
+	  number = {10},
+	  pages = {3897--3923},
+	  author = {Anna Jenul and Stefan Schrunner and J\"{u}rgen Pilz and Oliver Tomic},
+	  title = {A user-guided Bayesian framework for ensemble feature selection in life science applications ({UBayFS})},
+	  journal = {Machine Learning}
+}

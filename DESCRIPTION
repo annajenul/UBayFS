@@ -1,7 +1,6 @@
 Type: Package
 Package: UBayFS
 Title: A User-Guided Bayesian Framework for Ensemble Feature Selection
-    (UBayFS)
 Version: 1.0
 Authors@R: c(
     person("Anna", "Jenul", , "anna.jenul@nmbu.no", role = c("aut", "cre"),
@@ -15,7 +14,8 @@ Authors@R: c(
 Description: Implements the user-guided Bayesian framework for ensemble
     feature selection (UBayFS) : Jenul et al., (2022) <doi:10.1007/s10994-022-06221-9>.
 License: GPL-3
-URL: https://annajenul.github.io/UBayFS/
+URL: https://annajenul.github.io/UBayFS/, https://joss.theoj.org/papers/10.21105/joss.04848
+BugReports: https://github.com/annajenul/UBayFS/issues
 Depends: 
     R (>= 3.5.0)
 Imports: 

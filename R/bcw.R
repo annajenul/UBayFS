@@ -5,7 +5,7 @@
 #' The dataset has been taken from the UCI Repository of Machine Learning Databases and was created by W. H. Wolberg, W. N. Street and O. L. Mangasarian in 1995.
 #' For details, see UCI documentation or literature:
 #' \itemize{
-#'  \item{\url{https://doi.org/10.1117/12.148698}}
+#'  \item{\doi{10.1117/12.148698}}
 #'  \item{\url{https://www.jstor.org/stable/171686}}
 #' }
 #' Feature blocks were added to the original dataset according to the dataset description (10 blocks corresponding to different image characteristics).
@@ -16,5 +16,5 @@
 #'         \item{a vector `labels` of factor type with 569 entries representing the binary target variable, and}
 #'         \item{a list of feature indices representing feature blocks.}
 #'        }
-#' @source \url{ftp://ftp.ics.uci.edu/pub/machine-learning-databases}
+#' @source \url{https://archive.ics.uci.edu/ml/datasets/breast+cancer+wisconsin+(diagnostic)}
 "bcw"

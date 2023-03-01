@@ -110,7 +110,6 @@ train_GA <- function(theta, lambda, constraints, optim_params, feat_names, verbo
                           size = optim_params$popsize)
 
 
-  print("SAMPLING FINISHED")
   optim = ga(type = "binary",								# use GA for optimization
              fitness = target_fct,
              lower = 0,

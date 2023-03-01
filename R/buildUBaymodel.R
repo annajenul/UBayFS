@@ -155,6 +155,7 @@ build.UBaymodel = function(data,
 
 
       if(is.function(f)){
+        name = "method"
         out <- try({
         mod =  f(X = train_data, y = train_labels, n = n, ...)
         ranks = mod[["ranks"]]
@@ -200,6 +201,7 @@ build.UBaymodel = function(data,
         #vec[nconst_cols[ranks]] <- 1
       }
       else{vec = rep(NA, ncol(data))}
+
       # generate matrix of selected features
       ensemble_matrix = rbind(ensemble_matrix, vec)
       if(is.function(f)){

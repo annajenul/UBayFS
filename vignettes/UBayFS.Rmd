@@ -2,11 +2,8 @@
 title: "A quick tour through UBayFS"
 author: "Anna Jenul, Stefan Schrunner"
 date: "`r Sys.Date()`"
-output: 
-  prettydoc::html_pretty:
-    theme: architect
-    toc: TRUE
-    hightlight: github
+output: rmarkdown::html_vignette
+
 bibliography: references.bib
 vignette: >
   %\VignetteIndexEntry{UBayFS}

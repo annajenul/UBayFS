@@ -27,7 +27,6 @@ Imports:
     matrixStats,
     methods,
     mRMRe,
-    prettydoc,
     Rdimtools,
     shiny,
     utils

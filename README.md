@@ -8,7 +8,7 @@
 
 
 
-The UBayFS package implements the framework proposed in the article [Jenul et al. (2022)](https://link.springer.com/article/10.1007/s10994-022-06221-9), together with an interactive Shiny dashbord, which makes UBayFS applicable to R-users with different levels of expertise. UBayFS is an ensemble feature selection technique embedded in a Bayesian statistical framework. The method combines data and user knowledge, where the first is extracted via data-driven ensemble feature selection. The user can control the feature selection by assigning prior weights to features and penalizing specific feature combinations. In particular, the user can define a maximal number of selected features and must-link constraints (features must be selected together) or cannot-link constraints (features must not be selected together). Using relaxed constraints, a parameter $\rho$ regulates the penalty shape. Hence, violation of constraints can be valid but leads to a lower target value of the feature set that is derived from the violated constraints. UBayFS can be used for common feature selection and also for block feature selection.
+The UBayFS package implements the framework proposed in the article [Jenul et al. (2022)](https://link.springer.com/article/10.1007/s10994-022-06221-9), together with an interactive Shiny dashboard, which makes UBayFS applicable to R-users with different levels of expertise. UBayFS is an ensemble feature selection technique embedded in a Bayesian statistical framework. The method combines data and user knowledge, where the first is extracted via data-driven ensemble feature selection. The user can control the feature selection by assigning prior weights to features and penalizing specific feature combinations. In particular, the user can define a maximal number of selected features and must-link constraints (features must be selected together) or cannot-link constraints (features must not be selected together). Using relaxed constraints, a parameter $\rho$ regulates the penalty shape. Hence, violation of constraints can be valid but leads to a lower target value of the feature set that is derived from the violated constraints. UBayFS can be used for common feature selection and also for block feature selection.
 
 Documentation and Structure
 ---------------------------
@@ -95,4 +95,44 @@ For the implementation of a new feature or bug-fixing, we encourage you to send 
 
 Citation
 ------------
-Jenul, A., Schrunner, S., Pilz, J. et al. A user-guided Bayesian framework for ensemble feature selection in life science applications (UBayFS). Mach Learn (2022). https://doi.org/10.1007/s10994-022-06221-9
+If you use UBayFS in a report or scientific publication, we would appreciate citations to the following papers:
+
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.04848/status.svg)](https://doi.org/10.21105/joss.04848)
+
+
+Jenul, A. and Schrunner, S., (2023). UBayFS: An R Package for User Guided Feature Selection. Journal of Open Source Software, 8(81), 4848, https://doi.org/10.21105/joss.04848
+
+Bibtex entry:
+
+	@article{Jenul2023,
+	  doi = {10.21105/joss.04848},
+	  url = {https://doi.org/10.21105/joss.04848},
+	  year = {2023},
+	  month = jan,
+	  publisher = {The Open Journal},
+	  volume = {8},
+	  number = {81},
+	  pages = {4848},
+	  author = {Anna Jenul and Stefan Schrunner},
+	  title = {{UBayFS}: An R Package for User Guided Feature
+			Selection},
+	  journal = {Journal of Open Source Software}
+	}
+
+Jenul, A., Schrunner, S. et al. A user-guided Bayesian framework for ensemble feature selection in life science applications (UBayFS). Mach Learn (2022). https://doi.org/10.1007/s10994-022-06221-9
+
+Bibtex entry:
+
+	@article{Jenul2022,
+	  doi = {10.1007/s10994-022-06221-9},
+	  url = {https://doi.org/10.1007/s10994-022-06221-9},
+	  year = {2022},
+	  month = aug,
+	  publisher = {Springer Science and Business Media {LLC}},
+	  volume = {111},
+	  number = {10},
+	  pages = {3897--3923},
+	  author = {Anna Jenul and Stefan Schrunner and J\"{u}rgen Pilz and Oliver Tomic},
+	  title = {A user-guided Bayesian framework for ensemble feature selection in life science applications ({UBayFS})},
+	  journal = {Machine Learning}
+}

@@ -38,6 +38,7 @@
 #' model <- build.UBaymodel(
 #'                      data = bcw$data,
 #'                      target = bcw$labels,
+#'                      M = 20,
 #'                      constraints = c,
 #'                      weights = w
 #' )

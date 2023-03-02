@@ -86,7 +86,7 @@ In addition, some functionality of the package (in particular, the interactive S
 - knitr
 
 Like other R packages, UBayFS is loaded using the ``library(UBayFS)`` command. The sample dataset is accessed via ``data(bcw)``.
-```{r, include = TRUE, cache = TRUE}
+```{r, include = TRUE}
 library(UBayFS)
 data(bcw)
 ```

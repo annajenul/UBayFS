@@ -26,7 +26,7 @@ vignette: >
   }
 </style>
 
-```{r set-options, echo=FALSE, cache=FALSE}
+```{r set-options, echo=FALSE}
 options(width = 10000)
 ```
 
@@ -46,7 +46,7 @@ Block feature selection is essential in different fields of application, includi
 
 # UBayFS example
 At first we load the package and the Breast Cancer Wisconsin (BCW) example dataset, which is described in the main vignette.
-```{r, include = TRUE, cache = TRUE}
+```{r, include = TRUE}
 library(UBayFS)
 data(bcw)
 ```

@@ -3,7 +3,6 @@ title: "A quick tour through UBayFS"
 author: "Anna Jenul, Stefan Schrunner"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
-
 bibliography: references.bib
 vignette: >
   %\VignetteIndexEntry{UBayFS}
@@ -69,7 +68,6 @@ include_graphics("UBay_UML.png")
 - utils
 - hyper2
 - methods
-- prettydoc
 
 In addition, some functionality of the package (in particular, the interactive Shiny interface) requires the following dependencies:
 

@@ -2,6 +2,7 @@
 #' @param x a `UBayconstraint` object
 #' @param ... additional print parameters
 #' @importFrom methods is
+#' @return prints model summary to the console, no return value
 #' @export
 print.UBayconstraint <- function(x,...){
 

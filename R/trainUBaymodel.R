@@ -137,7 +137,7 @@ train_GA <- function(theta, lambda, constraints, optim_params, feat_names, verbo
 #' @param post_scores a vector of posterior scores (prior scores + likelihood) for each feature
 #' @param constraints a list containing feature-wise constraints
 #' @param size initial number of samples to be created. The output sample size can be lower, since duplicates are removed.
-#' @return A matrix containing initial feature sets as rows
+#' @return a matrix containing initial feature sets as rows
 
 sampleInitial <- function(post_scores, constraints, size){
 

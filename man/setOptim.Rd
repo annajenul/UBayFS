@@ -9,7 +9,7 @@ setOptim(model, method = "GA", popsize, maxiter)
 \arguments{
 \item{model}{a UBaymodel object created using build.UBaymodel}
 
-\item{method}{the method to evaluate the posterior distribution; currently only"GA" (genetic algorithm) is supported}
+\item{method}{the method to evaluate the posterior distribution; currently only'GA' (genetic algorithm) is supported}
 
 \item{popsize}{size of the initial population of the genetic algorithm for model optimization}
 

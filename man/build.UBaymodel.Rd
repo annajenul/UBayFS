@@ -31,7 +31,7 @@ build.UBaymodel(
 
 \item{tt_split}{the ratio of samples drawn for building an elementary model (train-test-split)}
 
-\item{nr_features}{number of features to select in each elementary model; if "auto" a randomized number of features is used in each elementary model}
+\item{nr_features}{number of features to select in each elementary model; if 'auto' a randomized number of features is used in each elementary model}
 
 \item{method}{a vector denoting the method(s) used as elementary models; options: `mRMR`, `laplace` (Laplacian score) Also self-defined functions are possible methods; they must have the arguments X (data), y (target), n (number of features) and name (name of the function). For more details see examples.}
 
@@ -75,7 +75,7 @@ The function aggregates input parameters for UBayFS - including data, parameters
 \examples{
 # build a UBayFS model using Breast Cancer Wisconsin dataset
 data(bcw) # dataset
-c <- buildConstraints(constraint_types = "max_size",
+c <- buildConstraints(constraint_types = 'max_size',
                       constraint_vars = list(10),
                       num_elements = ncol(bcw$data),
                       rho = 1) # prior constraints
@@ -89,8 +89,8 @@ model <- build.UBaymodel(
 )
 
 # use a function computing a decision tree as input
-library("rpart")
-decision_tree <- function(X, y, n, name = "tree"){
+library('rpart')
+decision_tree <- function(X, y, n, name = 'tree'){
 rf_data = as.data.frame(cbind(y, X))
 colnames(rf_data) <- make.names(colnames(rf_data))
 tree = rpart::rpart(y~., data = rf_data)
@@ -107,7 +107,7 @@ model <- build.UBaymodel(
 )
 
 # include block-constraints
-c_block <- buildConstraints(constraint_types = "max_size",
+c_block <- buildConstraints(constraint_types = 'max_size',
                             constraint_vars = list(2),
                             num_elements = length(bcw$blocks),
                             rho = 10,

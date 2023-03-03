@@ -16,7 +16,7 @@ setOptim(model, method = "GA", popsize, maxiter)
 \item{maxiter}{maximum number of iterations of the genetic algorithm for model optimization}
 }
 \value{
-A UBaymodel object with updated optimization parameters
+a UBaymodel object with updated optimization parameters
 }
 \description{
 Set the optimization parameters in a UBaymodel object.

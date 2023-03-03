@@ -4,6 +4,7 @@
 #' @param ... additional print parameters
 #' @importFrom utils str
 #' @importFrom methods is
+#' @return prints model summary to the console, no return value
 #' @export
 
 print.UBaymodel <- function(x,...){

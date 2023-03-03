@@ -14,7 +14,7 @@ buildDecorrConstraints(data, level = 0.5, method = "spearman")
 \item{method}{the method used to compute correlation; must be one of `pearson`, `spearman` or `kendall`}
 }
 \value{
-A list containing a matrix `A` and a vector `b` representing the inequality system `Ax<=b`, a vector `rho` and a block matrix
+a list containing a matrix `A` and a vector `b` representing the inequality system `Ax<=b`, a vector `rho` and a block matrix
 }
 \description{
 Build a cannot link constraint between highly correlated features. The user defines the correlation threshold.

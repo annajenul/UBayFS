@@ -83,6 +83,7 @@ w <- rep(1, ncol(bcw$data)) # weights
 model <- build.UBaymodel(
                      data = bcw$data,
                      target = bcw$labels,
+                     M = 20,
                      constraints = c,
                      weights = w
 )

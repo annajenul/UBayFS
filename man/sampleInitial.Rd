@@ -14,7 +14,7 @@ sampleInitial(post_scores, constraints, size)
 \item{size}{initial number of samples to be created. The output sample size can be lower, since duplicates are removed.}
 }
 \value{
-A matrix containing initial feature sets as rows
+a matrix containing initial feature sets as rows
 }
 \description{
 Sample initial solutions using a probabilistic version of Greedy algorithm.

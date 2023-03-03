@@ -12,7 +12,7 @@ build_train_set(y, tt_split)
 \item{tt_split}{the percentage of data used for training in each ensemble model.}
 }
 \value{
-Data indices for training ensembles
+data indices for training ensembles
 }
 \description{
 Sample indices for training from the data.

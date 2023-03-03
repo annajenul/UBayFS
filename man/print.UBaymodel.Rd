@@ -24,6 +24,9 @@ printResults(model)
 
 \item{object}{a `UBaymodel` object created using \link{build.UBaymodel}}
 }
+\value{
+prints model summary to the console, no return value
+}
 \description{
 Print details of a `UBaymodel`
 }

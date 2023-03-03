@@ -11,8 +11,7 @@ Authors@R: c(
     person("Oliver", "Tomic", role = "ctb"),
     person("Jürgen", "Pilz", role = "ctb")
   )
-Description: Implements the user-guided Bayesian framework for ensemble
-    feature selection (UBayFS) : Jenul et al., (2022) <doi:10.1007/s10994-022-06221-9>.
+Description: The framework proposed in Jenul et al., (2022) <doi:10.1007/s10994-022-06221-9>, together with an interactive Shiny dashboard. UBayFS is an ensemble feature selection technique embedded in a Bayesian statistical framework. The method combines data and user knowledge, where the first is extracted via data-driven ensemble feature selection. The user can control the feature selection by assigning prior weights to features and penalizing specific feature combinations. UBayFS can be used for common feature selection as well as block feature selection.
 License: GPL-3
 URL: https://annajenul.github.io/UBayFS/, https://joss.theoj.org/papers/10.21105/joss.04848
 BugReports: https://github.com/annajenul/UBayFS/issues

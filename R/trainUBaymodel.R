@@ -2,7 +2,7 @@
 #' @description Genetic algorithm to train UBayFS feature selection model.
 #' @param x a `UBaymodel` created by \link{build.UBaymodel}
 #' @param verbose if TRUE: GA optimization output is printed to the console
-#' @return a `UBaymodel` with an additional list element output containing the optimized solution.
+#' @return a `UBaymodel` with an additional list element output containing the optimized solution, see \link{build.UBaymodel}
 #' @importFrom GA ga
 #' @importFrom DirichletReg ddirichlet
 #' @importFrom matrixStats logSumExp
@@ -137,7 +137,7 @@ train_GA <- function(theta, lambda, constraints, optim_params, feat_names, verbo
 #' @param post_scores a vector of posterior scores (prior scores + likelihood) for each feature
 #' @param constraints a list containing feature-wise constraints
 #' @param size initial number of samples to be created. The output sample size can be lower, since duplicates are removed.
-#' @return A matrix containing initial feature sets as rows
+#' @return a matrix containing initial feature sets as rows
 
 sampleInitial <- function(post_scores, constraints, size){
 

@@ -12,7 +12,7 @@ train(x, verbose = FALSE)
 \item{verbose}{if TRUE: GA optimization output is printed to the console}
 }
 \value{
-a `UBaymodel` with an additional list element output containing the optimized solution.
+a `UBaymodel` with an additional list element output containing the optimized solution, see \link{build.UBaymodel}
 }
 \description{
 Genetic algorithm to train UBayFS feature selection model.

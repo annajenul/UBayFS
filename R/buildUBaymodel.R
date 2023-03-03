@@ -259,6 +259,7 @@ build.UBaymodel = function(data,
 #' Check whether an object is a UBaymodel
 #' @description Perform consistency checks of a UBaymodel.
 #' @param x an object to be checked for class consistency
+#' @return returns a single scalar (TRUE or FALSE) indicating whether the object fulfills the consistency requirements of the UBayFS model
 #' @export
 
 is.UBaymodel <- function(x){
@@ -296,7 +297,7 @@ is.UBaymodel <- function(x){
 #' @param method the method to evaluate the posterior distribution; currently only"GA" (genetic algorithm) is supported
 #' @param popsize size of the initial population of the genetic algorithm for model optimization
 #' @param maxiter maximum number of iterations of the genetic algorithm for model optimization
-#' @return A UBaymodel object with updated optimization parameters
+#' @return a UBaymodel object with updated optimization parameters
 #' @seealso build.UBaymodel
 #' @importFrom methods is
 #' @export
@@ -328,7 +329,7 @@ setOptim = function(model, method = "GA", popsize, maxiter){
 #' @param weights the vector of user-defined prior weights for each feature
 #' @param block_list the list of feature indices for each block; only required, if block-wise weights are specified and block_matrix is NULL
 #' @param block_matrix the matrix containing affiliations of features to each block; only required, if block-wise weights are specified and block_list is NULL
-#' @return A UBaymodel object with updated prior weights
+#' @return a UBaymodel object with updated prior weights
 #' @seealso build.UBaymodel
 #' @importFrom methods is
 #' @export
@@ -378,7 +379,7 @@ setWeights = function(model, weights, block_list = NULL, block_matrix = NULL){
 #' @description Sample indices for training from the data.
 #' @param y a column, often the target, by which the data shall be partitioned.
 #' @param tt_split the percentage of data used for training in each ensemble model.
-#' @return Data indices for training ensembles
+#' @return data indices for training ensembles
 
 build_train_set <- function(y, tt_split){
   n = length(unique(y))

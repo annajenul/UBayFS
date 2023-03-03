@@ -4,36 +4,35 @@
 #' @importFrom utils install.packages
 #' @importFrom utils installed.packages
 #' @importFrom utils select.list
+#' @return calls Shiny app, no return value
 #' @export
 
 runInteractive = function(){
-
-  installed_packages = installed.packages()
-  req_packages <- c(caret = "caret" %in% installed_packages,
-                   GSelection = "GSelection" %in% installed_packages,
-                   glmnet = "glmnet" %in% installed_packages,
-                   rpart = "rpart" %in% installed_packages,
-                   shinyalert = "shinyalert" %in% installed_packages,
-                   DT = "DT" %in% installed_packages,
-                   RColorBrewer = "RColorBrewer" %in% installed_packages,
-                   shinyWidgets = "shinyWidgets" %in% installed_packages,
-                   shinyjs = "shinyjs" %in% installed_packages,
-                   shinyBS = "shinyBS" %in% installed_packages,
-                   randomForest = "randomForest" %in% installed_packages
+  req_packages <- c(caret = "caret" ,
+                   GSelection = "GSelection" ,
+                   glmnet = "glmnet" ,
+                   rpart = "rpart" ,
+                   shinyalert = "shinyalert" ,
+                   DT = "DT",
+                   RColorBrewer = "RColorBrewer",
+                   shinyWidgets = "shinyWidgets",
+                   shinyjs = "shinyjs" ,
+                   shinyBS = "shinyBS",
+                   randomForest = "randomForest"
                    )
-
-  if(!all(req_packages)){
-    missing_packages <- names(req_packages)[!req_packages]
-    inst = "yes"
-    inst <- select.list(title = paste0("The shiny application requires the following packages: \n", paste(missing_packages, collapse = ","), "\nDo you want to install these packages and run the GUI?"),
-                        choices = c("yes", "no"))
-    if(inst == "yes"){
-      install.packages(missing_packages)
-    }
-    else{
-      return()
+  missing_packages = c()
+  for (package in req_packages) {
+    if (!require(package, quietly = TRUE, character.only = TRUE)){
+      missing_packages = c(missing_packages, package)
     }
   }
+
+
+  if(length(missing_packages) > 0){
+    stop(paste0("Please install missing packages: ", paste(missing_packages, collapse = ", ")))
+  }
+
+
 
   appDir <- system.file("shinyApp", "UBayFSInteractive", package = "UBayFS")
   if (appDir == "") {

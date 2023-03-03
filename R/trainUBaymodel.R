@@ -10,7 +10,7 @@
 #' @export train
 
 train <- function(x, verbose=FALSE){
-  UseMethod("train")
+  UseMethod('train')
 }
 
 #' @method train UBaymodel
@@ -18,28 +18,28 @@ train <- function(x, verbose=FALSE){
 
 train.UBaymodel = function(x, verbose=FALSE){
 
-  if(!is(x, "UBaymodel")){
-    stop("Wrong class of model")
+  if(!is(x, 'UBaymodel')){
+    stop('Wrong class of model')
   }
   if(is.null(x$constraint.params)){
-    stop("At least a max-size constraint must be defined")
+    stop('At least a max-size constraint must be defined')
   }
 
   # detect max-size constraint
   feat_const <- which(sapply(x$constraint.params, function(y){return(identical(y$block_matrix, diag(nrow = ncol(x$data))))}))
   ms = x$constraint.params[[feat_const]]$b[which(apply(x$constraint.params[[feat_const]]$A == 1, 1, all))]
   if((!is.numeric(ms)) || (length(ms) == 0)){
-    stop("No max-size constraint among constraints")
+    stop('No max-size constraint among constraints')
   }
   else if (ms > ncol(x$data)){
-    stop("No max-size constraint among constraints")
+    stop('No max-size constraint among constraints')
   }
 
   # define posterior expected parameter
   theta = posteriorExpectation(x)
 
-  if(x$optim.params$method == "GA"){
-    message("Running Genetic Algorithm")
+  if(x$optim.params$method == 'GA'){
+    message('Running Genetic Algorithm')
     tGA <- train_GA(theta,
                          x$lambda,
                          x$constraint.params,
@@ -73,7 +73,7 @@ train.UBaymodel = function(x, verbose=FALSE){
                      mutual_similarity = mut_sim)
   }
   else{
-    stop("Error: method not supported.")
+    stop('Error: method not supported.')
   }
 
   return(x)
@@ -110,7 +110,7 @@ train_GA <- function(theta, lambda, constraints, optim_params, feat_names, verbo
                           size = optim_params$popsize)
 
 
-  optim = ga(type = "binary",								# use GA for optimization
+  optim = ga(type = 'binary',								# use GA for optimization
              fitness = target_fct,
              lower = 0,
              upper = 1,
@@ -210,7 +210,7 @@ sampleInitial <- function(post_scores, constraints, size){
     x_start <- rbind(x_start, 1:n %in% ms_sel)
   }
   else{
-    stop("ERROR: no max-size constraint")
+    stop('ERROR: no max-size constraint')
   }
 
   return(x_start)

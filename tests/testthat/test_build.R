@@ -1,16 +1,16 @@
 library(UBayFS)
 
-test_that("loading demo dataset is possible",{
+test_that('loading demo dataset is possible',{
   data(bcw)
-  expect_equal(names(bcw), c("data", "labels","blocks"))
+  expect_equal(names(bcw), c('data', 'labels','blocks'))
   expect_equal(dim(bcw$data), c(569, 30))
   expect_equal(length(bcw$labels), 569)
 })
 
-test_that("correct input types in build.UBaymodel",{
+test_that('correct input types in build.UBaymodel',{
 
   data(bcw) # dataset
-  c <- buildConstraints("max_size", list(10), ncol(bcw$data), rho = 1) # prior constraints
+  c <- buildConstraints('max_size', list(10), ncol(bcw$data), rho = 1) # prior constraints
   w <- rep(1, ncol(bcw$data)) # weights
 
   # run with wrong input
@@ -64,16 +64,16 @@ test_that("correct input types in build.UBaymodel",{
     target = bcw$labels,
     constraints = c,
     weights = w,
-    method = "none"
+    method = 'none'
   ))
 
 })
 
-test_that("ensemble is trained correctly",{
+test_that('ensemble is trained correctly',{
 
   set.seed(1)
   data(bcw) # dataset
-  c <- buildConstraints("max_size", list(10), ncol(bcw$data), rho = 1) # prior constraints
+  c <- buildConstraints('max_size', list(10), ncol(bcw$data), rho = 1) # prior constraints
   model <- build.UBaymodel(
     data = bcw$data,
     target = bcw$labels,
@@ -101,7 +101,7 @@ test_that("ensemble is trained correctly",{
     M = 10,
     nr_features = 10,
     constraints = c,
-    method = "fisher",
+    method = 'fisher',
   )
   expect_equal(unname(model$ensemble.params$output$counts),
                c(10, 0, 10, 10, 0, 0, 10, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 10, 10, 0, 0, 10, 10, 0, 0))

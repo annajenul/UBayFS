@@ -17,7 +17,7 @@ group_admissibility = function(state, constraints, log = TRUE){
   # check input
   if(!is.null(A)){
     if(ncol(A) != length(state) | nrow(A) != length(b) | length(b) != length(rho)){
-      stop("Error: dimensions of constraints do not match")
+      stop('Error: dimensions of constraints do not match')
     }
   }
 
@@ -86,16 +86,16 @@ admissibility = function(state, constraint_list, log = TRUE){
 
 posteriorExpectation <- function(model){
 
-  if(!is(model, "UBaymodel")){
-    stop("Wrong class of model")
+  if(!is(model, 'UBaymodel')){
+    stop('Wrong class of model')
   }
 
-  if(model$prior_model == "dirichlet"){
+  if(model$prior_model == 'dirichlet'){
     # dirichlet expected value
     post_scores = model$ensemble.params$output$counts + model$user.params$weights
     post_scores = log(post_scores) - log(sum(post_scores))
   }
-  else if(model$prior_model == "wong"){
+  else if(model$prior_model == 'wong'){
     # generalized dirichlet expected value
     counts <- model$ensemble.params$output$counts
     alpha <- model$user.params$weights

@@ -8,17 +8,17 @@
 #' @export
 
 runInteractive = function(){
-  req_packages <- c(caret = "caret" ,
-                   GSelection = "GSelection" ,
-                   glmnet = "glmnet" ,
-                   rpart = "rpart" ,
-                   shinyalert = "shinyalert" ,
-                   DT = "DT",
-                   RColorBrewer = "RColorBrewer",
-                   shinyWidgets = "shinyWidgets",
-                   shinyjs = "shinyjs" ,
-                   shinyBS = "shinyBS",
-                   randomForest = "randomForest"
+  req_packages <- c(caret = 'caret',
+                   GSelection = 'GSelection',
+                   glmnet = 'glmnet',
+                   rpart = 'rpart',
+                   shinyalert = 'shinyalert',
+                   DT = 'DT',
+                   RColorBrewer = 'RColorBrewer',
+                   shinyWidgets = 'shinyWidgets',
+                   shinyjs = 'shinyjs',
+                   shinyBS = 'shinyBS',
+                   randomForest = 'randomForest'
                    )
   missing_packages = c()
   for (package in req_packages) {
@@ -29,15 +29,15 @@ runInteractive = function(){
 
 
   if(length(missing_packages) > 0){
-    stop(paste0("Please install missing packages: ", paste(missing_packages, collapse = ", ")))
+    stop(paste0('Please install missing packages: ', paste(missing_packages, collapse = ', ')))
   }
 
 
 
-  appDir <- system.file("shinyApp", "UBayFSInteractive", package = "UBayFS")
-  if (appDir == "") {
-   stop("Could not find app directory. Try re-installing `UBayFS`.", call. = FALSE)
+  appDir <- system.file('shinyApp', 'UBayFSInteractive', package = 'UBayFS')
+  if (appDir == '') {
+   stop('Could not find app directory. Try re-installing `UBayFS`.', call. = FALSE)
   }
-  shiny::runApp(appDir, display.mode = "normal",
+  shiny::runApp(appDir, display.mode = 'normal',
                launch.browser = TRUE)
 }

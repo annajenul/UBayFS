@@ -11,7 +11,7 @@
 #' @examples
 #' # given a dataset with 10 features, we create a max-size constraint limiting
 #' # the set to 5 features and a cannot-link constraint between features 1 and 2
-#' buildConstraints(constraint_types = c("max_size","cannot_link"),
+#' buildConstraints(constraint_types = c('max_size','cannot_link'),
 #'                  constraint_vars = list(5, c(1,2)),
 #'                  num_elements = 10,
 #'                  rho = 1)
@@ -20,26 +20,26 @@
 buildConstraints = function(constraint_types, constraint_vars, num_elements, rho = 1, block_list = NULL, block_matrix = NULL){
 
   # check input
-  if(!all(constraint_types %in% c("max_size", "must_link", "cannot_link"))){
-    stop("Error: wrong constraint type provided")
+  if(!all(constraint_types %in% c('max_size', 'must_link', 'cannot_link'))){
+    stop('Error: wrong constraint type provided')
   }
   if(length(constraint_types) != length(constraint_vars)){
-    stop("Error: constraint_vars must have same length as constraint_types")
+    stop('Error: constraint_vars must have same length as constraint_types')
   }
   if(num_elements <= 0 | num_elements %%1 != 0){
-    stop("Error: num_elements must be a positive integer")
+    stop('Error: num_elements must be a positive integer')
   }
   if(any(rho <= 0)){
-    stop("Error: rho must be positive")
+    stop('Error: rho must be positive')
   }
   if(length(rho) < 1){
-    stop("Error: rho must have positive length")
+    stop('Error: rho must have positive length')
   }
   else if(length(rho) == 1){
     rho = rep(rho, length(constraint_types))
   }
   else if((length(rho) > 1) & (length(rho) != length(constraint_types))){
-    stop("Error: rho has wrong length")
+    stop('Error: rho has wrong length')
   }
 
   # define constraints
@@ -77,15 +77,15 @@ buildConstraints = function(constraint_types, constraint_vars, num_elements, rho
 
   # iterate over provided constraints
   for (t in 1:length(constraint_types)) {				# for each constraint provided
-    if (constraint_types[t] == "max_size") {			# if max-size
+    if (constraint_types[t] == 'max_size') {			# if max-size
       l = max_size(constraint_vars[[t]],
                    num_elements)
     }
-    else if (constraint_types[t] == "must_link"){		# if must-link
+    else if (constraint_types[t] == 'must_link'){		# if must-link
       l = must_link(constraint_vars[[t]],
                     num_elements)
     }
-    else if (constraint_types[t] == "cannot_link"){		# if cannot-link
+    else if (constraint_types[t] == 'cannot_link'){		# if cannot-link
       l = cannot_link(constraint_vars[[t]],
                       num_elements)
     }
@@ -105,10 +105,10 @@ buildConstraints = function(constraint_types, constraint_vars, num_elements, rho
   # check consistency of block matrix
   if(!is.null(block_matrix)){
     if(nrow(block_matrix) != num_elements){
-      stop("Error: number of elements must match number of blocks, if block constraints are provided")
+      stop('Error: number of elements must match number of blocks, if block constraints are provided')
     }
     if(any(colSums(block_matrix > 0) > 1)){
-      stop("Error: more than one block assigned to a single feature")
+      stop('Error: more than one block assigned to a single feature')
     }
   }
 
@@ -129,7 +129,7 @@ buildConstraints = function(constraint_types, constraint_vars, num_elements, rho
 #' @importFrom utils combn
 #' @export
 
-buildDecorrConstraints = function(data, level = 0.5, method = "spearman"){
+buildDecorrConstraints = function(data, level = 0.5, method = 'spearman'){
 
   corr_matrix = cor(data, method = method)
   corr_matrix <- abs(corr_matrix)
@@ -178,13 +178,13 @@ build.UBayconstraint <- function(A, b, rho, block_matrix = NULL){
                 rho = rho,
                 block_matrix = block_matrix)
 
-  class(const) <- "UBayconstraint"
+  class(const) <- 'UBayconstraint'
 
-  if(is(const, "UBayconstraint")){
+  if(is(const, 'UBayconstraint')){
     return(const)
   }
   else{
-    stop("Could not produce constraint - check specifications")
+    stop('Could not produce constraint - check specifications')
   }
 }
 
@@ -198,7 +198,7 @@ is.UBayconstraint <- function(x){
   if(is.null(x)){
     return(TRUE)
   }
-  else if(is(x, "UBayconstraint")){
+  else if(is(x, 'UBayconstraint')){
     return(FALSE)
   }
   else if(!is.list(x)){
@@ -241,20 +241,20 @@ is.UBayconstraint <- function(x){
 
 setConstraints = function(model, constraints, append = FALSE){
 
-  if(!is(model, "UBaymodel")){
-    stop("Error: wrong class of model")
+  if(!is(model, 'UBaymodel')){
+    stop('Error: wrong class of model')
   }
 
-  if(!is(constraints, "UBayconstraint") && !is.null(constraints)){
-    stop("Error: inconsistent constraints provided1")
+  if(!is(constraints, 'UBayconstraint') && !is.null(constraints)){
+    stop('Error: inconsistent constraints provided!')
   }
   if(!is.null(constraints)){
     # set block matrix for ordinary constraints
     if(ncol(model$data) != ncol(constraints$block_matrix)){
-      stop("Error: inconsistent constraints provided")
+      stop('Error: inconsistent constraints provided')
     }
     if(nrow(constraints$block_matrix) != ncol(constraints$A)){
-      stop("Error: inconsistent constraints provided")
+      stop('Error: inconsistent constraints provided')
     }
 
     # check whether a constraint with same block_matrix exists

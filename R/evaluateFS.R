@@ -8,7 +8,7 @@
 #' @importFrom stats cor
 #' @export
 
-evaluateFS <- function(state, model, method = "spearman", log = FALSE){
+evaluateFS <- function(state, model, method = 'spearman', log = FALSE){
   if(sum(state) > 1){
     c <- abs(cor(model$data[, state == 1], method = method))
   }
@@ -36,9 +36,9 @@ evaluateFS <- function(state, model, method = "spearman", log = FALSE){
                         log = log), 3),
     num_viol_const,
     ifelse(is.matrix(c), round((sum(c) - sum(diag(c))) / (sum(state) * (sum(state) - 1)),3), NA))
-  colnames <- c("cardinality", "total utility", "posterior feature utility", "admissibility", "number of violated constraints", "avg feature correlation")
+  colnames <- c('cardinality', 'total utility', 'posterior feature utility', 'admissibility', 'number of violated constraints', 'avg feature correlation')
   if(log){
-    colnames[2:4] <- paste("log", colnames[2:4])
+    colnames[2:4] <- paste('log', colnames[2:4])
   }
   names(vec) <- colnames
 
@@ -48,7 +48,7 @@ evaluateFS <- function(state, model, method = "spearman", log = FALSE){
 #' @describeIn evaluateFS Evaluate multiple feature sets
 #' @export
 
-evaluateMultiple <- function(state, model, method = "spearman", log = TRUE){
+evaluateMultiple <- function(state, model, method = 'spearman', log = TRUE){
   return(apply(state, 1, evaluateFS, model = model, method = method, log = log))
 }
 

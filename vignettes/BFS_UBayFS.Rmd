@@ -1,7 +1,7 @@
 ---
-title: "Block feature selection with UBayFS"
-author: "Anna Jenul, Stefan Schrunner"
-date: "`r Sys.Date()`"
+title: 'Block feature selection with UBayFS'
+author: 'Anna Jenul, Stefan Schrunner'
+date: '`r Sys.Date()`'
 output: rmarkdown::html_vignette
 bibliography: references.bib
 vignette: >
@@ -15,13 +15,13 @@ vignette: >
   text-align: justify;
   padding: 1em}
   header:after {
-    content: "";
+    content: '';
     position: absolute;
     top: 55px;
     right: 40px;
     width: 120px;
     height: 120px;
-    background-image:url("logo.png");
+    background-image:url('logo.png');
     background-size:120px;
   }
 </style>
@@ -34,7 +34,7 @@ options(width = 10000)
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = '#>'
 )
 knitr::opts_chunk$set(fig.height = 5)
 knitr::opts_chunk$set(fig.width = 8)
@@ -67,7 +67,7 @@ block_list
 For the UBayFS model, we define a max-size block constraint restricting the number of selected blocks to (up to) one. Thus, the `constraint_vars` parameter is set to the maximum number of blocks to be selected, and `num_elements` contains the number of blocks, which equals the number of elements in the block_list.
 
 ```{r, include = TRUE}
-block_constraints = buildConstraints(constraint_types = c("max_size"), 
+block_constraints = buildConstraints(constraint_types = c('max_size'), 
                                      constraint_vars = list(1), 
                                      num_elements = length(block_list), 
                                      rho = 1, 
@@ -91,7 +91,7 @@ block_matrix
 The same block feature constraints as for the block list can be produced using the block matrix. However, note that the  `num_elements` parameter, specifying the number of blocks, has to be set to the number of rows in the block matrix:
 
 ```{r, include = TRUE}
-block_constraints = buildConstraints(constraint_types = c("max_size", "must_link"), 
+block_constraints = buildConstraints(constraint_types = c('max_size', 'must_link'), 
                                      constraint_vars = list(1, c(1,2)), 
                                      num_elements = nrow(block_matrix), 
                                      rho = 1, 
@@ -123,15 +123,15 @@ model = build.UBaymodel(data = bcw$data,
                         M = 100, 
                         tt_split = 0.75,
                         nr_features = 10,
-                        method = "mRMR",
-                        prior_model ="dirichlet",
+                        method = 'mRMR',
+                        prior_model ='dirichlet',
                         weights = prior_weights,
                         lambda = 1,
-                        constraints = buildConstraints(constraint_types = c("max_size"), 
+                        constraints = buildConstraints(constraint_types = c('max_size'), 
                                                        constraint_vars = list(3), 
                                                        num_elements = ncol(bcw$data), 
                                                        rho = 1),
-                        optim_method = "GA",
+                        optim_method = 'GA',
                         popsize = 100,
                         maxiter = 100,
                         shiny = FALSE

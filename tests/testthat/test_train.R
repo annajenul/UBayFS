@@ -1,10 +1,10 @@
 library(UBayFS)
 
-test_that("correct results in train.UBaymodel",{
+test_that('correct results in train.UBaymodel',{
 
   set.seed(1)
   data(bcw) # dataset
-  c <- buildConstraints("max_size", list(10), ncol(bcw$data), rho = 1) # prior constraints
+  c <- buildConstraints('max_size', list(10), ncol(bcw$data), rho = 1) # prior constraints
   w <- rep(1, ncol(bcw$data)) # weights
   model <- build.UBaymodel(
     data = bcw$data,
@@ -14,8 +14,8 @@ test_that("correct results in train.UBaymodel",{
     M = 100,
     tt_split = 0.75,
     nr_features = 10,
-    method = "mRMR",
-    optim_method = "GA",
+    method = 'mRMR',
+    optim_method = 'GA',
     popsize = 50,
     maxiter = 100,
     shiny = FALSE
@@ -31,7 +31,7 @@ test_that("correct results in train.UBaymodel",{
   # train model (standard)
   set.seed(1)
   model <- UBayFS::train(model)
-  expect_s3_class(model, "UBaymodel")
+  expect_s3_class(model, 'UBaymodel')
   expect_equal(unname(which(model$output$feature_set == 1)), c(3,7,8,14,21,22,23,24,27,28))
 
   # train model (with distinct weights)
@@ -42,7 +42,7 @@ test_that("correct results in train.UBaymodel",{
 
   # train model (with distinct constraints)
   set.seed(1)
-  const_new <- buildConstraints("cannot_link", constraint_vars = list(c(7,8,14)), 30, Inf)
+  const_new <- buildConstraints('cannot_link', constraint_vars = list(c(7,8,14)), 30, Inf)
   c <- build.UBayconstraint(A = rbind(c$A, const_new$A),
            b = c(c$b, const_new$b),
            rho = c(c$rho, const_new$rho))

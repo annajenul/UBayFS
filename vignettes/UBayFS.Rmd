@@ -1,7 +1,7 @@
 ---
-title: "A quick tour through UBayFS"
-author: "Anna Jenul, Stefan Schrunner"
-date: "`r Sys.Date()`"
+title: 'A quick tour through UBayFS'
+author: 'Anna Jenul, Stefan Schrunner'
+date: '`r Sys.Date()`'
 output: rmarkdown::html_vignette
 bibliography: references.bib
 vignette: >
@@ -15,13 +15,13 @@ vignette: >
   text-align: justify;
   padding: 1em}
   header:after {
-    content: "";
+    content: '';
     position: absolute;
     top: 55px;
     right: 40px;
     width: 120px;
     height: 120px;
-    background-image:url("logo.png");
+    background-image:url('logo.png');
     background-size:120px;
   }
 </style>
@@ -32,7 +32,7 @@ vignette: >
 library(knitr)
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = '#>'
 )
 knitr::opts_chunk$set(fig.height = 5)
 knitr::opts_chunk$set(fig.width = 8)
@@ -40,7 +40,7 @@ knitr::opts_chunk$set(fig.align = 'center')
 ```
 
 ```{r, include = FALSE, fig.show=FALSE}
-include_graphics("logo.png")
+include_graphics('logo.png')
 ```
 
 # Introduction
@@ -51,8 +51,8 @@ In this vignette, we use the Breast Cancer Wisconsin dataset [@wolberg:wisconsin
 
 UBayFS is implemented via a core S3-class ``UBaymodel``, along with help functions. An overview of the 'UBaymodel' class and its main generic functions is shown in the following diagram:
 
-```{r, out.width="70%", out.height="70%", fig.align="center", echo = FALSE}
-include_graphics("UBay_UML.png")
+```{r, out.width='70%', out.height='70%', fig.align='center', echo = FALSE}
+include_graphics('UBay_UML.png')
 ``` 
 
 ## Requirements and dependencies
@@ -162,15 +162,15 @@ model = build.UBaymodel(data = bcw$data,
                         M = 100, 
                         tt_split = 0.75,
                         nr_features = 10,
-                        method = "mRMR",
-                        prior_model ="dirichlet",
+                        method = 'mRMR',
+                        prior_model ='dirichlet',
                         weights = 0.01,
                         lambda = 1,
-                        constraints = buildConstraints(constraint_types = c("max_size"), 
+                        constraints = buildConstraints(constraint_types = c('max_size'), 
                                                        constraint_vars = list(3), 
                                                        num_elements = dim(bcw$data)[2], 
                                                        rho = 1),
-                        optim_method = "GA",
+                        optim_method = 'GA',
                         popsize = 100,
                         maxiter = 100,
                         shiny = FALSE
@@ -185,7 +185,7 @@ In addition to ``mRMR``, we add a function ``decision_tree()`` that computes fea
 ```{r, include = TRUE, eval=FALSE}
 
 library(rpart)
-decision_tree <- function(X, y, n, name = "tree"){
+decision_tree <- function(X, y, n, name = 'tree'){
   rf_data = as.data.frame(cbind(y, X))
   colnames(rf_data) <- make.names(colnames(rf_data))
   tree = rpart::rpart(y~., data = rf_data)
@@ -198,15 +198,15 @@ model = build.UBaymodel(data = bcw$data,
                         M = 100, 
                         tt_split = 0.75,
                         nr_features = 10,
-                        method = c("mRMR", decision_tree),
-                        prior_model ="dirichlet",
+                        method = c('mRMR', decision_tree),
+                        prior_model ='dirichlet',
                         weights = 0.01,
                         lambda = 1,
-                        constraints = buildConstraints(constraint_types = c("max_size"), 
+                        constraints = buildConstraints(constraint_types = c('max_size'), 
                                                        constraint_vars = list(3), 
                                                        num_elements = dim(bcw$data)[2], 
                                                        rho = 1),
-                        optim_method = "GA",
+                        optim_method = 'GA',
                         popsize = 100,
                         maxiter = 100,
                         shiny = FALSE
@@ -219,12 +219,12 @@ Examples for more feature selection methods are:
 
 # recursive feature elimination
 library(caret)
-rec_fe <- function(X,y,n, name="rfe"){
+rec_fe <- function(X,y,n, name='rfe'){
   if(is.factor(y)){
-        control <- rfeControl(functions=rfFuncs, method = "cv", number = 2)
+        control <- rfeControl(functions=rfFuncs, method = 'cv', number = 2)
       }
       else{
-        control <- rfeControl(functions=lmFuncs, method = "cv", number = 2)
+        control <- rfeControl(functions=lmFuncs, method = 'cv', number = 2)
       }
       results <- caret::rfe(X, y, sizes = n, rfeControl=control)
       return(list(ranks = which(colnames(X) %in% results$optVariables),
@@ -233,8 +233,8 @@ rec_fe <- function(X,y,n, name="rfe"){
 
 # Lasso
 library(glmnet)
-lasso <- function(X, y, n=NULL, name="lasso"){
-  family = ifelse(is.factor(y), "binomial", "gaussian")
+lasso <- function(X, y, n=NULL, name='lasso'){
+  family = ifelse(is.factor(y), 'binomial', 'gaussian')
   cv.lasso <- cv.glmnet(as.matrix(X), y, intercept = FALSE, alpha = 1, family = family, nfolds=3)
   model <- glmnet(as.matrix(X), y, intercept = FALSE, alpha = 1, family = family,
                   lambda = cv.lasso$lambda.min)
@@ -244,7 +244,7 @@ lasso <- function(X, y, n=NULL, name="lasso"){
 
 # HSIC Lasso
 library(GSelection)
-hsic_lasso <- function(X, y, n, name="hsic"){
+hsic_lasso <- function(X, y, n, name='hsic'){
   ifelse(is.factor(y), {tl = as.numeric(as.integer(y)-1)}, {tl = y})
   results = feature.selection(X, tl, n)
   return(list(ranks = results$hsic_selected_feature_index,
@@ -266,17 +266,17 @@ model = setWeights(model = model,
 
 In addition to prior weights, feature set constraints may be specified. Internally, constraints are implemented via an S3-class ``UBayconstraint``, depicted in the following diagram:
 
-```{r, out.width="70%", out.height="70%", fig.align="center", echo = FALSE}
-include_graphics("UBay_UML2.png")
+```{r, out.width='70%', out.height='70%', fig.align='center', echo = FALSE}
+include_graphics('UBay_UML2.png')
 ``` 
 
 Rather than calling the constructor method directly, the help function ``buildConstraints()`` may be used to facilitate the definition of a set of constraints: the input ``constraint_types`` consists of a vector, where all constraint types are defined. Then, with ``constraint_vars``, the user specifies details about the constraint: for max-size, the number of features to select is provided, while for must-link and cannot-link, the set of feature indices to be linked must be provided. Each list entry corresponds to one constraint in ``constraint_types``. In addition, ``num_features`` denotes the total number of features in the dataset (or the total number of blocks if the constraint is block-wise) and ``rho`` corresponds to the relaxation parameter of the admissibility function. For block constraints, information about the block structure is included either with ``block_list``or ``block_matrix`` - if both arguments are ``NULL``, feature-wise constraints are generated.
 
 Applying ``print(constraints)`` demonstrates that, the matrix ``A`` has ten rows to represent four constraints. While *max-size* and *cannot-link* can be expressed in one equation each, *must-link* is a pairwise constraint. In specific, the *must-link* constraint between $n$ features produces $\frac{n!}{(n-2)!}$ elementary constraints. Hence, six equations represent the *must-link* constraint. The function ``setConstraints()`` integrates the constraints into the UBayFS model. 
 ```{r, include=TRUE}
-constraints = buildConstraints(constraint_types = c("max_size", 
-                                                    "must_link", 
-                                                    rep("cannot_link", 2)),
+constraints = buildConstraints(constraint_types = c('max_size', 
+                                                    'must_link', 
+                                                    rep('cannot_link', 2)),
                                constraint_vars = list(10, # max-size (maximal 10 features)
                                                       c(1,11,21), # must-link between features 1, 11, and 21
                                                       c(1,10), # cannot-link between features 1, and 10
@@ -333,8 +333,8 @@ The output contains the following information:
 runInteractive()
 ```
 
-```{r, out.width="100%", echo = FALSE}
-include_graphics("UBay_Shiny_Screenshot.png")
+```{r, out.width='100%', echo = FALSE}
+include_graphics('UBay_Shiny_Screenshot.png')
 ``` 
 
 The dashboard includes multiple tabs:

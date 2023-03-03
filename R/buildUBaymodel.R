@@ -5,7 +5,7 @@
 #' @param target a vector of input labels; for binary problems a factor variable should be used
 #' @param M the number of elementary models to be trained in the ensemble
 #' @param tt_split the ratio of samples drawn for building an elementary model (train-test-split)
-#' @param nr_features number of features to select in each elementary model; if "auto" a randomized number of features is used in each elementary model
+#' @param nr_features number of features to select in each elementary model; if 'auto' a randomized number of features is used in each elementary model
 #' @param method a vector denoting the method(s) used as elementary models; options: `mRMR`, `laplace` (Laplacian score) Also self-defined functions are possible methods; they must have the arguments X (data), y (target), n (number of features) and name (name of the function). For more details see examples.
 #' @param prior_model a string denoting the prior model to use; options: `dirichlet`, `wong`, `hankin`; `hankin` is the most general prior model, but also the most time consuming
 #' @param weights the vector of user-defined prior weights for each feature
@@ -30,7 +30,7 @@
 #' @examples
 #' # build a UBayFS model using Breast Cancer Wisconsin dataset
 #' data(bcw) # dataset
-#' c <- buildConstraints(constraint_types = "max_size",
+#' c <- buildConstraints(constraint_types = 'max_size',
 #'                       constraint_vars = list(10),
 #'                       num_elements = ncol(bcw$data),
 #'                       rho = 1) # prior constraints
@@ -44,8 +44,8 @@
 #' )
 #'
 #' # use a function computing a decision tree as input
-#' library("rpart")
-#' decision_tree <- function(X, y, n, name = "tree"){
+#' library('rpart')
+#' decision_tree <- function(X, y, n, name = 'tree'){
 #' rf_data = as.data.frame(cbind(y, X))
 #' colnames(rf_data) <- make.names(colnames(rf_data))
 #' tree = rpart::rpart(y~., data = rf_data)
@@ -62,7 +62,7 @@
 #' )
 #'
 #' # include block-constraints
-#' c_block <- buildConstraints(constraint_types = "max_size",
+#' c_block <- buildConstraints(constraint_types = 'max_size',
 #'                             constraint_vars = list(2),
 #'                             num_elements = length(bcw$blocks),
 #'                             rho = 10,
@@ -79,13 +79,13 @@ build.UBaymodel = function(data,
                            target,
                            M = 100,
                            tt_split = 0.75,
-                           nr_features = "auto",
-                           method = "mRMR",
-                           prior_model = "dirichlet",
+                           nr_features = 'auto',
+                           method = 'mRMR',
+                           prior_model = 'dirichlet',
                            weights = 1,
                            constraints = NULL,
                            lambda = 1,
-                           optim_method = "GA",
+                           optim_method = 'GA',
                            popsize = 50,
                            maxiter = 100,
                            shiny = FALSE,
@@ -96,39 +96,39 @@ build.UBaymodel = function(data,
     data = as.matrix(data)
   }
   if(any(is.na(data)) | any(is.na(target))){
-    stop("Error: NA values not supported")
+    stop('Error: NA values not supported')
   }
 
   if(is.function(method)){method = list(method)}
 
   if(nrow(data) != length(target)){
-    stop("Error: number of labels must match number of data rows")
+    stop('Error: number of labels must match number of data rows')
   }
   if(M %% 1 != 0 | M <= 0){
-    stop("Error: M must be a positive integer")
+    stop('Error: M must be a positive integer')
   }
   if(tt_split < 0 | tt_split > 1){
-    stop("Error: tt_split must be between 0 and 1")
+    stop('Error: tt_split must be between 0 and 1')
   }
   else if(tt_split < 0.5 | tt_split > 0.99){
-    warning("Warning: tt_split should not be outside [0.5,0.99]")
+    warning('Warning: tt_split should not be outside [0.5,0.99]')
   }
   f_vs_string = sapply(method, is.function)
-  if(!all(method[!f_vs_string] %in% c("mRMR", "mrmr", "Laplacian score", "laplace", "fisher", "Fisher"))){
-      stop("Error: unknown method")
+  if(!all(method[!f_vs_string] %in% c('mRMR', 'mrmr', 'Laplacian score', 'laplace', 'fisher', 'Fisher'))){
+      stop('Error: unknown method')
   }
 
   if(!is.numeric(lambda) | lambda <=0){
-    stop("Error: lambda must be a scalar greater than 0")
+    stop('Error: lambda must be a scalar greater than 0')
   }
-  if(!(prior_model %in% c("dirichlet", "wong", "hankin"))){
-    stop("Error: unknown prior_model")
+  if(!(prior_model %in% c('dirichlet', 'wong', 'hankin'))){
+    stop('Error: unknown prior_model')
   }
   # binary targets must be of type factor
   if(is.numeric(target)){
     if(length(unique(target)) == 2){
       target = as.factor(target)
-      message("binary target converted from numeric to factor")
+      message('binary target converted from numeric to factor')
     }
   }
 
@@ -145,7 +145,7 @@ build.UBaymodel = function(data,
     train_data = scale(data[train_index,nconst_cols])											# scale data
     train_labels = target[train_index]															# prepare labels
 
-    if(nr_features == "auto"){
+    if(nr_features == 'auto'){
       n = sample(1:ncol(train_data), 1)
     }
     else{n = nr_features}
@@ -156,29 +156,29 @@ build.UBaymodel = function(data,
 
 
       if(is.function(f)){
-        name = "method"
+        name = 'method'
         out <- try({
         mod =  f(X = train_data, y = train_labels, n = n, ...)
-        ranks = mod[["ranks"]]
-        name = mod[["name"]]
+        ranks = mod[['ranks']]
+        name = mod[['name']]
         method_names = c(method_names, name)
         })
       }
 
-      else if(f %in% c("laplace", "Laplacian score")){												# type: Laplacian score
+      else if(f %in% c('laplace', 'Laplacian score')){												# type: Laplacian score
         out <- try({
         ranks = do.lscore(train_data,ndim = n)$featidx									# use do.lscore function (package Rdimtools)
         })
       }
-      else if(f %in% c("fisher", "Fisher")){
+      else if(f %in% c('fisher', 'Fisher')){
         out <- try({
-        if(is.numeric(train_labels)){stop("Fisher score cannot be used for regression!")}
+        if(is.numeric(train_labels)){stop('Fisher score cannot be used for regression!')}
         ranks = do.fscore(X = train_data, label = train_labels, ndim = n)$featidx
         })
       }
-      else if(f %in% c("mrmr", "mRMR")){														# type: mRMR
+      else if(f %in% c('mrmr', 'mRMR')){														# type: mRMR
         out <- try({
-        dat = data.frame(train_data, "class" = train_labels)									# change data format to data.frame
+        dat = data.frame(train_data, 'class' = train_labels)									# change data format to data.frame
         if(is.factor(train_labels)){
         dat$class = factor(dat$class, 															# change label format to ordered factor
                            ordered = TRUE)}
@@ -192,10 +192,10 @@ build.UBaymodel = function(data,
         })
       }
       else{
-        stop(paste0("Error: unknown method", f))												# catch unknown methods
+        stop(paste0('Error: unknown method', f))												# catch unknown methods
       }
 
-      if (!is(out, "try-error")){
+      if (!is(out, 'try-error')){
 
         vec = rep(0, ncol(data))
         vec[nconst_cols[unique(ranks)[unique(ranks) <= ncol(train_data)]]] <- 1
@@ -222,7 +222,7 @@ build.UBaymodel = function(data,
   if(length(rm_rows)>0){
     ensemble_matrix = ensemble_matrix[-rm_rows,]
   }
-  if(ceiling(nrow(ensemble_matrix) / length(method)) < ceiling(M/2)){stop("Too many ensembles could not be performed!")}
+  if(ceiling(nrow(ensemble_matrix) / length(method)) < ceiling(M/2)){stop('Too many ensembles could not be performed!')}
 
   # structure results
   counts = colSums(ensemble_matrix)
@@ -242,7 +242,7 @@ build.UBaymodel = function(data,
                     ensemble_matrix = ensemble_matrix)
     )
   )
-  class(obj) = "UBaymodel"
+  class(obj) = 'UBaymodel'
 
   obj = setConstraints(obj, constraints)
   obj = setWeights(obj, weights)
@@ -286,7 +286,7 @@ is.UBaymodel <- function(x){
     return(FALSE)
   }
   else{
-    return(class(x) == "UBaymodel")
+    return(class(x) == 'UBaymodel')
   }
 }
 
@@ -294,7 +294,7 @@ is.UBaymodel <- function(x){
 #' Set optimization parameters in a UBaymodel object
 #' @description Set the optimization parameters in a UBaymodel object.
 #' @param model a UBaymodel object created using build.UBaymodel
-#' @param method the method to evaluate the posterior distribution; currently only"GA" (genetic algorithm) is supported
+#' @param method the method to evaluate the posterior distribution; currently only'GA' (genetic algorithm) is supported
 #' @param popsize size of the initial population of the genetic algorithm for model optimization
 #' @param maxiter maximum number of iterations of the genetic algorithm for model optimization
 #' @return a UBaymodel object with updated optimization parameters
@@ -302,18 +302,18 @@ is.UBaymodel <- function(x){
 #' @importFrom methods is
 #' @export
 
-setOptim = function(model, method = "GA", popsize, maxiter){
+setOptim = function(model, method = 'GA', popsize, maxiter){
 
-  if(!is(model, "UBaymodel")){
-    stop("Wrong class of model")
+  if(!is(model, 'UBaymodel')){
+    stop('Wrong class of model')
   }
 
-  if(is.null(method) | !(method %in% c("GA"))){
-    stop("Error: method not supported")
+  if(is.null(method) | !(method %in% c('GA'))){
+    stop('Error: method not supported')
   }
 
   if(popsize < 10 | maxiter < 10){
-    stop("Error: popsize or maxiter < 10 does not make sense")
+    stop('Error: popsize or maxiter < 10 does not make sense')
   }
 
   model$optim.params <- list(method = method,
@@ -336,12 +336,12 @@ setOptim = function(model, method = "GA", popsize, maxiter){
 
 setWeights = function(model, weights, block_list = NULL, block_matrix = NULL){
 
-  if(!is(model, "UBaymodel")){
-    stop("Wrong class of model")
+  if(!is(model, 'UBaymodel')){
+    stop('Wrong class of model')
   }
 
   if(is.null(weights)){
-    stop("Error: weights cannot be empty")
+    stop('Error: weights cannot be empty')
   }
 
 
@@ -353,20 +353,20 @@ setWeights = function(model, weights, block_list = NULL, block_matrix = NULL){
       }
     }
     if(nrow(block_matrix) != length(weights)){
-      stop("Error: wrong length of weights vector: must match number of blocks, if block_matrix or block_list are provided")
+      stop('Error: wrong length of weights vector: must match number of blocks, if block_matrix or block_list are provided')
     }
     weights = as.vector(t(block_matrix) %*% weights)
   }
 
   if((length(weights) > 1) & (length(weights) != ncol(model$data))){
-    stop("Error: length of prior weights does not match data matrix")
+    stop('Error: length of prior weights does not match data matrix')
   }
   else if(length(weights) == 1){
     weights = rep(weights, ncol(model$data))
   }
 
   if(any(weights <= 0)){
-    stop("Error: weights must be positive")
+    stop('Error: weights must be positive')
   }
 
   model$user.params$weights = weights
@@ -383,7 +383,7 @@ setWeights = function(model, weights, block_list = NULL, block_matrix = NULL){
 
 build_train_set <- function(y, tt_split){
   n = length(unique(y))
-  if(n == 1){stop("Error: Target must have more than one unique value!")}
+  if(n == 1){stop('Error: Target must have more than one unique value!')}
   else if(n > 2){
     return(sample(1:length(y), floor(tt_split*length(y))))
   }

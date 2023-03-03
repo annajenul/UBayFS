@@ -17,4 +17,4 @@
 #'         \item{a list of feature indices representing feature blocks.}
 #'        }
 #' @source \url{https://archive.ics.uci.edu/ml/datasets/breast+cancer+wisconsin+(diagnostic)}
-"bcw"
+'bcw'

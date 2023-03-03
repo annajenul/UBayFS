@@ -3,13 +3,13 @@ Package: UBayFS
 Title: A User-Guided Bayesian Framework for Ensemble Feature Selection
 Version: 1.0
 Authors@R: c(
-    person("Anna", "Jenul", , "anna.jenul@nmbu.no", role = c("aut", "cre"),
-           comment = c(ORCID = "0000-0002-6919-3483")),
-    person("Stefan", "Schrunner", , "stefan.schrunner@nmbu.no", role = "aut",
-           comment = c(ORCID = "0000-0003-1327-4855")),
-    person("Kristian Hovde", "Liland", role = "rev"),
-    person("Oliver", "Tomic", role = "ctb"),
-    person("Jürgen", "Pilz", role = "ctb")
+    person('Anna', 'Jenul', , 'anna.jenul@nmbu.no', role = c('aut', 'cre'),
+           comment = c(ORCID = '0000-0002-6919-3483')),
+    person('Stefan', 'Schrunner', , 'stefan.schrunner@nmbu.no', role = 'aut',
+           comment = c(ORCID = '0000-0003-1327-4855')),
+    person('Kristian Hovde', 'Liland', role = 'rev'),
+    person('Oliver', 'Tomic', role = 'ctb'),
+    person('Jürgen', 'Pilz', role = 'ctb')
   )
 Description: The framework proposed in Jenul et al., (2022) <doi:10.1007/s10994-022-06221-9>, together with an interactive Shiny dashboard. UBayFS is an ensemble feature selection technique embedded in a Bayesian statistical framework. The method combines data and user knowledge, where the first is extracted via data-driven ensemble feature selection. The user can control the feature selection by assigning prior weights to features and penalizing specific feature combinations. UBayFS can be used for common feature selection as well as block feature selection.
 License: GPL-3

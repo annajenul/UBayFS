@@ -6,16 +6,16 @@
 #' @export
 print.UBayconstraint <- function(x,...){
 
-  if(!is(x, "UBayconstraint")){
-    stop("Wrong class of x")
+  if(!is(x, 'UBayconstraint')){
+    stop('Wrong class of x')
   }
-  cat(" A\n")
+  cat(' A\n')
   print(x$A)
-  cat(" b\n")
+  cat(' b\n')
   print(x$b)
-  cat(" rho\n")
+  cat(' rho\n')
   print(x$rho)
-  cat(" block_matrix\n")
+  cat(' block_matrix\n')
   print(x$block_matrix)
 }
 
@@ -25,31 +25,31 @@ print.UBayconstraint <- function(x,...){
 #' @export
 summary.UBayconstraint <- function(object,...){
 
-  if(!is(object, "UBayconstraint")){
-    stop("Wrong class of object")
+  if(!is(object, 'UBayconstraint')){
+    stop('Wrong class of object')
   }
 
   block_constraint = ifelse(identical(object$block_matrix, diag(nrow = ncol(object$block_matrix))), FALSE, TRUE)
 
   if(block_constraint){
-    cat(" block constraints with ", nrow(object$block_matrix), "blocks\n")
+    cat(' block constraints with ', nrow(object$block_matrix), 'blocks\n')
   }
 
   if(!is.null(object$A)){
     cat(paste0(
       sapply(1:nrow(object$A), function(i){
         paste0(
-          ifelse(block_constraint, " block", ""),
-          " constraint ",
+          ifelse(block_constraint, ' block', ''),
+          ' constraint ',
           i,
-          ": (",
-          paste0(object$A[i,], collapse = ","),
-          ") x <= ",
+          ': (',
+          paste0(object$A[i,], collapse = ','),
+          ') x <= ',
           object$b[i],
-          "; rho = ",
+          '; rho = ',
           object$rho[i]
         )
       }),
-      collapse = "\n"), "\n")
+      collapse = '\n'), '\n')
   }
 }

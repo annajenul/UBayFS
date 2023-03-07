@@ -41,7 +41,7 @@ Suggests:
     rmarkdown,
     rpart,
     shinyalert,
-    shinyBS,¨
+    shinyBS,
     shinyjs,
     shinyWidgets,
     testthat (>= 3.0.0)

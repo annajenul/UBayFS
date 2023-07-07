@@ -68,7 +68,7 @@
                         <h4 data-toc-skip class="author">Anna Jenul,
 Stefan Schrunner</h4>
             
-            <h4 data-toc-skip class="date">2023-03-03</h4>
+            <h4 data-toc-skip class="date">2023-07-07</h4>
       
       
       <div class="d-none name"><code>UBayFS.Rmd</code></div>
@@ -319,11 +319,11 @@ in each iteration.</p>
 model and trains an ensemble of elementary feature selectors. The
 training dataset and target are initialized with the arguments
 <code>data</code> and <code>target</code>. Although the UBayFS concept
-permits unsupervised, multiclass, or regression setups, the current
-implementation supports binary target variables only. While
-<code>M</code> defines the ensemble size (number of elementary feature
-selectors), the types of the elementary feature selectors is set via
-<code>method</code>. Three different feature selectors (mRMR, Fisher
+also permits unsupervised and multiclass setups, the current
+implementation only supports binary and regression target variables.
+While <code>M</code> defines the ensemble size (number of elementary
+feature selectors), the types of the elementary feature selectors is set
+via <code>method</code>. Three different feature selectors (mRMR, Fisher
 schore and Laplace score) are implemented as baseline. In general, the
 <code>method</code> argument allows for each self-implemented feature
 selection function with the arguments <code>X</code> (describes the
@@ -377,7 +377,7 @@ feature was selected over the ensemble feature selections.</p>
 <span><span class="co">#&gt;   weights: ( 0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01 ) </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   === likelihood === </span></span>
-<span><span class="co">#&gt;   ensemble counts: ( 0,10,75,0,0,0,100,100,0,0,0,0,2,100,0,0,4,0,0,0,100,90,100,100,3,16,100,100,0,0 ) </span></span>
+<span><span class="co">#&gt;   ensemble counts: ( 0,10,73,0,0,0,100,100,0,0,0,0,4,100,0,0,8,0,0,0,100,88,100,100,2,15,100,100,0,0 ) </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   === feature selection results === </span></span>
 <span><span class="co">#&gt;  no output produced yet</span></span></code></pre></div>
@@ -697,7 +697,7 @@ parameter <span class="math inline">\(\rho\)</span> are presented.</p>
 <span><span class="co">#&gt;   weights: ( 0.0222222222222222,0.0333333333333333,0.0444444444444444,0.0355555555555556,0.0333333333333333,0.0222222222222222,0.0266666666666667,0.0377777777777778,0.0466666666666667,0.0311111111111111,0.0222222222222222,0.0333333333333333,0.0444444444444444,0.0355555555555556,0.0333333333333333,0.0222222222222222,0.0266666666666667,0.0377777777777778,0.0466666666666667,0.0311111111111111,0.0222222222222222,0.0333333333333333,0.0444444444444444,0.0355555555555556,0.0333333333333333,0.0222222222222222,0.0266666666666667,0.0377777777777778,0.0466666666666667,0.0311111111111111 ) </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   === likelihood === </span></span>
-<span><span class="co">#&gt;   ensemble counts: ( 0,10,75,0,0,0,100,100,0,0,0,0,2,100,0,0,4,0,0,0,100,90,100,100,3,16,100,100,0,0 ) </span></span>
+<span><span class="co">#&gt;   ensemble counts: ( 0,10,73,0,0,0,100,100,0,0,0,0,4,100,0,0,8,0,0,0,100,88,100,100,2,15,100,100,0,0 ) </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   === feature selection results === </span></span>
 <span><span class="co">#&gt;   ( 2,3,7,8,14,22,23,26,27,28 )</span></span>
@@ -716,8 +716,8 @@ additional properties can be evaluated with
 <span><span class="fu"><a href="../reference/evaluateFS.html">evaluateMultiple</a></span><span class="op">(</span>state <span class="op">=</span> <span class="va">model</span><span class="op">$</span><span class="va">output</span><span class="op">$</span><span class="va">feature_set</span>, model <span class="op">=</span> <span class="va">model</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                                  [,1]</span></span>
 <span><span class="co">#&gt; cardinality                    10.000</span></span>
-<span><span class="co">#&gt; log total utility              -0.235</span></span>
-<span><span class="co">#&gt; log posterior feature utility  -0.235</span></span>
+<span><span class="co">#&gt; log total utility              -0.241</span></span>
+<span><span class="co">#&gt; log posterior feature utility  -0.241</span></span>
 <span><span class="co">#&gt; log admissibility               0.000</span></span>
 <span><span class="co">#&gt; number of violated constraints  0.000</span></span>
 <span><span class="co">#&gt; avg feature correlation         0.614</span></span></code></pre></div>

@@ -9,6 +9,9 @@ is.UBaymodel(x)
 \arguments{
 \item{x}{an object to be checked for class consistency}
 }
+\value{
+returns a single scalar (TRUE or FALSE) indicating whether the object fulfills the consistency requirements of the UBayFS model
+}
 \description{
 Perform consistency checks of a UBaymodel.
 }

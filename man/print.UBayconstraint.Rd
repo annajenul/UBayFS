@@ -16,6 +16,9 @@
 
 \item{object}{a `UBayconstraint` object}
 }
+\value{
+prints model summary to the console, no return value
+}
 \description{
 Prints the `UBayconstraint` object
 }

@@ -1,0 +1,36 @@
+bibentry(
+  bibtype = "Article",
+  doi = "10.21105/joss.04848",
+  url = "https://doi.org/10.21105/joss.04848",
+  year = "2023",
+  month = "jan",
+  publisher = "The Open Journal",
+  volume = "8",
+  number = "81",
+  pages = "4848",
+  author = c(
+    person("Anna", "Jenul"),
+    person("Stefan", "Schrunner")),
+  title = "{UBayFS}: An R Package for User Guided Feature
+		Selection",
+  journal = "Journal of Open Source Software"
+)
+
+bibentry(
+  bibtype = "Article",
+  doi = "10.1007/s10994-022-06221-9",
+  url = "https://doi.org/10.1007/s10994-022-06221-9",
+  year = "2022",
+  month = "aug",
+  publisher = "Springer Science and Business Media {LLC}",
+  volume = "111",
+  number = "10",
+  pages = "3897--3923",
+  author = c(
+    person("Anna", "Jenul"),
+    person("Stefan", "Schrunner"),
+    person("J\"{u}rgen", "Pilz"),
+    person("Oliver", "Tomic")),
+  title = "A user-guided Bayesian framework for ensemble feature selection in life science applications ({UBayFS})",
+  journal = "Machine Learning"
+)

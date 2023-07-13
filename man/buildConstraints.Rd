@@ -27,7 +27,7 @@ buildConstraints(
 \item{block_matrix}{the matrix containing affiliations of features to each block; only required, if block-wise constraints are built and `block_list` is `NULL`}
 }
 \value{
-a `UBayconstraint` containing a matrix `A` and a vector `b` representing the inequality system `Ax<=b`, and a vector `rho`
+a `UBayconstraint` containing a matrix `A` and a vector `b` representing the inequality system `Ax<=b`, and a vector `rho` representing the penalty shape
 }
 \description{
 Build an inequation system from constraints provided by the user.

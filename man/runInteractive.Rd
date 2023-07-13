@@ -6,6 +6,9 @@
 \usage{
 runInteractive()
 }
+\value{
+calls Shiny app, no return value
+}
 \description{
 Starts an interactive R Shiny application in the browser.
 }
